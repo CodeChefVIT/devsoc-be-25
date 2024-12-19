@@ -1,23 +1,15 @@
-FROM golang:alpine AS builder
+FROM golang:alpine
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache git
 
 WORKDIR /app
 
-RUN apk add --no-cache git
+RUN go install github.com/air-verse/air@latest
 
 COPY go.mod go.sum ./
-
 RUN go mod download
 
-COPY . .
+EXPOSE 8080
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o ./dist/app ./cmd
-
-FROM alpine:latest
-
-COPY --from=builder /app/dist/app .
-
-ENV HTTP_PORT=8080
-
-EXPOSE $HTTP_PORT
-
-CMD ["./app"]
+CMD ["air", "-c", ".air.toml"]
