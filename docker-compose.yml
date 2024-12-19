@@ -19,6 +19,17 @@ services:
     volumes:
       - redis_data:/data
 
+  api:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 127.0.0.1:8080:8080
+    restart: on-failure:5
+    depends_on:
+      - postgres
+      - redis
+
 volumes:
   postgres_data:
   redis_data:
