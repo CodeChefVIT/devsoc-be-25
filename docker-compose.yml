@@ -21,11 +21,13 @@ services:
 
   api:
     build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
     env_file:
       - .env
-    ports:
-      - 127.0.0.1:8080:8080
-    restart: on-failure:5
+    restart: on-failure
     depends_on:
       - postgres
       - redis
