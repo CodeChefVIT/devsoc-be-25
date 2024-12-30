@@ -1,0 +1,15 @@
+-- +goose Up
+CREATE TABLE ideas (
+	id UUID NOT NULL UNIQUE,
+	title TEXT NOT NULL,
+	description TEXT NOT NULL,
+	track TEXT NOT NULL,
+	team_id UUID NOT NULL,
+	is_selected BOOLEAN NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(id)
+);
+
+-- +goose Down
+DROP TABLE ideas;
