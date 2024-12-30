@@ -9,64 +9,45 @@ import (
 	"context"
 )
 
-const createAuthor = `-- name: CreateAuthor :one
-INSERT INTO authors (
-  name, bio
-) VALUES (
-  $1, $2
-)
-RETURNING id, name, bio
+const banUser = `-- name: BanUser :exec
+UPDATE users
+SET is_banned = TRUE
+WHERE email = $1
 `
 
-type CreateAuthorParams struct {
-	Name string
-	Bio  *string
-}
-
-func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (Author, error) {
-	row := q.db.QueryRow(ctx, createAuthor, arg.Name, arg.Bio)
-	var i Author
-	err := row.Scan(&i.ID, &i.Name, &i.Bio)
-	return i, err
-}
-
-const deleteAuthor = `-- name: DeleteAuthor :exec
-DELETE FROM authors
-WHERE id = $1
-`
-
-func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteAuthor, id)
+func (q *Queries) BanUser(ctx context.Context, email string) error {
+	_, err := q.db.Exec(ctx, banUser, email)
 	return err
 }
 
-const getAuthor = `-- name: GetAuthor :one
-SELECT id, name, bio FROM authors
-WHERE id = $1 LIMIT 1
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users
 `
 
-func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
-	row := q.db.QueryRow(ctx, getAuthor, id)
-	var i Author
-	err := row.Scan(&i.ID, &i.Name, &i.Bio)
-	return i, err
-}
-
-const listAuthors = `-- name: ListAuthors :many
-SELECT id, name, bio FROM authors
-ORDER BY name
-`
-
-func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
-	rows, err := q.db.Query(ctx, listAuthors)
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Author
+	var items []User
 	for rows.Next() {
-		var i Author
-		if err := rows.Scan(&i.ID, &i.Name, &i.Bio); err != nil {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.TeamID,
+			&i.Email,
+			&i.IsVitian,
+			&i.RegNo,
+			&i.Password,
+			&i.PhoneNo,
+			&i.Role,
+			&i.IsLeader,
+			&i.College,
+			&i.IsVerified,
+			&i.IsBanned,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -77,20 +58,76 @@ func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
 	return items, nil
 }
 
-const updateAuthor = `-- name: UpdateAuthor :exec
-UPDATE authors
-  set name = $2,
-  bio = $3
-WHERE id = $1
+const getAllVitians = `-- name: GetAllVitians :many
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE is_vitian = TRUE
 `
 
-type UpdateAuthorParams struct {
-	ID   int64
-	Name string
-	Bio  *string
+func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllVitians)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.TeamID,
+			&i.Email,
+			&i.IsVitian,
+			&i.RegNo,
+			&i.Password,
+			&i.PhoneNo,
+			&i.Role,
+			&i.IsLeader,
+			&i.College,
+			&i.IsVerified,
+			&i.IsBanned,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-func (q *Queries) UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) error {
-	_, err := q.db.Exec(ctx, updateAuthor, arg.ID, arg.Name, arg.Bio)
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.TeamID,
+		&i.Email,
+		&i.IsVitian,
+		&i.RegNo,
+		&i.Password,
+		&i.PhoneNo,
+		&i.Role,
+		&i.IsLeader,
+		&i.College,
+		&i.IsVerified,
+		&i.IsBanned,
+	)
+	return i, err
+}
+
+const unbanUser = `-- name: UnbanUser :exec
+UPDATE users
+SET is_banned = FALSE
+WHERE email = $1
+`
+
+func (q *Queries) UnbanUser(ctx context.Context, email string) error {
+	_, err := q.db.Exec(ctx, unbanUser, email)
 	return err
 }
