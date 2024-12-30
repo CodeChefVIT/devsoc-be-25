@@ -22,7 +22,8 @@ func GetAllUsers(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Users fetched successfully",
-		"users":   users})
+		"users":   users,
+	})
 }
 
 func GetAllVitians(c echo.Context) error {
@@ -65,7 +66,8 @@ func BanUser(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": err.Error(),
+			"message": "Improper request",
+			"error":   err.Error(),
 		})
 	}
 
@@ -74,10 +76,12 @@ func BanUser(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, map[string]string{
 				"message": "User does not exist",
+				"error":   err.Error(),
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
+			"message": "some error occured",
+			"error":   err.Error(),
 		})
 	}
 
@@ -99,7 +103,8 @@ func UnbanUser(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": err.Error(),
+			"message": "Improper request",
+			"error":   err.Error(),
 		})
 	}
 
@@ -111,7 +116,8 @@ func UnbanUser(c echo.Context) error {
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
+			"message": "some error occured",
+			"error":   err.Error(),
 		})
 	}
 
