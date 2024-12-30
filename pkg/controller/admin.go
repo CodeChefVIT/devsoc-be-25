@@ -6,13 +6,10 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/labstack/echo/v4"
 )
-
-type BanUserReq struct {
-	Email string `json:"email"`
-}
 
 func GetAllUsers(c echo.Context) error {
 	ctx := context.Background()
@@ -64,7 +61,7 @@ func GetUsersByEmail(c echo.Context) error {
 }
 
 func BanUser(c echo.Context) error {
-	var payload BanUserReq
+	var payload models.BanUserReq
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -98,7 +95,7 @@ func BanUser(c echo.Context) error {
 }
 
 func UnbanUser(c echo.Context) error {
-	var payload BanUserReq
+	var payload models.BanUserReq
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
