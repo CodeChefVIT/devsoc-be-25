@@ -18,5 +18,7 @@ func RegisterRoutes(e *echo.Echo) {
 	e.GET("/users", controller.GetAllUsers)
 	e.GET("/vitians", controller.GetAllVitians)
 	e.GET("/user/:email", controller.GetUsersByEmail)
+	e.POST("/ban", controller.BanUser)
+	e.POST("/unban", controller.UnbanUser)
 
 }
