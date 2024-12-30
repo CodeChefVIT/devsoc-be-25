@@ -1,7 +1,7 @@
 -- +goose Up
-CREATE TABLE IF NOT EXISTS score (
+CREATE TABLE score (
     id UUID NOT NULL UNIQUE,
-    team_id UUID NOT NULL UNIQUE,
+    team_id UUID NOT NULL,
     design INTEGER DEFAULT 0,
     implementation INTEGER DEFAULT 0,
     presentation INTEGER DEFAULT 0,
@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS score (
 );
 
 -- +goose Down
-DROP TABLE IF EXISTS score;
+DROP TABLE score;
