@@ -4,8 +4,49 @@
 
 package db
 
-type Author struct {
-	ID   int64
-	Name string
-	Bio  *string
+import (
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type Score struct {
+	ID             uuid.UUID
+	TeamID         uuid.UUID
+	Design         pgtype.Int4
+	Implementation pgtype.Int4
+	Presentation   pgtype.Int4
+	Round          pgtype.Int4
+}
+
+type Submission struct {
+	ID         uuid.UUID
+	GithubLink string
+	FigmaLink  string
+	PptLink    string
+	OtherLink  string
+}
+
+type Team struct {
+	ID             uuid.UUID
+	Name           string
+	NumberOfPeople pgtype.Int4
+	Users          uuid.UUID
+	Submission     uuid.UUID
+	RoundQualified pgtype.Int4
+	Code           string
+}
+
+type User struct {
+	ID         uuid.UUID
+	Name       string
+	TeamID     uuid.NullUUID
+	Email      string
+	IsVitian   bool
+	RegNo      string
+	Password   string
+	PhoneNo    string
+	IsLeader   bool
+	College    string
+	IsVerified bool
+	IsBanned   pgtype.Bool
 }

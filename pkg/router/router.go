@@ -14,4 +14,9 @@ func RegisterRoutes(e *echo.Echo) {
 
 	e.GET("/ping", controller.Ping)
 	e.GET("/docs", controller.Docs)
+
+	e.GET("/users", controller.GetAllUsers)
+	e.GET("/vitians", controller.GetAllVitians)
+	e.GET("/user/:email", controller.GetUsersByEmail)
+
 }
