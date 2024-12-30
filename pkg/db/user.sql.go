@@ -21,7 +21,7 @@ func (q *Queries) BanUser(ctx context.Context, email string) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, is_leader, college, is_verified, is_banned FROM users
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -42,6 +42,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.RegNo,
 			&i.Password,
 			&i.PhoneNo,
+			&i.Role,
 			&i.IsLeader,
 			&i.College,
 			&i.IsVerified,
@@ -58,7 +59,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getAllVitians = `-- name: GetAllVitians :many
-SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, is_leader, college, is_verified, is_banned FROM users WHERE is_vitian = TRUE
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE is_vitian = TRUE
 `
 
 func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
@@ -79,6 +80,7 @@ func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
 			&i.RegNo,
 			&i.Password,
 			&i.PhoneNo,
+			&i.Role,
 			&i.IsLeader,
 			&i.College,
 			&i.IsVerified,
@@ -95,7 +97,7 @@ func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, is_leader, college, is_verified, is_banned FROM users WHERE email = $1
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -110,6 +112,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.RegNo,
 		&i.Password,
 		&i.PhoneNo,
+		&i.Role,
 		&i.IsLeader,
 		&i.College,
 		&i.IsVerified,

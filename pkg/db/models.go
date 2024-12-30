@@ -9,6 +9,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Idea struct {
+	ID          uuid.UUID
+	Title       string
+	Description string
+	Track       string
+	TeamID      uuid.UUID
+	IsSelected  bool
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+}
+
 type Score struct {
 	ID             uuid.UUID
 	TeamID         uuid.UUID
@@ -24,14 +35,13 @@ type Submission struct {
 	FigmaLink  string
 	PptLink    string
 	OtherLink  string
+	TeamID     uuid.UUID
 }
 
 type Team struct {
 	ID             uuid.UUID
 	Name           string
-	NumberOfPeople pgtype.Int4
-	Users          uuid.UUID
-	Submission     uuid.UUID
+	NumberOfPeople int32
 	RoundQualified pgtype.Int4
 	Code           string
 }
@@ -45,8 +55,9 @@ type User struct {
 	RegNo      string
 	Password   string
 	PhoneNo    string
+	Role       string
 	IsLeader   bool
 	College    string
 	IsVerified bool
-	IsBanned   pgtype.Bool
+	IsBanned   bool
 }
