@@ -22,5 +22,6 @@ func main() {
 		LogValuesFunc: logger.RouteLogger,
 	}))
 	router.RegisterRoutes(e)
+	router.IdeaRoutes(e)
 	e.Start(":" + utils.Config.Port)
 }

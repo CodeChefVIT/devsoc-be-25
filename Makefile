@@ -24,3 +24,6 @@ status:
 
 down:
 	goose -dir ./database/schema postgres "$(DB_URL)" down
+	
+fixtures:
+	goose -dir ./database/schema postgres "$(DB_URL)" up
