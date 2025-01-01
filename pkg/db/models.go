@@ -23,10 +23,10 @@ type Idea struct {
 type Score struct {
 	ID             uuid.UUID
 	TeamID         uuid.UUID
-	Design         pgtype.Int4
-	Implementation pgtype.Int4
-	Presentation   pgtype.Int4
-	Round          pgtype.Int4
+	Design         int32
+	Implementation int32
+	Presentation   int32
+	Round          int32
 }
 
 type Submission struct {

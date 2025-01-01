@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const banUser = `-- name: BanUser :exec
@@ -17,6 +19,49 @@ WHERE email = $1
 
 func (q *Queries) BanUser(ctx context.Context, email string) error {
 	_, err := q.db.Exec(ctx, banUser, email)
+	return err
+}
+
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (
+    id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+)
+`
+
+type CreateUserParams struct {
+	ID         uuid.UUID
+	Name       string
+	TeamID     uuid.NullUUID
+	Email      string
+	IsVitian   bool
+	RegNo      string
+	Password   string
+	PhoneNo    string
+	Role       string
+	IsLeader   bool
+	College    string
+	IsVerified bool
+	IsBanned   bool
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.ID,
+		arg.Name,
+		arg.TeamID,
+		arg.Email,
+		arg.IsVitian,
+		arg.RegNo,
+		arg.Password,
+		arg.PhoneNo,
+		arg.Role,
+		arg.IsLeader,
+		arg.College,
+		arg.IsVerified,
+		arg.IsBanned,
+	)
 	return err
 }
 
