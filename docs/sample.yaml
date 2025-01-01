@@ -6,18 +6,18 @@ info:
 servers:
   - url: https://api.example.com/v1
 paths:
-  /users:
+  /admin/users:
     get:
       summary: List all users
       responses:
-        '200':
+        "200":
           description: A list of users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: "#/components/schemas/User"
     post:
       summary: Create a new user
       requestBody:
@@ -25,40 +25,117 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
-        '201':
+        "201":
           description: User created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-  /users/{id}:
+                $ref: "#/components/schemas/User"
+  /admin/users/{email}:
     get:
-      summary: Get a user by ID
+      summary: Get a user by email
       parameters:
-        - name: id
+        - name: email
           in: path
           required: true
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A single user
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
+                $ref: "#/components/schemas/User"
+        "404":
           description: User not found
+  /admin/vitians:
+    get:
+      summary: List all vitians
+      responses:
+        "200":
+          description: A list of vitians
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /admin/ban:
+    post:
+      summary: Ban user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BanUserReq"
+      responses:
+        "201":
+          description: User banned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user banned successfully
+  /admin/unban:
+    post:
+      summary: Unan user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BanUserReq"
+      responses:
+        "201":
+          description: User unbanned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user unbanned successfully
 components:
   schemas:
     User:
       type: object
       properties:
         id:
-          type: string
+          type: uuid
         name:
           type: string
+        email:
+          type: string
+        team_id:
+          type: uuid
+        is_vitian:
+          type: boolean
+        reg_no:
+          type: string
+        password:
+          type: string
+        phone_no:
+          type: string
+        role:
+          type: string
+        is_leader:
+          type: boolean
+        college:
+          type: string
+        is_verified:
+          type: boolean
+        is_banned:
+          type: boolean
+    BanUserReq:
+      type: object
+      properties:
         email:
           type: string

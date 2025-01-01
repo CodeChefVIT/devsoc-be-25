@@ -6,13 +6,10 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/labstack/echo/v4"
 )
-
-type BanUserReq struct {
-	Email string `json:"email"`
-}
 
 func GetAllUsers(c echo.Context) error {
 	ctx := context.Background()
@@ -25,7 +22,8 @@ func GetAllUsers(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Users fetched successfully",
-		"users":   users})
+		"users":   users,
+	})
 }
 
 func GetAllVitians(c echo.Context) error {
@@ -64,11 +62,12 @@ func GetUsersByEmail(c echo.Context) error {
 }
 
 func BanUser(c echo.Context) error {
-	var payload BanUserReq
+	var payload models.BanUserReq
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": err.Error(),
+			"message": "Improper request",
+			"error":   err.Error(),
 		})
 	}
 
@@ -77,10 +76,12 @@ func BanUser(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, map[string]string{
 				"message": "User does not exist",
+				"error":   err.Error(),
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
+			"message": "some error occured",
+			"error":   err.Error(),
 		})
 	}
 
@@ -98,11 +99,12 @@ func BanUser(c echo.Context) error {
 }
 
 func UnbanUser(c echo.Context) error {
-	var payload BanUserReq
+	var payload models.BanUserReq
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": err.Error(),
+			"message": "Improper request",
+			"error":   err.Error(),
 		})
 	}
 
@@ -114,7 +116,8 @@ func UnbanUser(c echo.Context) error {
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
+			"message": "some error occured",
+			"error":   err.Error(),
 		})
 	}
 

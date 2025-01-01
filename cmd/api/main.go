@@ -23,5 +23,6 @@ func main() {
 	}))
 	router.RegisterRoutes(e)
 	router.IdeaRoutes(e)
+	router.AdminRoutes(e)
 	e.Start(":" + utils.Config.Port)
 }
