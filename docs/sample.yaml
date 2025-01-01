@@ -5,9 +5,18 @@ info:
   version: 1.0.0
 servers:
   - url: https://api.example.com/v1
+
+tags:
+  - name: Admin
+    description: Admin operations
+  - name: Submission
+    description: Submission operations
+
 paths:
   /admin/users:
     get:
+      tags:
+        - Admin
       summary: List all users
       responses:
         "200":
@@ -19,6 +28,8 @@ paths:
                 items:
                   $ref: "#/components/schemas/User"
     post:
+      tags:
+        - Admin
       summary: Create a new user
       requestBody:
         required: true
@@ -35,6 +46,8 @@ paths:
                 $ref: "#/components/schemas/User"
   /admin/users/{email}:
     get:
+      tags:
+        - Admin
       summary: Get a user by email
       parameters:
         - name: email
@@ -53,6 +66,8 @@ paths:
           description: User not found
   /admin/vitians:
     get:
+      tags:
+        - Admin
       summary: List all vitians
       responses:
         "200":
@@ -65,6 +80,8 @@ paths:
                   $ref: "#/components/schemas/User"
   /admin/ban:
     post:
+      tags:
+        - Admin
       summary: Ban user
       requestBody:
         required: true
@@ -85,7 +102,9 @@ paths:
                     example: user banned successfully
   /admin/unban:
     post:
-      summary: Unan user
+      tags:
+        - Admin
+      summary: Unban user
       requestBody:
         required: true
         content:
@@ -103,6 +122,142 @@ paths:
                   message:
                     type: string
                     example: user unbanned successfully
+  /submission:
+    post:
+      tags:
+        - Submission
+      summary: Create new submission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubmissionRequest"
+      responses:
+        201:
+          description: Submission created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/Submission"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /submission/{teamId}:
+    get:
+      tags:
+        - Submission
+      summary: Get submission by team ID
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Team ID to fetch submission for
+      responses:
+        200:
+          description: Submission retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/Submission"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      tags:
+        - Submission
+      summary: Update submission
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubmissionRequest"
+      responses:
+        200:
+          description: Submission updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/Submission"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags:
+        - Submission
+      summary: Delete submission
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Submission deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Submission deleted successfully"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     User:
@@ -139,3 +294,89 @@ components:
       properties:
         email:
           type: string
+    Submission:
+      type: object
+      properties:
+        team_id:
+          type: string
+          format: uuid
+        github_link:
+          type: string
+          format: url
+        figma_link:
+          type: string
+          format: url
+        ppt_link:
+          type: string
+          format: url
+        other_link:
+          type: string
+          format: url
+
+    CreateSubmissionRequest:
+      type: object
+      required:
+        - team_id
+        - github_link
+        - figma_link
+      properties:
+        team_id:
+          type: string
+          format: uuid
+        github_link:
+          type: string
+          format: url
+        figma_link:
+          type: string
+          format: url
+        ppt_link:
+          type: string
+          format: url
+        other_link:
+          type: string
+          format: url
+
+    UpdateSubmissionRequest:
+      type: object
+      required:
+        - github_link
+        - figma_link
+      properties:
+        github_link:
+          type: string
+          format: url
+        figma_link:
+          type: string
+          format: url
+        ppt_link:
+          type: string
+          format: url
+        other_link:
+          type: string
+          format: url
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Submission created successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        data:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Invalid request parameters"
