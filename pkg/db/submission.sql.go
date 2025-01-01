@@ -11,12 +11,100 @@ import (
 	"github.com/google/uuid"
 )
 
+const createSubmission = `-- name: CreateSubmission :one
+INSERT INTO submission (
+    id,
+    team_id,
+    github_link,
+    figma_link,
+    ppt_link,
+    other_link
+) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, github_link, figma_link, ppt_link, other_link, team_id
+`
+
+type CreateSubmissionParams struct {
+	ID         uuid.UUID
+	TeamID     uuid.UUID
+	GithubLink string
+	FigmaLink  string
+	PptLink    string
+	OtherLink  string
+}
+
+func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionParams) (Submission, error) {
+	row := q.db.QueryRow(ctx, createSubmission,
+		arg.ID,
+		arg.TeamID,
+		arg.GithubLink,
+		arg.FigmaLink,
+		arg.PptLink,
+		arg.OtherLink,
+	)
+	var i Submission
+	err := row.Scan(
+		&i.ID,
+		&i.GithubLink,
+		&i.FigmaLink,
+		&i.PptLink,
+		&i.OtherLink,
+		&i.TeamID,
+	)
+	return i, err
+}
+
+const deleteSubmission = `-- name: DeleteSubmission :exec
+DELETE FROM submission WHERE team_id = $1
+`
+
+func (q *Queries) DeleteSubmission(ctx context.Context, teamID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSubmission, teamID)
+	return err
+}
+
 const getSubmissionByTeamID = `-- name: GetSubmissionByTeamID :one
 SELECT id, github_link, figma_link, ppt_link, other_link, team_id FROM submission WHERE team_id = $1
 `
 
 func (q *Queries) GetSubmissionByTeamID(ctx context.Context, teamID uuid.UUID) (Submission, error) {
 	row := q.db.QueryRow(ctx, getSubmissionByTeamID, teamID)
+	var i Submission
+	err := row.Scan(
+		&i.ID,
+		&i.GithubLink,
+		&i.FigmaLink,
+		&i.PptLink,
+		&i.OtherLink,
+		&i.TeamID,
+	)
+	return i, err
+}
+
+const updateSubmission = `-- name: UpdateSubmission :one
+UPDATE submission 
+SET github_link = $2,
+    figma_link = $3,
+    ppt_link = $4,
+    other_link = $5
+WHERE team_id = $1 
+RETURNING id, github_link, figma_link, ppt_link, other_link, team_id
+`
+
+type UpdateSubmissionParams struct {
+	TeamID     uuid.UUID
+	GithubLink string
+	FigmaLink  string
+	PptLink    string
+	OtherLink  string
+}
+
+func (q *Queries) UpdateSubmission(ctx context.Context, arg UpdateSubmissionParams) (Submission, error) {
+	row := q.db.QueryRow(ctx, updateSubmission,
+		arg.TeamID,
+		arg.GithubLink,
+		arg.FigmaLink,
+		arg.PptLink,
+		arg.OtherLink,
+	)
 	var i Submission
 	err := row.Scan(
 		&i.ID,
