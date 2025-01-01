@@ -20,9 +20,6 @@ WHERE email = $1;
 -- name: GetTeamLeader :one
 SELECT * FROM users WHERE team_id = $1 AND is_leader = TRUE;
 
--- name: GetTeamLeader :one
-SELECT * FROM users WHERE team_id = $1 AND is_leader = TRUE;
-
 -- name: CreateUser :exec
 INSERT INTO users (
     id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned
