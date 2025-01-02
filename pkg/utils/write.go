@@ -2,7 +2,6 @@ package utils
 
 import(
 	"log"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,9 +22,7 @@ func WriteJSON(c echo.Context, status int, message interface{}) error {
 }
 
 func WriteError(c echo.Context, status int, err error) error {
-	if status < 400 {
-		status = http.StatusInternalServerError
-	}
+
 	response := StandardResponse{
 		Status: status,
 		Error:  err.Error(),
