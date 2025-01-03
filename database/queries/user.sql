@@ -26,3 +26,16 @@ INSERT INTO users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 );
+
+-- name: GetUserByRegNo :one
+SELECT * FROM users WHERE reg_no = $1;
+
+-- name: VerifyUser :exec
+UPDATE users
+SET is_verified = TRUE
+WHERE email = $1;
+
+-- name: UpdatePassword :exec
+UPDATE users
+SET password = $2
+WHERE email = $1;

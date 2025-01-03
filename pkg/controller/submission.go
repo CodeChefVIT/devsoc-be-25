@@ -65,8 +65,9 @@ func CreateSubmission(c echo.Context) error {
 		})
 	}
 
+	submission_id, _ := uuid.NewV7()
 	submission, err := utils.Queries.CreateSubmission(ctx, db.CreateSubmissionParams{
-		ID:         uuid.New(),
+		ID:         submission_id,
 		TeamID:     teamUuid,
 		GithubLink: req.GithubLink,
 		FigmaLink:  req.FigmaLink,
