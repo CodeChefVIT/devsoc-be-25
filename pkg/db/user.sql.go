@@ -191,6 +191,31 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
+const getUserByRegNo = `-- name: GetUserByRegNo :one
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE reg_no = $1
+`
+
+func (q *Queries) GetUserByRegNo(ctx context.Context, regNo string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByRegNo, regNo)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.TeamID,
+		&i.Email,
+		&i.IsVitian,
+		&i.RegNo,
+		&i.Password,
+		&i.PhoneNo,
+		&i.Role,
+		&i.IsLeader,
+		&i.College,
+		&i.IsVerified,
+		&i.IsBanned,
+	)
+	return i, err
+}
+
 const unbanUser = `-- name: UnbanUser :exec
 UPDATE users
 SET is_banned = FALSE
@@ -199,5 +224,32 @@ WHERE email = $1
 
 func (q *Queries) UnbanUser(ctx context.Context, email string) error {
 	_, err := q.db.Exec(ctx, unbanUser, email)
+	return err
+}
+
+const updatePassword = `-- name: UpdatePassword :exec
+UPDATE users
+SET password = $2
+WHERE email = $1
+`
+
+type UpdatePasswordParams struct {
+	Email    string
+	Password string
+}
+
+func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
+	_, err := q.db.Exec(ctx, updatePassword, arg.Email, arg.Password)
+	return err
+}
+
+const verifyUser = `-- name: VerifyUser :exec
+UPDATE users
+SET is_verified = TRUE
+WHERE email = $1
+`
+
+func (q *Queries) VerifyUser(ctx context.Context, email string) error {
+	_, err := q.db.Exec(ctx, verifyUser, email)
 	return err
 }
