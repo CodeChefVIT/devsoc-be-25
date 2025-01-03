@@ -8,6 +8,7 @@ import (
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -130,5 +131,72 @@ func UnbanUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"message": "user unbanned successfully",
+	})
+}
+
+func GetTeams(c echo.Context) error {
+	teams, err := utils.Queries.GetTeams(context.Background())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "Failed to fetch teams",
+			"error":   err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Teams fetched successfully",
+		"teams":   teams,
+	})
+}
+
+func GetTeamById(c echo.Context) error {
+	teamIdParam := c.Param("id")
+	teamId, err := uuid.Parse(teamIdParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "some error occured",
+			"error":   err.Error(),
+		})
+	}
+
+	team, err := utils.Queries.GetTeamById(context.Background(), teamId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "some error occured",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Team fetched successfully",
+		"team":    team,
+	})
+}
+
+func GetTeamLeader(c echo.Context) error {
+	teamIdParam := c.Param("id")
+	teamId, err := uuid.Parse(teamIdParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "some error occured",
+			"error":   err.Error(),
+		})
+	}
+
+	nullUUID := uuid.NullUUID{
+		UUID:  teamId,
+		Valid: true,
+	}
+
+	user, err := utils.Queries.GetTeamLeader(context.Background(), nullUUID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "some error occured",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Team leader fetched successfully",
+		"user":    user,
 	})
 }

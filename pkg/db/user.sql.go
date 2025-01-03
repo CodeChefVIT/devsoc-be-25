@@ -141,6 +141,31 @@ func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getTeamLeader = `-- name: GetTeamLeader :one
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE team_id = $1 AND is_leader = TRUE
+`
+
+func (q *Queries) GetTeamLeader(ctx context.Context, teamID uuid.NullUUID) (User, error) {
+	row := q.db.QueryRow(ctx, getTeamLeader, teamID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.TeamID,
+		&i.Email,
+		&i.IsVitian,
+		&i.RegNo,
+		&i.Password,
+		&i.PhoneNo,
+		&i.Role,
+		&i.IsLeader,
+		&i.College,
+		&i.IsVerified,
+		&i.IsBanned,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE email = $1
 `

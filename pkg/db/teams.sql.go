@@ -11,6 +11,23 @@ import (
 	"github.com/google/uuid"
 )
 
+const getTeamById = `-- name: GetTeamById :one
+SELECT id, name, number_of_people, round_qualified, code FROM teams WHERE id = $1
+`
+
+func (q *Queries) GetTeamById(ctx context.Context, id uuid.UUID) (Team, error) {
+	row := q.db.QueryRow(ctx, getTeamById, id)
+	var i Team
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.NumberOfPeople,
+		&i.RoundQualified,
+		&i.Code,
+	)
+	return i, err
+}
+
 const getTeamIDByCode = `-- name: GetTeamIDByCode :one
 SELECT id FROM teams WHERE code = $1
 `
@@ -20,4 +37,34 @@ func (q *Queries) GetTeamIDByCode(ctx context.Context, code string) (uuid.UUID, 
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const getTeams = `-- name: GetTeams :many
+SELECT id, name, number_of_people, round_qualified, code FROM teams
+`
+
+func (q *Queries) GetTeams(ctx context.Context) ([]Team, error) {
+	rows, err := q.db.Query(ctx, getTeams)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Team
+	for rows.Next() {
+		var i Team
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.NumberOfPeople,
+			&i.RoundQualified,
+			&i.Code,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

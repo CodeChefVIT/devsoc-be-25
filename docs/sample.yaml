@@ -122,6 +122,60 @@ paths:
                   message:
                     type: string
                     example: user unbanned successfully
+  /admin/teams:
+    get:
+      tags:
+        - Admin
+      summary: List all teams
+      responses:
+        "200":
+          description: A list of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Teams"
+  /admin/teams/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get a team by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: uuid
+      responses:
+        "200":
+          description: A single team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Teams"
+        "404":
+          description: Team not found
+  /admin/teams/leader/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get the team leader by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: uuid
+      responses:
+        "200":
+          description: Team leader
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Team leader not found
   /submission:
     post:
       tags:
@@ -293,6 +347,19 @@ components:
       type: object
       properties:
         email:
+          type: string
+    Teams:
+      type: object
+      properties:
+        id:
+          type: uuid
+        name:
+          type: string
+        number_of_people:
+          type: integer
+        round_qualified:
+          type: integer
+        code:
           type: string
     Submission:
       type: object
