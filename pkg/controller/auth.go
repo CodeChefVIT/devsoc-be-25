@@ -303,13 +303,6 @@ func Login(c echo.Context) error {
 		})
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return c.JSON(http.StatusUnauthorized, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid password"},
-		})
-	}
-
 	token, err := utils.GenerateToken(&user)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
