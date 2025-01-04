@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
+	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/go-playground/validator"
@@ -21,6 +22,7 @@ func SignUp(c echo.Context) error {
 	var req models.SignupRequest
 
 	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
@@ -28,6 +30,7 @@ func SignUp(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
@@ -52,6 +55,7 @@ func SignUp(c echo.Context) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to hash password"},
@@ -93,6 +97,7 @@ func SignUp(c echo.Context) error {
 		IsBanned:   user.IsBanned,
 	})
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to create user"},
@@ -112,6 +117,7 @@ func SendOTP(c echo.Context) error {
 	var req models.SendOTPRequest
 
 	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
@@ -119,6 +125,7 @@ func SendOTP(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
@@ -128,12 +135,14 @@ func SendOTP(c echo.Context) error {
 	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, models.Response{
 				Status: "fail",
 				Data:   map[string]string{"error": "User not found"},
 			})
 		}
 
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to get user"},
@@ -142,6 +151,7 @@ func SendOTP(c echo.Context) error {
 
 	err = utils.GenerateOTP(ctx, req.Email)
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate OTP"},
@@ -161,6 +171,7 @@ func VerifyOTP(c echo.Context) error {
 	var req models.VerifyOTPRequest
 
 	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
@@ -168,6 +179,7 @@ func VerifyOTP(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
@@ -177,11 +189,13 @@ func VerifyOTP(c echo.Context) error {
 	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, models.Response{
 				Status: "fail",
 				Data:   map[string]string{"error": "User not found"},
 			})
 		}
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to get user"},
@@ -190,6 +204,7 @@ func VerifyOTP(c echo.Context) error {
 
 	otp, err := utils.RedisClient.Get(ctx, req.Email).Result()
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusNotFound, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "OTP invalid/expired"},
@@ -205,6 +220,7 @@ func VerifyOTP(c echo.Context) error {
 
 	err = utils.RedisClient.Del(ctx, req.Email).Err()
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to delete OTP"},
@@ -213,6 +229,7 @@ func VerifyOTP(c echo.Context) error {
 
 	err = utils.Queries.VerifyUser(ctx, req.Email)
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to verify user"},
@@ -232,6 +249,7 @@ func Login(c echo.Context) error {
 	var req models.LoginRequest
 
 	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
@@ -239,6 +257,7 @@ func Login(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
@@ -248,12 +267,14 @@ func Login(c echo.Context) error {
 	user, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, models.Response{
 				Status: "fail",
 				Data:   map[string]string{"error": "User not found"},
 			})
 		}
 
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to get user"},
@@ -275,6 +296,7 @@ func Login(c echo.Context) error {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid password"},
@@ -283,6 +305,7 @@ func Login(c echo.Context) error {
 
 	token, err := utils.GenerateToken(&user)
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate token"},
@@ -303,6 +326,7 @@ func UpdatePassword(c echo.Context) error {
 	var req models.UpdatePasswordRequest
 
 	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
@@ -310,6 +334,7 @@ func UpdatePassword(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
@@ -319,12 +344,14 @@ func UpdatePassword(c echo.Context) error {
 	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, models.Response{
 				Status: "fail",
 				Data:   map[string]string{"error": "User not found"},
 			})
 		}
 
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to get user"},
@@ -333,6 +360,7 @@ func UpdatePassword(c echo.Context) error {
 
 	storedOTP, err := utils.RedisClient.Get(ctx, req.Email).Result()
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "OTP expired or invalid"},
@@ -348,6 +376,7 @@ func UpdatePassword(c echo.Context) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to hash password"},
@@ -359,6 +388,7 @@ func UpdatePassword(c echo.Context) error {
 		Password: string(hashedPassword),
 	})
 	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to update password"},
