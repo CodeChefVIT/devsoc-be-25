@@ -295,7 +295,6 @@ func Login(c echo.Context) error {
 		})
 	}
 
-<<<<<<< HEAD
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, models.Response{
