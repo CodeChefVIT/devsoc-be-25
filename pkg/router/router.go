@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/controller"
+
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -14,5 +15,4 @@ func RegisterRoutes(e *echo.Echo) {
 
 	e.GET("/ping", controller.Ping)
 	e.GET("/docs", controller.Docs)
-
 }
