@@ -9,7 +9,107 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const addUserToTeam = `-- name: AddUserToTeam :exec
+UPDATE users
+SET team_id = $1
+WHERE id = $2
+`
+
+type AddUserToTeamParams struct {
+	TeamID uuid.NullUUID
+	ID     uuid.UUID
+}
+
+func (q *Queries) AddUserToTeam(ctx context.Context, arg AddUserToTeamParams) error {
+	_, err := q.db.Exec(ctx, addUserToTeam, arg.TeamID, arg.ID)
+	return err
+}
+
+const countTeamMembers = `-- name: CountTeamMembers :one
+SELECT COUNT(*) FROM users
+WHERE team_id = $1
+`
+
+func (q *Queries) CountTeamMembers(ctx context.Context, teamID uuid.NullUUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countTeamMembers, teamID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createTeam = `-- name: CreateTeam :one
+INSERT INTO teams (
+    id, name, number_of_people, round_qualified, code
+) VALUES (
+    $1, $2, $3, $4, $5
+)
+RETURNING id, name, number_of_people, round_qualified, code
+`
+
+type CreateTeamParams struct {
+	ID             uuid.UUID
+	Name           string
+	NumberOfPeople int32
+	RoundQualified pgtype.Int4
+	Code           string
+}
+
+func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error) {
+	row := q.db.QueryRow(ctx, createTeam,
+		arg.ID,
+		arg.Name,
+		arg.NumberOfPeople,
+		arg.RoundQualified,
+		arg.Code,
+	)
+	var i Team
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.NumberOfPeople,
+		&i.RoundQualified,
+		&i.Code,
+	)
+	return i, err
+}
+
+const deleteTeam = `-- name: DeleteTeam :exec
+DELETE FROM teams 
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTeam(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteTeam, id)
+	return err
+}
+
+const findTeam = `-- name: FindTeam :one
+SELECT id,name,code,round_qualified FROM teams 
+WHERE code = $1 
+LIMIT 1
+`
+
+type FindTeamRow struct {
+	ID             uuid.UUID
+	Name           string
+	Code           string
+	RoundQualified pgtype.Int4
+}
+
+func (q *Queries) FindTeam(ctx context.Context, code string) (FindTeamRow, error) {
+	row := q.db.QueryRow(ctx, findTeam, code)
+	var i FindTeamRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Code,
+		&i.RoundQualified,
+	)
+	return i, err
+}
 
 const getTeamById = `-- name: GetTeamById :one
 SELECT id, name, number_of_people, round_qualified, code FROM teams WHERE id = $1
@@ -67,4 +167,84 @@ func (q *Queries) GetTeams(ctx context.Context) ([]Team, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.TeamID,
+		&i.Email,
+		&i.IsVitian,
+		&i.RegNo,
+		&i.Password,
+		&i.PhoneNo,
+		&i.Role,
+		&i.IsLeader,
+		&i.College,
+		&i.IsVerified,
+		&i.IsBanned,
+	)
+	return i, err
+}
+
+const kickMemeber = `-- name: KickMemeber :exec
+UPDATE users
+SET team_id = NULL
+WHERE id = $1
+`
+
+func (q *Queries) KickMemeber(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, kickMemeber, id)
+	return err
+}
+
+const leaveTeam = `-- name: LeaveTeam :exec
+UPDATE users 
+SET team_id = NULL
+WHERE id = $1
+`
+
+func (q *Queries) LeaveTeam(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, leaveTeam, id)
+	return err
+}
+
+const removeUserFromTeam = `-- name: RemoveUserFromTeam :exec
+UPDATE users
+SET team_id = NULL
+WHERE team_id = $1 AND id = $2
+`
+
+type RemoveUserFromTeamParams struct {
+	TeamID uuid.NullUUID
+	ID     uuid.UUID
+}
+
+func (q *Queries) RemoveUserFromTeam(ctx context.Context, arg RemoveUserFromTeamParams) error {
+	_, err := q.db.Exec(ctx, removeUserFromTeam, arg.TeamID, arg.ID)
+	return err
+}
+
+const updateUserTeam = `-- name: UpdateUserTeam :exec
+UPDATE users
+SET team_id = $1, is_leader = $2
+WHERE id = $3
+`
+
+type UpdateUserTeamParams struct {
+	TeamID   uuid.NullUUID
+	IsLeader bool
+	ID       uuid.UUID
+}
+
+func (q *Queries) UpdateUserTeam(ctx context.Context, arg UpdateUserTeamParams) error {
+	_, err := q.db.Exec(ctx, updateUserTeam, arg.TeamID, arg.IsLeader, arg.ID)
+	return err
 }

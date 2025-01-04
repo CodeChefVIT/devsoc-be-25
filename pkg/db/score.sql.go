@@ -37,6 +37,16 @@ func (q *Queries) CreateScore(ctx context.Context, arg CreateScoreParams) error 
 	return err
 }
 
+const deleteScore = `-- name: DeleteScore :exec
+DELETE FROM score
+WHERE id = $1
+`
+
+func (q *Queries) DeleteScore(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteScore, id)
+	return err
+}
+
 const getTeamScores = `-- name: GetTeamScores :many
 SELECT id, team_id, design, implementation, presentation, round FROM score WHERE team_id = $1
 `
@@ -66,4 +76,31 @@ func (q *Queries) GetTeamScores(ctx context.Context, teamID uuid.UUID) ([]Score,
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateScore = `-- name: UpdateScore :exec
+UPDATE score
+SET team_id = $1, design = $2, implementation = $3, presentation = $4, round = $5
+WHERE id = $6
+`
+
+type UpdateScoreParams struct {
+	TeamID         uuid.UUID
+	Design         int32
+	Implementation int32
+	Presentation   int32
+	Round          int32
+	ID             uuid.UUID
+}
+
+func (q *Queries) UpdateScore(ctx context.Context, arg UpdateScoreParams) error {
+	_, err := q.db.Exec(ctx, updateScore,
+		arg.TeamID,
+		arg.Design,
+		arg.Implementation,
+		arg.Presentation,
+		arg.Round,
+		arg.ID,
+	)
+	return err
 }

@@ -17,4 +17,5 @@ func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin.GET("/teams", controller.GetTeams)
 	admin.GET("/teams/:id", controller.GetTeamById)
 	admin.GET("/team/leader/:id", controller.GetTeamLeader)
+	admin.POST("/createpanel", controller.CreatePanel)
 }
