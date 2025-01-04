@@ -303,7 +303,7 @@ func Login(c echo.Context) error {
 		})
 	}
 
-	token, err := utils.GenerateToken(&user)
+	token, err := utils.GenerateToken(&user, false)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
@@ -312,11 +312,39 @@ func Login(c echo.Context) error {
 		})
 	}
 
+	refreshToken, err := utils.GenerateToken(&user, true)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to generate refresh token"},
+		})
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		MaxAge:   7200,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+	})
+
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "User logged in successfully",
-			"token":   token,
 		},
 	})
 }
@@ -399,6 +427,81 @@ func UpdatePassword(c echo.Context) error {
 		Status: "success",
 		Data: map[string]string{
 			"message": "Password updated successfully",
+		},
+	})
+}
+
+func RefreshToken(c echo.Context) error {
+	ctx := c.Request().Context()
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Refresh token not found"},
+		})
+	}
+
+	refreshClaims, err := utils.ValidateRefreshToken(refreshToken.Value)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid refresh token"},
+		})
+	}
+
+	dbUser, err := utils.Queries.GetUserByID(ctx, refreshClaims.UserID)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusNotFound, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User not found"},
+		})
+	}
+
+	token, err := utils.GenerateToken(&dbUser, false)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to generate token"},
+		})
+	}
+
+	newRefreshToken, err := utils.GenerateToken(&dbUser, true)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to generate refresh token"},
+		})
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    newRefreshToken,
+		MaxAge:   7200,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	return c.JSON(http.StatusOK, models.Response{
+		Status: "success",
+		Data: map[string]string{
+			"message": "Token refreshed successfully",
 		},
 	})
 }
