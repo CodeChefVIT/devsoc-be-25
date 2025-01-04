@@ -23,7 +23,7 @@ type LoginRequest struct {
 }
 
 type UpdatePasswordRequest struct {
-	Email string `json:"email" validate:"required,email,endswith=@vitstudent.ac.in"`
+	Email       string `json:"email" validate:"required,email,endswith=@vitstudent.ac.in"`
 	NewPassword string `json:"new_password" validate:"required"`
-	OTP string `json:"otp" validate:"required"`
+	OTP         string `json:"otp" validate:"required"`
 }

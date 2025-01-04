@@ -295,6 +295,7 @@ func Login(c echo.Context) error {
 		})
 	}
 
+<<<<<<< HEAD
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, models.Response{
@@ -302,6 +303,14 @@ func Login(c echo.Context) error {
 			Data:   map[string]string{"error": "Invalid password"},
 		})
 	}
+=======
+	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+	// 	return c.JSON(http.StatusUnauthorized, models.Response{
+	// 		Status: "fail",
+	// 		Data:   map[string]string{"error": "Invalid password"},
+	// 	})
+	// }
+>>>>>>> 7630468 (added admin middleware)
 
 	token, err := utils.GenerateToken(&user)
 	if err != nil {
