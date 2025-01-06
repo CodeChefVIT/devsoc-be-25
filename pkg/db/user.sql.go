@@ -166,6 +166,31 @@ func (q *Queries) GetTeamLeader(ctx context.Context, teamID uuid.NullUUID) (User
 	return i, err
 }
 
+const getUser = `-- name: GetUser :one
+SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.TeamID,
+		&i.Email,
+		&i.IsVitian,
+		&i.RegNo,
+		&i.Password,
+		&i.PhoneNo,
+		&i.Role,
+		&i.IsLeader,
+		&i.College,
+		&i.IsVerified,
+		&i.IsBanned,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE email = $1
 `
@@ -240,6 +265,23 @@ type UpdatePasswordParams struct {
 
 func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
 	_, err := q.db.Exec(ctx, updatePassword, arg.Email, arg.Password)
+	return err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET name = $1, phone_no = $2
+WHERE id = $3
+`
+
+type UpdateUserParams struct {
+	Name    string
+	PhoneNo string
+	ID      uuid.UUID
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser, arg.Name, arg.PhoneNo, arg.ID)
 	return err
 }
 
