@@ -8,7 +8,7 @@ import (
 
 func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin := incomingRoutes.Group("/admin")
-	admin.Use(middleware.Protected())
+	admin.Use(middleware.JWTMiddleware())
 	admin.Use(middleware.CheckAdmin)
 
 	admin.GET("/users", controller.GetAllUsers)

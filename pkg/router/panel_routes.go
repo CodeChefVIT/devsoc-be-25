@@ -8,7 +8,7 @@ import (
 
 func PanelRoutes(incomingRoutes *echo.Echo) {
 	panel := incomingRoutes.Group("/panel")
-	panel.Use(middleware.Protected())
+	panel.Use(middleware.JWTMiddleware())
 	panel.Use(middleware.CheckPanel)
 
 	panel.POST("/createscore", controller.CreateScore)
