@@ -14,4 +14,6 @@ func PanelRoutes(incomingRoutes *echo.Echo) {
 	panel.DELETE("/deletescore/:id", controller.DeleteScore)
 	panel.GET("/getscore/:teamid", controller.GetScore)
 	panel.PUT("/updatescore/:id", controller.UpdateScore)
+	panel.GET("/:teamId", controller.GetSubmission)
+
 }
