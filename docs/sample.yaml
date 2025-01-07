@@ -243,7 +243,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-    put:
+    post:
       tags:
         - Submission
       summary: Update team's submission
