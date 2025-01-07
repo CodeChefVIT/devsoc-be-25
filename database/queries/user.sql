@@ -39,3 +39,11 @@ WHERE email = $1;
 UPDATE users
 SET password = $2
 WHERE email = $1;
+
+-- name: UpdateUser :exec
+UPDATE users
+SET name = $1, phone_no = $2
+WHERE id = $3;
+
+-- name: GetUser :one
+SELECT * FROM users WHERE id = $1;
