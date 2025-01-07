@@ -11,7 +11,7 @@ func SubmissionRoutes(incomingRoutes *echo.Echo) {
 	submission.Use(middleware.Protected())
 
 	submission.POST("", controller.CreateSubmission)
-	submission.GET("/:teamId", controller.GetSubmission)
+	// submission.GET("/:teamId", controller.GetSubmission)
 	submission.PUT("/:teamId", controller.UpdateSubmission)
 	submission.DELETE("/:teamId", controller.DeleteSubmission)
 }
