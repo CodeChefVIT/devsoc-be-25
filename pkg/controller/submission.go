@@ -12,9 +12,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSubmission(c echo.Context) error {
+func GetUserSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
 	teamId := c.Param("teamId")
+	user, ok := c.Get("user").(db.User)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid user"},
+		})
+	}
 
 	teamUuid, err := uuid.Parse(teamId)
 	if err != nil {
@@ -25,6 +32,19 @@ func GetSubmission(c echo.Context) error {
 		})
 	}
 
+	if teamUuid == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of any team"},
+		})
+	}
+
+	if user.TeamID.UUID.String() != teamId {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of the team"},
+		})
+	}
 	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
@@ -62,6 +82,28 @@ func CreateSubmission(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
+		})
+	}
+
+	if teamUuid == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of any team"},
+		})
+	}
+
+	user, ok := c.Get("user").(db.User)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid user"},
+		})
+	}
+
+	if user.TeamID.UUID.String() != req.TeamID {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of the team"},
 		})
 	}
 
@@ -115,6 +157,28 @@ func UpdateSubmission(c echo.Context) error {
 		})
 	}
 
+	if teamUuid == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of any team"},
+		})
+	}
+
+	user, ok := c.Get("user").(db.User)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid user"},
+		})
+	}
+
+	if user.TeamID.UUID.String() != teamId {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of the team"},
+		})
+	}
+
 	submission, err := utils.Queries.UpdateSubmission(ctx, db.UpdateSubmissionParams{
 		TeamID:     teamUuid,
 		GithubLink: req.GithubLink,
@@ -152,6 +216,28 @@ func DeleteSubmission(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
+		})
+	}
+
+	if teamUuid == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of any team"},
+		})
+	}
+
+	user, ok := c.Get("user").(db.User)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid user"},
+		})
+	}
+
+	if user.TeamID.UUID.String() != teamId {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User is not part of the team"},
 		})
 	}
 
