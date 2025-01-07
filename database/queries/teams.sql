@@ -55,3 +55,28 @@ SELECT * FROM users WHERE id = $1;
 UPDATE users
 SET team_id = $1, is_leader = $2
 WHERE id = $3;
+
+-- name: IncreaseCountTeam :exec
+UPDATE teams
+SET number_of_people = number_of_people + 1
+WHERE id = $1;
+
+-- name: DecreaseUserCountTeam :exec
+UPDATE teams
+SET number_of_people = number_of_people - 1
+WHERE id = $1;
+
+-- name: RemoveTeamIDFromUsers :exec
+UPDATE users
+SET team_id = NULL
+WHERE team_id = $1;
+
+-- name: UpdateLeader :exec
+UPDATE users
+SET is_leader = $1
+WHERE id = $2;
+
+-- name: UpdateTeamName :exec
+UPDATE teams
+SET name = $1
+WHERE id = $2;

@@ -76,6 +76,17 @@ func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, e
 	return i, err
 }
 
+const decreaseUserCountTeam = `-- name: DecreaseUserCountTeam :exec
+UPDATE teams
+SET number_of_people = number_of_people - 1
+WHERE id = $1
+`
+
+func (q *Queries) DecreaseUserCountTeam(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, decreaseUserCountTeam, id)
+	return err
+}
+
 const deleteTeam = `-- name: DeleteTeam :exec
 DELETE FROM teams 
 WHERE id = $1
@@ -194,6 +205,17 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
+const increaseCountTeam = `-- name: IncreaseCountTeam :exec
+UPDATE teams
+SET number_of_people = number_of_people + 1
+WHERE id = $1
+`
+
+func (q *Queries) IncreaseCountTeam(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, increaseCountTeam, id)
+	return err
+}
+
 const kickMemeber = `-- name: KickMemeber :exec
 UPDATE users
 SET team_id = NULL
@@ -216,6 +238,17 @@ func (q *Queries) LeaveTeam(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const removeTeamIDFromUsers = `-- name: RemoveTeamIDFromUsers :exec
+UPDATE users
+SET team_id = NULL
+WHERE team_id = $1
+`
+
+func (q *Queries) RemoveTeamIDFromUsers(ctx context.Context, teamID uuid.NullUUID) error {
+	_, err := q.db.Exec(ctx, removeTeamIDFromUsers, teamID)
+	return err
+}
+
 const removeUserFromTeam = `-- name: RemoveUserFromTeam :exec
 UPDATE users
 SET team_id = NULL
@@ -229,6 +262,38 @@ type RemoveUserFromTeamParams struct {
 
 func (q *Queries) RemoveUserFromTeam(ctx context.Context, arg RemoveUserFromTeamParams) error {
 	_, err := q.db.Exec(ctx, removeUserFromTeam, arg.TeamID, arg.ID)
+	return err
+}
+
+const updateLeader = `-- name: UpdateLeader :exec
+UPDATE users
+SET is_leader = $1
+WHERE id = $2
+`
+
+type UpdateLeaderParams struct {
+	IsLeader bool
+	ID       uuid.UUID
+}
+
+func (q *Queries) UpdateLeader(ctx context.Context, arg UpdateLeaderParams) error {
+	_, err := q.db.Exec(ctx, updateLeader, arg.IsLeader, arg.ID)
+	return err
+}
+
+const updateTeamName = `-- name: UpdateTeamName :exec
+UPDATE teams
+SET name = $1
+WHERE id = $2
+`
+
+type UpdateTeamNameParams struct {
+	Name string
+	ID   uuid.UUID
+}
+
+func (q *Queries) UpdateTeamName(ctx context.Context, arg UpdateTeamNameParams) error {
+	_, err := q.db.Exec(ctx, updateTeamName, arg.Name, arg.ID)
 	return err
 }
 
