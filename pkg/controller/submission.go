@@ -12,40 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSubmission(c echo.Context) error {
-	ctx := c.Request().Context()
-	teamId := c.Param("teamId")
-
-	teamUuid, err := uuid.Parse(teamId)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
-		})
-	}
-
-	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": err.Error()},
-		})
-	}
-
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: dto.Submission{
-			GithubLink: submission.GithubLink,
-			FigmaLink:  submission.FigmaLink,
-			PptLink:    submission.PptLink,
-			OtherLink:  submission.OtherLink,
-			TeamID:     submission.TeamID.String(),
-		},
-	})
-}
-
 func CreateSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
 	var req models.CreateSubmissionRequest
