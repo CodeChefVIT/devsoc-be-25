@@ -878,6 +878,159 @@ paths:
                 properties:
                   error:
                     type: string
+  
+  /team/join:
+    post:
+      summary: Join a team
+      description: Allows a user to join a team using a team code.
+      tags:
+        - Team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinTeamRequest'
+      responses:
+        '200':
+          description: Successfully joined the team.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request or invalid team code.
+        '500':
+          description: Internal server error.
+  /team/create:
+    post:
+      summary: Create a team
+      description: Allows a user to create a new team.
+      tags:
+        - Team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+      responses:
+        '200':
+          description: Successfully created the team.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  team:
+                    $ref: '#/components/schemas/Team'
+        '400':
+          description: Bad request or team name already exists.
+        '500':
+          description: Internal server error.
+  /team/leave:
+    post:
+      summary: Leave a team
+      description: Allows a user to leave their current team.
+      tags:
+        - Team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeaveTeamRequest'
+      responses:
+        '200':
+          description: Successfully left the team.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request or user not part of a team.
+        '500':
+          description: Internal server error.
+  /team/kick:
+    post:
+      summary: Kick a team member
+      description: Allows a team leader to remove a member from their team.
+      tags:
+        - Team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KickMemberRequest'
+      responses:
+        '200':
+          description: Successfully removed the team member.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request or unauthorized access.
+        '500':
+          description: Internal server error.
+  /team/delete:
+    post:
+      summary: Delete a team
+      description: Allows a team leader to delete their team.
+      tags:
+        - Team
+      responses:
+        '200':
+          description: Successfully deleted the team.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request or unauthorized access.
+        '500':
+          description: Internal server error.
+  /team/update:
+    put:
+      summary: Update team name
+      description: Allows a team leader to update their team name.
+      tags:
+        - Team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeamNameRequest'
+      responses:
+        '200':
+          description: Successfully updated the team name.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: string
+        '400':
+          description: Bad request or unauthorized access.
+        '500':
+          description: Internal server error.
 
 components:
   schemas:
@@ -1254,3 +1407,44 @@ components:
           type: object
           additionalProperties:
             type: string
+    
+    JoinTeamRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Team code to join.
+      required:
+        - code
+    CreateTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the team to be created.
+      required:
+        - name
+    LeaveTeamRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: ID of the user leaving the team.
+      required:
+        - userId
+    KickMemberRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: ID of the user to be kicked.
+      required:
+        - userId
+    UpdateTeamNameRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New name for the team.
+      required:
+        - name
