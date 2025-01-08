@@ -19,31 +19,23 @@ func GetSubmission(c echo.Context) error {
 	teamUuid, err := uuid.Parse(teamId)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid team ID format"})
 	}
 
 	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": err.Error()},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: dto.Submission{
-			GithubLink: submission.GithubLink,
-			FigmaLink:  submission.FigmaLink,
-			PptLink:    submission.PptLink,
-			OtherLink:  submission.OtherLink,
-			TeamID:     submission.TeamID.String(),
-		},
-	})
+	return c.JSON(http.StatusOK, dto.Submission{
+		GithubLink: submission.GithubLink,
+		FigmaLink:  submission.FigmaLink,
+		PptLink:    submission.PptLink,
+		OtherLink:  submission.OtherLink,
+		TeamID:     submission.TeamID.String(),
+	},
+	)
 }
 
 func UpdateScore(c echo.Context) error {
@@ -52,13 +44,12 @@ func UpdateScore(c echo.Context) error {
 	points := new(models.UpdateScore)
 	if err := c.Bind(points); err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
+		return c.JSON(http.StatusBadRequest,
+			map[string]string{
 				"message": "Invalid request body",
 				"error":   err.Error(),
 			},
-		})
+		)
 	}
 
 	if err := utils.Validate.Struct(points); err != nil {
@@ -71,24 +62,20 @@ func UpdateScore(c echo.Context) error {
 	scoreid, err := uuid.Parse(id)
 	if err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid score ID format",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid score ID format",
+			"error":   err.Error(),
+		},
+		)
 	}
 	teamid, err := uuid.Parse(points.TeamID)
 	if err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid team ID format",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid team ID format",
+			"error":   err.Error(),
+		},
+		)
 	}
 
 	score := db.UpdateScoreParams{
@@ -103,21 +90,17 @@ func UpdateScore(c echo.Context) error {
 	err = utils.Queries.UpdateScore(ctx, score)
 	if err != nil {
 		logger.Errorf(logger.DatabaseError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to update score",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Failed to update score",
+			"error":   err.Error(),
+		},
+		)
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "Score updated successfully",
-		},
-	})
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Score updated successfully",
+	},
+	)
 }
 
 func DeleteScore(c echo.Context) error {
@@ -127,13 +110,11 @@ func DeleteScore(c echo.Context) error {
 	scoreUuid, err := uuid.Parse(scoreId)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid score ID format",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid score ID format",
+			"error":   err.Error(),
+		},
+		)
 	}
 
 	err = utils.Queries.DeleteScore(ctx, scoreUuid)
@@ -162,13 +143,11 @@ func CreateScore(c echo.Context) error {
 	points := new(models.CreateScore)
 	if err := c.Bind(points); err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid request body",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		},
+		)
 	}
 
 	if err := utils.Validate.Struct(points); err != nil {
@@ -181,13 +160,11 @@ func CreateScore(c echo.Context) error {
 	teamid, err := uuid.Parse(points.TeamID)
 	if err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid team ID format",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid team ID format",
+			"error":   err.Error(),
+		},
+		)
 	}
 
 	score := db.CreateScoreParams{
@@ -202,17 +179,12 @@ func CreateScore(c echo.Context) error {
 	err = utils.Queries.CreateScore(ctx, score)
 	if err != nil {
 		logger.Errorf(logger.DatabaseError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to create score",
-				"error":   err.Error(),
-			},
-		})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Failed to create score",
+			"error":   err.Error(),
+		},
+		)
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data:   map[string]string{"message": "Score created successfully"},
-	})
+	return c.JSON(http.StatusOK, map[string]string{"message": "Score created successfully"})
 }
