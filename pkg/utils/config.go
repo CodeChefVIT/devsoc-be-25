@@ -6,17 +6,26 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type smtpcreds struct {
+	User     string `env:"USER"`
+	Password string `env:"PASS"`
+}
+
 type cfg struct {
-	Port             string `env:"PORT" envDefault:"8080"`
-	JwtSecret        string `env:"JWT_SECRET,notEmpty"`
-	PostgresHost     string `env:"POSTGRES_HOST,notEmpty"`
-	PostgresPort     string `env:"POSTGRES_PORT,notEmpty"`
-	PostgresUser     string `env:"POSTGRES_USER,notEmpty"`
-	PostgresPassword string `env:"POSTGRES_PASSWORD,notEmpty"`
-	PostgresDB       string `env:"POSTGRES_DB,notEmpty"`
-	RedisHost        string `env:"REDIS_HOST,notEmpty"`
-	RedisPort        string `env:"REDIS_PORT,notEmpty"`
-	RedisPassword    string `env:"REDIS_PASSWORD,notEmpty"`
+	Port             string      `env:"PORT" envDefault:"8080"`
+	JwtSecret        string      `env:"JWT_SECRET,notEmpty"`
+	PostgresHost     string      `env:"POSTGRES_HOST,notEmpty"`
+	PostgresPort     string      `env:"POSTGRES_PORT,notEmpty"`
+	PostgresUser     string      `env:"POSTGRES_USER,notEmpty"`
+	PostgresPassword string      `env:"POSTGRES_PASSWORD,notEmpty"`
+	PostgresDB       string      `env:"POSTGRES_DB,notEmpty"`
+	RedisHost        string      `env:"REDIS_HOST,notEmpty"`
+	RedisPort        string      `env:"REDIS_PORT,notEmpty"`
+	RedisPassword    string      `env:"REDIS_PASSWORD,notEmpty"`
+	EmailHost        string      `env:"EMAIL_HOST,notEmpty"`
+	EmailPort        int         `env:"EMAIL_PORT,notEmpty"`
+	SmtpCreds        []smtpcreds `envPrefix:"MAIL"`
+	SendingEmail     string      `env:"SENDING_EMAIL,notEmpty"`
 }
 
 var Config cfg
