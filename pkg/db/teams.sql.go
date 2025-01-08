@@ -181,7 +181,7 @@ func (q *Queries) GetTeams(ctx context.Context) ([]Team, error) {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE id = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -189,16 +189,20 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.TeamID,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
-		&i.IsVitian,
-		&i.RegNo,
-		&i.Password,
 		&i.PhoneNo,
+		&i.Gender,
+		&i.RegNo,
+		&i.VitEmail,
+		&i.HostelBlock,
+		&i.RoomNo,
+		&i.GithubProfile,
+		&i.Password,
 		&i.Role,
 		&i.IsLeader,
-		&i.College,
 		&i.IsVerified,
 		&i.IsBanned,
 	)

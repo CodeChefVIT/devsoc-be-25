@@ -22,6 +22,8 @@ func FormatValidationErrors(err error) map[string]string {
 				errorMessages[e.Field()] = "Email must end with @vitstudent.ac.in"
 			case "url":
 				errorMessages[e.Field()] = "Invalid URL format"
+			case "len":
+				errorMessages[e.Field()] = "Invalid length"
 			}
 		}
 	}

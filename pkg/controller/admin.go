@@ -331,19 +331,23 @@ func CreatePanel(c echo.Context) error {
 	}
 
 	panelDb := db.CreateUserParams{
-		Name:     panel.Name,
-		Email:    panel.Email,
-		RegNo:    panel.RegNo,
-		Password: string(hashedPassword),
-		PhoneNo:  panel.PhoneNo,
+		FirstName:     panel.FirstName,
+		LastName:      panel.LastName,
+		Email:         panel.Email,
+		VitEmail:      panel.VitEmail,
+		RegNo:         panel.RegNo,
+		Password:      string(hashedPassword),
+		PhoneNo:       panel.PhoneNo,
+		Role:          "panel",
+		IsLeader:      true,
+		IsVerified:    true,
+		IsBanned:      false,
+		Gender:        panel.Gender,
+		HostelBlock:   panel.HostelBlock,
+		RoomNo:        int32(panel.RoomNumber),
+		GithubProfile: panel.GithubProfile,
 	}
 	panelDb.ID, _ = uuid.NewV7()
-	panelDb.Role = "panel"
-	panelDb.IsVerified = true
-	panelDb.IsLeader = true
-	panelDb.IsVitian = true
-	panelDb.IsBanned = false
-	panelDb.College = "VIT"
 	panelDb.TeamID = uuid.NullUUID{
 		Valid: false,
 	}

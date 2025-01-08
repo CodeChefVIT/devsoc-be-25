@@ -11,8 +11,9 @@ import (
 )
 
 type UpdateUserInput struct {
-	Name     string `json:"name"`
-	PhoneNo  string `json:"phone_no"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	PhoneNo   string `json:"phone_no"`
 }
 
 func GetDetails(c echo.Context) error {
@@ -42,11 +43,11 @@ func GetDetails(c echo.Context) error {
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
 		Data: map[string]string{
-			"name":     userData.Name,
-			"email":    userData.Email,
-			"phone_no": userData.PhoneNo,
-			"college":  userData.College,
-			"reg_no":   userData.RegNo,
+			"first_name": userData.FirstName,
+			"last_name":  userData.LastName,
+			"email":      userData.Email,
+			"phone_no":   userData.PhoneNo,
+			"reg_no":     userData.RegNo,
 		},
 	})
 }
@@ -74,13 +75,12 @@ func UpdateUser(c echo.Context) error {
 		})
 	}
 
-	var updateParams db.UpdateUserParams
-	updateParams.Name = input.Name
-	updateParams.PhoneNo = input.PhoneNo
-	updateParams.ID = user.ID
-
-	var err error
-	err = utils.Queries.UpdateUser(context.Background(), updateParams)
+	err := utils.Queries.UpdateUser(context.Background(), db.UpdateUserParams{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		PhoneNo:   input.PhoneNo,
+		ID:        user.ID,
+	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
