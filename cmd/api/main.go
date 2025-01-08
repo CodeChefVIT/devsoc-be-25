@@ -14,6 +14,7 @@ func main() {
 	utils.InitCache()
 	utils.InitDB()
 	utils.InitValidator()
+	utils.InitMailer()
 
 	e := echo.New()
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
