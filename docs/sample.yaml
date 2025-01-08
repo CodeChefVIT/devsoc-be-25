@@ -727,6 +727,157 @@ paths:
                           - Failed to get user
                           - Failed to hash password
                           - Failed to update password
+  /panel/createscore:
+    post:
+      summary: Create a new score
+      tags:
+        - Panel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScore'
+      responses:
+        '200':
+          description: Score created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Score created successfully
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  /panel/deletescore/{id}:
+    delete:
+      summary: Delete a score
+      tags:
+        - Panel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Score deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /panel/getscore/{teamid}:
+    get:
+      summary: Get score by team ID
+      tags:
+        - Panel
+      parameters:
+        - name: teamid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Score retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Score'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /panel/updatescore/{id}:
+    put:
+      summary: Update a score
+      tags:
+        - Panel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScore'
+      responses:
+        '200':
+          description: Score updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Score updated successfully
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  /panel/getsubmission/{teamId}:
+    get:
+      summary: Get submission by team ID
+      tags:
+        - Panel
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Submission retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submissions'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 
 components:
   schemas:
@@ -1014,3 +1165,92 @@ components:
         otp:
           type: string
           description: One Time Password (OTP)
+    CreateScore:
+      type: object
+      required:
+        - design
+        - implementation
+        - presentation
+        - round
+        - team_id
+      properties:
+        design:
+          type: integer
+          minimum: 0
+          maximum: 10
+        implementation:
+          type: integer
+          minimum: 0
+          maximum: 10
+        presentation:
+          type: integer
+          minimum: 0
+          maximum: 10
+        round:
+          type: integer
+        team_id:
+          type: string
+          format: uuid
+    UpdateScore:
+      type: object
+      required:
+        - design
+        - implementation
+        - presentation
+        - round
+        - team_id
+      properties:
+        design:
+          type: integer
+          minimum: 0
+          maximum: 10
+        implementation:
+          type: integer
+          minimum: 0
+          maximum: 10
+        presentation:
+          type: integer
+          minimum: 0
+          maximum: 10
+        round:
+          type: integer
+        team_id:
+          type: string
+          format: uuid
+    Submissions:
+      type: object
+      properties:
+        github_link:
+          type: string
+        figma_link:
+          type: string
+        ppt_link:
+          type: string
+        other_link:
+          type: string
+        team_id:
+          type: string
+          format: uuid
+    Score:
+      type: object
+      properties:
+        design:
+          type: integer
+        implementation:
+          type: integer
+        presentation:
+          type: integer
+        round:
+          type: integer
+        team_id:
+          type: string
+          format: uuid
+    Response:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
