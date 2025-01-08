@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/controller"
-	"github.com/CodeChefVIT/devsoc-be-24/pkg/middleware"
+	// "github.com/CodeChefVIT/devsoc-be-24/pkg/middleware"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,6 +15,6 @@ func AuthRoutes(incomingRoutes *echo.Echo) {
 	auth.POST("/update-password", controller.UpdatePassword)
 	auth.POST("/refresh", controller.RefreshToken)
 
-	auth.Use(middleware.JWTMiddleware())
-	auth.GET("/ping", controller.Ping)
+	// auth.Use(middleware.JWTMiddleware())
+	// auth.GET("/ping", controller.Ping)
 }
