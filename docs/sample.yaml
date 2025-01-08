@@ -182,14 +182,35 @@ paths:
     post:
       tags:
         - Submission
-      summary: Create new submission
-      description: Creates a new submission for a team
+      summary: Create a new submission
+      description: Create a submission for a team with required project links
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSubmissionRequest'
+              type: object
+              required:
+                - github_link
+                - figma_link
+                - ppt_link
+                - team_id
+              properties:
+                github_link:
+                  type: string
+                  format: url
+                figma_link:
+                  type: string
+                  format: url
+                ppt_link:
+                  type: string
+                  format: url
+                other_link:
+                  type: string
+                  format: url
+                team_id:
+                  type: string
+                  format: uuid
       responses:
         201:
           description: Submission created successfully
@@ -202,19 +223,49 @@ paths:
                     type: string
                     enum: [success]
                   data:
-                    $ref: '#/components/schemas/Submission'
+                    type: object
+                    properties:
+                      github_link:
+                        type: string
+                        format: url
+                      figma_link:
+                        type: string
+                        format: url
+                      ppt_link:
+                        type: string
+                        format: url
+                      other_link:
+                        type: string
+                        format: url
+                      team_id:
+                        type: string
+                        format: uuid
         400:
-          description: Invalid request or team ID
+          description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [fail]
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        enum:
+                          - Invalid request body
+                          - Invalid team ID format
+                          - User is not part of any team
+                          - Invalid user
+                          - User is not part of the team
   /submission/{teamId}:
     get:
       tags:
         - Submission
-      summary: Get team's submission
+      summary: Get submission for a team
       description: Retrieves the submission details for a specific team
       parameters:
         - name: teamId
@@ -223,6 +274,7 @@ paths:
           schema:
             type: string
             format: uuid
+          description: ID of the team
       responses:
         200:
           description: Submission retrieved successfully
@@ -235,19 +287,48 @@ paths:
                     type: string
                     enum: [success]
                   data:
-                    $ref: "#/components/schemas/Submission"
+                    type: object
+                    properties:
+                      github_link:
+                        type: string
+                        format: url
+                      figma_link:
+                        type: string
+                        format: url
+                      ppt_link:
+                        type: string
+                        format: url
+                      other_link:
+                        type: string
+                        format: url
+                      team_id:
+                        type: string
+                        format: uuid
         400:
-          description: Invalid team ID or request failed
+          description: Bad request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [fail]
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        enum:
+                          - Invalid user
+                          - Invalid team ID format
+                          - User is not part of any team
+                          - User is not part of the team
     post:
       tags:
         - Submission
-      summary: Update team's submission
-      description: Updates an existing submission for a team
+      summary: Update an existing submission
+      description: Update submission details for a specific team
       parameters:
         - name: teamId
           in: path
@@ -255,12 +336,26 @@ paths:
           schema:
             type: string
             format: uuid
+          description: ID of the team whose submission to update
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateSubmissionRequest"
+              type: object
+              properties:
+                github_link:
+                  type: string
+                  format: url
+                figma_link:
+                  type: string
+                  format: url
+                ppt_link:
+                  type: string
+                  format: url
+                other_link:
+                  type: string
+                  format: url
       responses:
         200:
           description: Submission updated successfully
@@ -273,29 +368,25 @@ paths:
                     type: string
                     enum: [success]
                   data:
-                    $ref: "#/components/schemas/Submission"
+                    type: object
+                    properties:
+                      github_link:
+                        type: string
+                        format: url
+                      figma_link:
+                        type: string
+                        format: url
+                      ppt_link:
+                        type: string
+                        format: url
+                      other_link:
+                        type: string
+                        format: url
+                      team_id:
+                        type: string
+                        format: uuid
         400:
-          description: Invalid request or team ID
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-    delete:
-      tags:
-        - Submission
-      summary: Delete team's submission
-      description: Deletes a team's submission
-      parameters:
-        - name: teamId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        200:
-          description: Submission deleted successfully
+          description: Bad request
           content:
             application/json:
               schema:
@@ -303,20 +394,18 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
+                    enum: [fail]
                   data:
                     type: object
                     properties:
-                      message:
+                      error:
                         type: string
-                        example: Submission deleted successfully
-        400:
-          description: Invalid team ID or deletion failed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
+                        enum:
+                          - Invalid request body
+                          - Invalid team ID format
+                          - User is not part of any team
+                          - Invalid user
+                          - User is not part of the team
   /auth/signup:
     post:
       tags:
@@ -390,6 +479,56 @@ paths:
                         enum:
                           - Failed to hash password
                           - Failed to create user
+    delete:
+      tags:
+        - Submission
+      summary: Delete a team's submission
+      description: Deletes an existing submission for a specific team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the team whose submission to delete
+      responses:
+        200:
+          description: Submission deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [success]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Submission deleted successfully
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [fail]
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        enum:
+                          - Invalid team ID format
+                          - User is not part of any team
+                          - Invalid user
+                          - User is not part of the team
   /auth/send-otp:
     post:
       tags:
@@ -727,6 +866,93 @@ paths:
                           - Failed to get user
                           - Failed to hash password
                           - Failed to update password
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh JWT access token
+      description: Generates new access and refresh tokens using existing refresh token
+      parameters:
+        - in: cookie
+          name: refresh_token
+          required: true
+          schema:
+            type: string
+          description: Valid refresh token cookie
+      responses:
+        200:
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [success]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets new JWT and refresh token cookies
+        401:
+          description: Invalid or missing refresh token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [fail]
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        enum:
+                          - Refresh token not found
+                          - Invalid refresh token
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [fail]
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: User not found
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [fail]
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        enum:
+                          - Failed to generate token
+                          - Failed to generate refresh token
   /panel/createscore:
     post:
       summary: Create a new score
@@ -737,9 +963,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateScore'
+              $ref: "#/components/schemas/CreateScore"
       responses:
-        '200':
+        "200":
           description: Score created successfully
           content:
             application/json:
@@ -749,7 +975,7 @@ paths:
                   message:
                     type: string
                     example: Score created successfully
-        '400':
+        "400":
           description: Invalid request
           content:
             application/json:
@@ -773,18 +999,18 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Score deleted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
-        '400':
+                $ref: "#/components/schemas/Response"
+        "400":
           description: Invalid request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
   /panel/getscore/{teamid}:
     get:
       summary: Get score by team ID
@@ -798,18 +1024,18 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Score retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Score'
-        '400':
+                $ref: "#/components/schemas/Score"
+        "400":
           description: Invalid request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
   /panel/updatescore/{id}:
     put:
       summary: Update a score
@@ -827,9 +1053,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateScore'
+              $ref: "#/components/schemas/UpdateScore"
       responses:
-        '200':
+        "200":
           description: Score updated successfully
           content:
             application/json:
@@ -839,7 +1065,7 @@ paths:
                   message:
                     type: string
                     example: Score updated successfully
-        '400':
+        "400":
           description: Invalid request
           content:
             application/json:
@@ -863,13 +1089,13 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Submission retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Submissions'
-        '400':
+                $ref: "#/components/schemas/Submissions"
+        "400":
           description: Invalid request
           content:
             application/json:
@@ -878,7 +1104,7 @@ paths:
                 properties:
                   error:
                     type: string
-  
+
   /team/join:
     post:
       summary: Join a team
@@ -890,9 +1116,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JoinTeamRequest'
+              $ref: "#/components/schemas/JoinTeamRequest"
       responses:
-        '200':
+        "200":
           description: Successfully joined the team.
           content:
             application/json:
@@ -901,9 +1127,9 @@ paths:
                 properties:
                   message:
                     type: string
-        '400':
+        "400":
           description: Bad request or invalid team code.
-        '500':
+        "500":
           description: Internal server error.
   /team/create:
     post:
@@ -916,9 +1142,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateTeamRequest'
+              $ref: "#/components/schemas/CreateTeamRequest"
       responses:
-        '200':
+        "200":
           description: Successfully created the team.
           content:
             application/json:
@@ -926,10 +1152,10 @@ paths:
                 type: object
                 properties:
                   team:
-                    $ref: '#/components/schemas/Team'
-        '400':
+                    $ref: "#/components/schemas/Team"
+        "400":
           description: Bad request or team name already exists.
-        '500':
+        "500":
           description: Internal server error.
   /team/leave:
     post:
@@ -942,9 +1168,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LeaveTeamRequest'
+              $ref: "#/components/schemas/LeaveTeamRequest"
       responses:
-        '200':
+        "200":
           description: Successfully left the team.
           content:
             application/json:
@@ -953,9 +1179,9 @@ paths:
                 properties:
                   message:
                     type: string
-        '400':
+        "400":
           description: Bad request or user not part of a team.
-        '500':
+        "500":
           description: Internal server error.
   /team/kick:
     post:
@@ -968,9 +1194,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KickMemberRequest'
+              $ref: "#/components/schemas/KickMemberRequest"
       responses:
-        '200':
+        "200":
           description: Successfully removed the team member.
           content:
             application/json:
@@ -979,9 +1205,9 @@ paths:
                 properties:
                   message:
                     type: string
-        '400':
+        "400":
           description: Bad request or unauthorized access.
-        '500':
+        "500":
           description: Internal server error.
   /team/delete:
     post:
@@ -990,7 +1216,7 @@ paths:
       tags:
         - Team
       responses:
-        '200':
+        "200":
           description: Successfully deleted the team.
           content:
             application/json:
@@ -999,9 +1225,9 @@ paths:
                 properties:
                   message:
                     type: string
-        '400':
+        "400":
           description: Bad request or unauthorized access.
-        '500':
+        "500":
           description: Internal server error.
   /team/update:
     put:
@@ -1014,9 +1240,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTeamNameRequest'
+              $ref: "#/components/schemas/UpdateTeamNameRequest"
       responses:
-        '200':
+        "200":
           description: Successfully updated the team name.
           content:
             application/json:
@@ -1027,9 +1253,9 @@ paths:
                     type: string
                   data:
                     type: string
-        '400':
+        "400":
           description: Bad request or unauthorized access.
-        '500':
+        "500":
           description: Internal server error.
 
 components:
@@ -1407,7 +1633,7 @@ components:
           type: object
           additionalProperties:
             type: string
-    
+
     JoinTeamRequest:
       type: object
       properties:
