@@ -245,22 +245,165 @@ paths:
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /create/idea:
+    post:
+      tags:
+        - Idea
+      summary: Create new idea
+      description: Creates a new idea for a team, accessible only by team leaders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIdeaRequest"
+      responses:
+        201:
+          description: Idea created successfully
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    enum: [success]
                   data:
                     type: object
                     properties:
+                      message:
+                        type: string
+                        example: "Idea created successfully"
                       error:
                         type: string
-                        enum:
-                          - Invalid request body
-                          - Invalid team ID format
-                          - User is not part of any team
-                          - Invalid user
-                          - User is not part of the team
+                        nullable: true
+        400:
+          description: Invalid request or invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Forbidden - User does not belong to a team or is not a team leader
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        409:
+          description: Conflict - An idea already exists for this team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal Server Error - Failed to create idea
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /idea/update/{id}:
+    put:
+      tags:
+        - Idea
+      summary: Update an existing idea
+      description: Updates an idea for the team. Only team leaders can update ideas, and the team must match the idea's team.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the idea to update
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateIdeaParams"
+      responses:
+        200:
+          description: Idea updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [success]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Idea updated successfully"
+        400:
+          description: Invalid ID format or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Forbidden - User does not belong to a team, is not a leader, or the team's ID does not match the idea's team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Idea not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal Server Error - Failed to update idea
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /idea:
+    get:
+      tags:
+        - Idea
+      summary: Get ideas for the current team
+      description: Fetches all ideas related to the user's team. Only users who belong to a team can access the ideas.
+      responses:
+        200:
+          description: Ideas fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [success]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Ideas fetched successfully"
+                      ideas:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/GetIdeaByTeamIDRow"
+        403:
+          description: Forbidden - User does not belong to any team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal Server Error - Failed to fetch ideas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /submission/{teamId}:
     get:
       tags:
@@ -1610,6 +1753,7 @@ components:
         team_id:
           type: string
           format: uuid
+
     Score:
       type: object
       properties:
@@ -1633,6 +1777,48 @@ components:
           type: object
           additionalProperties:
             type: string
+
+    CreateIdeaRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
+        team_id:
+          type: string
+          format: uuid
+        is_selected:
+          type: boolean
+    UpdateIdeaParams:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
+        is_selected:
+          type: boolean
+
+    GetIdeaByTeamIDRow:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
 
     JoinTeamRequest:
       type: object
