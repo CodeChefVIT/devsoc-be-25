@@ -84,6 +84,13 @@ func UpdateUser(c echo.Context) error {
 		})
 	}
 
+	if err := utils.Validate.Struct(req); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusForbidden, &models.Response{
@@ -108,13 +115,6 @@ func UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Gender must be M, F or O"},
-		})
-	}
-
-	if err := utils.Validate.Struct(req); err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 

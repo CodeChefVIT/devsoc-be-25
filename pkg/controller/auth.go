@@ -27,6 +27,14 @@ func SignUp(c echo.Context) error {
 		})
 	}
 
+	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
 	req.FirstName = strings.TrimSpace(req.FirstName)
 	req.LastName = strings.TrimSpace(req.LastName)
 
@@ -41,14 +49,6 @@ func SignUp(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Gender must be M, F or O"},
-		})
-	}
-
-	if err := utils.Validate.Struct(req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
