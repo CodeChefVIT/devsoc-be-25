@@ -14,7 +14,6 @@ import (
 
 func GetUserSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
-	teamId := c.Param("teamId")
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -23,28 +22,14 @@ func GetUserSubmission(c echo.Context) error {
 		})
 	}
 
-	teamUuid, err := uuid.Parse(teamId)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
+	teamUuid := user.TeamID.UUID
+	if !user.TeamID.Valid {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
-	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of any team"},
-		})
-	}
-
-	if user.TeamID.UUID.String() != teamId {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of the team"},
-		})
-	}
 	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
@@ -68,30 +53,6 @@ func GetUserSubmission(c echo.Context) error {
 
 func CreateSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
-	var req models.CreateSubmissionRequest
-
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
-		})
-	}
-
-	teamUuid, err := uuid.Parse(req.TeamID)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
-		})
-	}
-
-	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of any team"},
-		})
-	}
-
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -100,12 +61,32 @@ func CreateSubmission(c echo.Context) error {
 		})
 	}
 
-	if user.TeamID.UUID.String() != req.TeamID {
-		return c.JSON(http.StatusBadRequest, &models.Response{
+	if !ok || !user.TeamID.Valid || !user.IsLeader {
+		return c.JSON(http.StatusForbidden, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of the team"},
+			Data: map[string]string{
+				"message": "Forbidden",
+				"error":   "User does not belong to any team or is not team leader",
+			},
 		})
 	}
+
+	var req models.CreateSubmissionRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid request body"},
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	teamUuid := user.TeamID.UUID
 
 	submission_id, _ := uuid.NewV7()
 	submission, err := utils.Queries.CreateSubmission(ctx, db.CreateSubmissionParams{
@@ -139,30 +120,6 @@ func CreateSubmission(c echo.Context) error {
 
 func UpdateSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
-	teamId := c.Param("teamId")
-	var req models.UpdateSubmissionRequest
-
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
-		})
-	}
-
-	teamUuid, err := uuid.Parse(teamId)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
-		})
-	}
-
-	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of any team"},
-		})
-	}
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
@@ -172,10 +129,26 @@ func UpdateSubmission(c echo.Context) error {
 		})
 	}
 
-	if user.TeamID.UUID.String() != teamId {
+	var req models.UpdateSubmissionRequest
+	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of the team"},
+			Data:   map[string]string{"error": "Invalid request body"},
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	teamUuid := user.TeamID.UUID
+	if !user.TeamID.Valid {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
@@ -209,22 +182,6 @@ func UpdateSubmission(c echo.Context) error {
 
 func DeleteSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
-	teamId := c.Param("teamId")
-
-	teamUuid, err := uuid.Parse(teamId)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
-		})
-	}
-
-	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of any team"},
-		})
-	}
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
@@ -234,14 +191,15 @@ func DeleteSubmission(c echo.Context) error {
 		})
 	}
 
-	if user.TeamID.UUID.String() != teamId {
+	teamUuid := user.TeamID.UUID
+	if !user.TeamID.Valid {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "User is not part of the team"},
+			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
-	err = utils.Queries.DeleteSubmission(ctx, teamUuid)
+	err := utils.Queries.DeleteSubmission(ctx, teamUuid)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
