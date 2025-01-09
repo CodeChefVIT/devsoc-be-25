@@ -129,6 +129,16 @@ func UpdateSubmission(c echo.Context) error {
 		})
 	}
 
+	if !user.TeamID.Valid || !user.IsLeader {
+		return c.JSON(http.StatusForbidden, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"message": "Forbidden",
+				"error":   "User does not belong to any team or is not team leader",
+			},
+		})
+	}
+
 	var req models.UpdateSubmissionRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -188,6 +198,16 @@ func DeleteSubmission(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid user"},
+		})
+	}
+
+	if !user.IsLeader {
+		return c.JSON(http.StatusForbidden, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"message": "Forbidden",
+				"error":   "User is not team leader",
+			},
 		})
 	}
 
