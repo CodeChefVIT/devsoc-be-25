@@ -5,7 +5,6 @@ type CreateSubmissionRequest struct {
 	FigmaLink  string `json:"figma_link" validate:"required,url"`
 	PptLink    string `json:"ppt_link" validate:"required,url"`
 	OtherLink  string `json:"other_link" validate:"omitempty,url"`
-	TeamID     string `json:"team_id" validate:"required"`
 }
 
 type UpdateSubmissionRequest struct {
