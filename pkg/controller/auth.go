@@ -4,18 +4,16 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
-	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var validate = validator.New()
 
 func SignUp(c echo.Context) error {
 	ctx := c.Request().Context()
@@ -29,6 +27,23 @@ func SignUp(c echo.Context) error {
 		})
 	}
 
+	req.FirstName = strings.TrimSpace(req.FirstName)
+	req.LastName = strings.TrimSpace(req.LastName)
+
+	if req.FirstName == "" || req.LastName == "" {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "First name and last name cannot be empty"},
+		})
+	}
+
+	if req.Gender != "M" && req.Gender != "F" && req.Gender != "O" {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Gender must be M, F or O"},
+		})
+	}
+
 	if err := utils.Validate.Struct(req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, models.Response{
@@ -38,18 +53,71 @@ func SignUp(c echo.Context) error {
 	}
 
 	existingUserByEmail, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err == nil && existingUserByEmail.ID != uuid.Nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByEmail.ID != uuid.Nil {
 		return c.JSON(http.StatusConflict, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User with this email already exists"},
 		})
 	}
 
+	existingUserByVitEmail, err := utils.Queries.GetUserByVitEmail(ctx, req.VitEmail)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByVitEmail.ID != uuid.Nil {
+		return c.JSON(http.StatusConflict, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User with this VIT email already exists"},
+		})
+	}
+
+	existingUserByPhoneNo, err := utils.Queries.GetUserByPhoneNo(ctx, req.PhoneNo)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByPhoneNo.ID != uuid.Nil {
+		return c.JSON(http.StatusConflict, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User with this phone number already exists"},
+		})
+	}
+
 	existingUserByRegNo, err := utils.Queries.GetUserByRegNo(ctx, req.RegNo)
-	if err == nil && existingUserByRegNo.ID != uuid.Nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByRegNo.ID != uuid.Nil {
 		return c.JSON(http.StatusConflict, models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User with this registration number already exists"},
+		})
+	}
+
+	userId, err := uuid.NewV7()
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to generate user ID"},
 		})
 	}
 
@@ -62,39 +130,24 @@ func SignUp(c echo.Context) error {
 		})
 	}
 
-	userId, _ := uuid.NewV7()
-	user := &db.User{
-		ID:   userId,
-		Name: req.UserName,
-		TeamID: uuid.NullUUID{
-			Valid: false,
-		},
-		Email:      req.Email,
-		IsVitian:   true,
-		RegNo:      req.RegNo,
-		Password:   string(hashedPassword),
-		PhoneNo:    req.PhoneNo,
-		Role:       "student",
-		IsLeader:   false,
-		College:    "VIT",
-		IsVerified: false,
-		IsBanned:   false,
-	}
-
 	err = utils.Queries.CreateUser(ctx, db.CreateUserParams{
-		ID:         user.ID,
-		Name:       user.Name,
-		TeamID:     user.TeamID,
-		Email:      user.Email,
-		IsVitian:   user.IsVitian,
-		RegNo:      user.RegNo,
-		Password:   user.Password,
-		PhoneNo:    user.PhoneNo,
-		Role:       user.Role,
-		IsLeader:   user.IsLeader,
-		College:    user.College,
-		IsVerified: user.IsVerified,
-		IsBanned:   user.IsBanned,
+		ID:            userId,
+		TeamID:        uuid.NullUUID{Valid: false},
+		FirstName:     req.FirstName,
+		LastName:      req.LastName,
+		Email:         req.Email,
+		PhoneNo:       req.PhoneNo,
+		Gender:        req.Gender,
+		RegNo:         req.RegNo,
+		VitEmail:      req.VitEmail,
+		HostelBlock:   req.HostelBlock,
+		RoomNo:        int32(req.RoomNumber),
+		GithubProfile: req.GithubProfile,
+		Password:      string(hashedPassword),
+		Role:          "student",
+		IsLeader:      false,
+		IsVerified:    false,
+		IsBanned:      false,
 	})
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
@@ -104,53 +157,7 @@ func SignUp(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "User signed up successfully",
-		},
-	})
-}
-
-func SendOTP(c echo.Context) error {
-	ctx := c.Request().Context()
-	var req models.SendOTPRequest
-
-	if err := c.Bind(&req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
-		})
-	}
-
-	if err := utils.Validate.Struct(req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
-		})
-	}
-
-	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			logger.Errorf(logger.InternalError, err.Error())
-			return c.JSON(http.StatusNotFound, models.Response{
-				Status: "fail",
-				Data:   map[string]string{"error": "User not found"},
-			})
-		}
-
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to get user"},
-		})
-	}
-
-	err = utils.GenerateOTP(ctx, req.Email)
-	if err != nil {
+	if err = utils.GenerateOTP(ctx, req.Email); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
@@ -161,7 +168,7 @@ func SendOTP(c echo.Context) error {
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
 		Data: map[string]string{
-			"message": "OTP sent successfully",
+			"message": "User signed up successfully. OTP has been sent to email",
 		},
 	})
 }
@@ -282,9 +289,18 @@ func Login(c echo.Context) error {
 	}
 
 	if !user.IsVerified {
+		err := utils.GenerateOTP(ctx, req.Email)
+		if err != nil {
+			logger.Errorf(logger.InternalError, err.Error())
+			return c.JSON(http.StatusInternalServerError, models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "Failed to generate OTP"},
+			})
+		}
+
 		return c.JSON(http.StatusUnauthorized, models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "User not verified"},
+			Data:   map[string]string{"error": "User not verified. OTP has been sent to email"},
 		})
 	}
 

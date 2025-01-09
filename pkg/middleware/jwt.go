@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
+	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -29,26 +30,12 @@ func JWTMiddleware() echo.MiddlewareFunc {
 
 			userId, _ := uuid.Parse(claims["user_id"].(string))
 
-			teamId := uuid.NullUUID{}
-			if claims["team_id"] != nil {
-				teamId.UUID, _ = uuid.Parse(claims["team_id"].(string))
-				teamId.Valid = true
+			user, err := utils.Queries.GetUserByID(c.Request().Context(), userId)
+			if err != nil {
+				logger.Errorf(logger.InternalError, err.Error())
 			}
 
-			c.Set("user", db.User{
-				ID:         userId,
-				Name:       claims["user_name"].(string),
-				TeamID:     teamId,
-				Email:      claims["email"].(string),
-				IsVitian:   claims["is_vitian"].(bool),
-				RegNo:      claims["reg_no"].(string),
-				PhoneNo:    claims["phone_no"].(string),
-				Role:       claims["role"].(string),
-				IsLeader:   claims["is_leader"].(bool),
-				College:    claims["college"].(string),
-				IsVerified: claims["is_verified"].(bool),
-				IsBanned:   claims["is_banned"].(bool),
-			})
+			c.Set("user", user)
 		},
 		ErrorHandler: func(c echo.Context, err error) error {
 			if err == echojwt.ErrJWTMissing {

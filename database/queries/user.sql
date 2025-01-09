@@ -22,9 +22,25 @@ SELECT * FROM users WHERE team_id = $1 AND is_leader = TRUE;
 
 -- name: CreateUser :exec
 INSERT INTO users (
-    id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned
+    id,
+    team_id,
+    first_name,
+    last_name, 
+    email,
+    phone_no,
+    gender,
+    reg_no,
+    vit_email,
+    hostel_block,
+    room_no,
+    github_profile,
+    password,
+    role,
+    is_leader,
+    is_verified,
+    is_banned
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 );
 
 -- name: GetUserByRegNo :one
@@ -42,8 +58,14 @@ WHERE email = $1;
 
 -- name: UpdateUser :exec
 UPDATE users
-SET name = $1, phone_no = $2
-WHERE id = $3;
+SET first_name = $1, last_name = $2, phone_no = $3
+WHERE id = $4;
 
 -- name: GetUser :one
 SELECT * FROM users WHERE id = $1;
+
+-- name: GetUserByPhoneNo :one
+SELECT * FROM users WHERE phone_no = $1;
+
+-- name: GetUserByVitEmail :one
+SELECT * FROM users WHERE vit_email = $1;

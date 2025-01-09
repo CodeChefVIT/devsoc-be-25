@@ -47,17 +47,21 @@ type Team struct {
 }
 
 type User struct {
-	ID         uuid.UUID
-	Name       string
-	TeamID     uuid.NullUUID
-	Email      string
-	IsVitian   bool
-	RegNo      string
-	Password   string
-	PhoneNo    string
-	Role       string
-	IsLeader   bool
-	College    string
-	IsVerified bool
-	IsBanned   bool
+	ID            uuid.UUID
+	TeamID        uuid.NullUUID
+	FirstName     string
+	LastName      string
+	Email         string
+	PhoneNo       string
+	Gender        string
+	RegNo         string
+	VitEmail      string
+	HostelBlock   string
+	RoomNo        int32
+	GithubProfile string
+	Password      string
+	Role          string
+	IsLeader      bool
+	IsVerified    bool
+	IsBanned      bool
 }

@@ -553,16 +553,64 @@ paths:
     post:
       tags:
         - Authentication
-      summary: Register a new user account
-      description: Creates a new user account for VIT students with validation and duplicate checks
+      summary: Register a new user
+      description: Creates a new user account and sends verification OTP to email
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SignupRequest"
+              type: object
+              required:
+                - first_name
+                - last_name
+                - email
+                - phone_no
+                - gender
+                - reg_no
+                - vit_email
+                - hostel_block
+                - room_no
+                - github_profile
+                - password
+              properties:
+                first_name:
+                  type: string
+                  minLength: 1
+                last_name:
+                  type: string
+                  minLength: 1
+                email:
+                  type: string
+                  format: email
+                phone_no:
+                  type: string
+                  minLength: 10
+                  maxLength: 10
+                gender:
+                  type: string
+                  enum: [M, F, O]
+                  description: Must be either M, F or O
+                reg_no:
+                  type: string
+                vit_email:
+                  type: string
+                  format: email
+                  pattern: "@vitstudent.ac.in$"
+                hostel_block:
+                  type: string
+                room_no:
+                  type: integer
+                  minimum: 1
+                  maximum: 999
+                github_profile:
+                  type: string
+                  format: uri
+                password:
+                  type: string
+                  format: password
       responses:
-        200:
+        "200":
           description: User successfully registered
           content:
             application/json:
@@ -571,23 +619,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
+                    example: success
                   data:
                     type: object
                     properties:
                       message:
                         type: string
-                        example: User signed up successfully
-        400:
-          description: Invalid request body or validation errors
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/ErrorResponse"
-                  - $ref: "#/components/schemas/ValidationErrorResponse"
-        409:
-          description: User already exists
+                        example: User signed up successfully. OTP has been sent to email
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -595,17 +635,30 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - User with this email already exists
-                          - User with this registration number already exists
-        500:
-          description: Internal server error
+              examples:
+                invalidBody:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid request body
+                emptyName:
+                  value:
+                    status: fail
+                    data:
+                      error: First name and last name cannot be empty
+                invalidGender:
+                  value:
+                    status: fail
+                    data:
+                      error: Gender must be M, F or O
+        "409":
+          description: Conflict - Resource already exists
           content:
             application/json:
               schema:
@@ -613,31 +666,35 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Failed to hash password
-                          - Failed to create user
-    delete:
-      tags:
-        - Submission
-      summary: Delete a team's submission
-      description: Deletes an existing submission for a specific team
-      parameters:
-        - name: teamId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: ID of the team whose submission to delete
-      responses:
-        200:
-          description: Submission deleted successfully
+              examples:
+                emailExists:
+                  value:
+                    status: fail
+                    data:
+                      error: User with this email already exists
+                vitEmailExists:
+                  value:
+                    status: fail
+                    data:
+                      error: User with this VIT email already exists
+                phoneExists:
+                  value:
+                    status: fail
+                    data:
+                      error: User with this phone number already exists
+                regNoExists:
+                  value:
+                    status: fail
+                    data:
+                      error: User with this registration number already exists
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -645,118 +702,62 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Submission deleted successfully
-        400:
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Invalid team ID format
-                          - User is not part of any team
-                          - Invalid user
-                          - User is not part of the team
-  /auth/send-otp:
-    post:
-      tags:
-        - Authentication
-      summary: Send OTP to user's email
-      description: Sends a one-time password to the specified email address for verification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SendOTPRequest"
-      responses:
-        200:
-          description: OTP sent successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [success]
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: OTP sent successfully
-        400:
-          description: Invalid request body or validation errors
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/ErrorResponse"
-                  - $ref: "#/components/schemas/ValidationErrorResponse"
-        404:
-          description: User not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [fail]
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [fail]
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        enum:
-                          - Failed to get user
-                          - Failed to generate OTP
+              examples:
+                databaseError:
+                  value:
+                    status: fail
+                    data:
+                      error: Database error
+                uuidError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate user ID
+                passwordError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to hash password
+                createError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to create user
+                otpError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate OTP
   /auth/verify-otp:
     post:
       tags:
         - Authentication
-      summary: Verify OTP for user email
-      description: Validates the OTP sent to user's email and marks the user as verified
+      summary: Verify user email using OTP
+      description: Validates the OTP sent to user's email during signup
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/VerifyOTPRequest"
+              type: object
+              required:
+                - email
+                - otp
+              properties:
+                email:
+                  type: string
+                  format: email
+                otp:
+                  type: string
+                  description: One-time password sent to email
       responses:
-        200:
+        '200':
           description: OTP verified successfully
           content:
             application/json:
@@ -765,23 +766,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
+                    example: success
                   data:
                     type: object
                     properties:
                       message:
                         type: string
                         example: User verified successfully
-        400:
-          description: Invalid request body or validation errors
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/ErrorResponse"
-                  - $ref: "#/components/schemas/ValidationErrorResponse"
-        404:
-          description: User not found or OTP expired
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -789,17 +782,20 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - User not found
-                          - OTP invalid/expired
-        401:
-          description: Invalid OTP
+              examples:
+                invalidBody:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid request body
+        '401':
+          description: Unauthorized - Invalid OTP
           content:
             application/json:
               schema:
@@ -807,15 +803,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
                         example: Invalid OTP
-        500:
-          description: Internal server error
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -823,31 +819,25 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Failed to get user
-                          - Failed to delete OTP
-                          - Failed to verify user
-  /auth/login:
-    post:
-      tags:
-        - Authentication
-      summary: Authenticate user and generate access token
-      description: Validates user credentials, checks verification status, and returns JWT token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginRequest"
-      responses:
-        200:
-          description: Login successful
+              examples:
+                userNotFound:
+                  value:
+                    status: fail
+                    data:
+                      error: User not found
+                otpExpired:
+                  value:
+                    status: fail
+                    data:
+                      error: OTP invalid/expired
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -855,26 +845,76 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+              examples:
+                databaseError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to get user
+                redisError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to delete OTP
+                verifyError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to verify user
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticates user and returns JWT tokens as cookies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: |
+                  jwt=<token>; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=3600
+                  refresh_token=<token>; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=7200
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
                   data:
                     type: object
                     properties:
                       message:
                         type: string
                         example: User logged in successfully
-                      token:
-                        type: string
-                        example: eyJhbGciOiJIUzI1NiIs...
-        400:
-          description: Invalid request body or validation errors
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/ErrorResponse"
-                  - $ref: "#/components/schemas/ValidationErrorResponse"
-        401:
-          description: Authentication failed
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -882,18 +922,20 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - User not verified
-                          - User banned
-                          - Invalid password
-        404:
-          description: User not found
+              examples:
+                invalidBody:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid request body
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -901,15 +943,46 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+              examples:
+                unverified:
+                  value:
+                    status: fail
+                    data:
+                      error: User not verified. OTP has been sent to email
+                banned:
+                  value:
+                    status: fail
+                    data:
+                      error: User banned
+                invalidPassword:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid password
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
                         example: User not found
-        500:
-          description: Internal server error
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -917,29 +990,61 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Failed to get user
-                          - Failed to generate token
+              examples:
+                databaseError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to get user
+                otpError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate OTP
+                tokenError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate token
+                refreshTokenError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate refresh token
   /auth/update-password:
     post:
       tags:
         - Authentication
-      summary: Update user password using OTP
-      description: Updates user password after validating OTP
+      summary: Update user password
+      description: Updates user password after OTP verification
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdatePasswordRequest"
+              type: object
+              required:
+                - email
+                - otp
+                - new_password
+              properties:
+                email:
+                  type: string
+                  format: email
+                otp:
+                  type: string
+                  description: One-time password sent to email
+                new_password:
+                  type: string
+                  format: password
       responses:
-        200:
+        '200':
           description: Password updated successfully
           content:
             application/json:
@@ -948,15 +1053,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
+                    example: success
                   data:
                     type: object
                     properties:
                       message:
                         type: string
                         example: Password updated successfully
-        400:
-          description: Invalid request body, validation errors, or invalid OTP
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -964,18 +1069,30 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Invalid request body
-                          - OTP expired or invalid
-                          - Invalid OTP
-        404:
-          description: User not found
+              examples:
+                invalidBody:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid request body
+                invalidOTP:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid OTP
+                expiredOTP:
+                  value:
+                    status: fail
+                    data:
+                      error: OTP expired or invalid
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -983,15 +1100,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
                         example: User not found
-        500:
-          description: Internal server error
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -999,32 +1116,51 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Failed to get user
-                          - Failed to hash password
-                          - Failed to update password
+              examples:
+                databaseError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to get user
+                hashError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to hash password
+                updateError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to update password
   /auth/refresh:
     post:
       tags:
         - Authentication
-      summary: Refresh JWT access token
-      description: Generates new access and refresh tokens using existing refresh token
+      summary: Refresh access token
+      description: Generate new access and refresh tokens using refresh token
       parameters:
         - in: cookie
           name: refresh_token
           required: true
           schema:
             type: string
-          description: Valid refresh token cookie
+          description: Refresh token cookie
       responses:
-        200:
+        '200':
           description: Tokens refreshed successfully
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: |
+                  jwt=<token>; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=3600
+                  refresh_token=<token>; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=7200
           content:
             application/json:
               schema:
@@ -1032,20 +1168,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [success]
+                    example: success
                   data:
                     type: object
                     properties:
                       message:
                         type: string
                         example: Token refreshed successfully
-          headers:
-            Set-Cookie:
-              schema:
-                type: string
-              description: Sets new JWT and refresh token cookies
-        401:
-          description: Invalid or missing refresh token
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -1053,17 +1184,25 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Refresh token not found
-                          - Invalid refresh token
-        404:
-          description: User not found
+              examples:
+                noToken:
+                  value:
+                    status: fail
+                    data:
+                      error: Refresh token not found
+                invalidToken:
+                  value:
+                    status: fail
+                    data:
+                      error: Invalid refresh token
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -1071,15 +1210,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
                         example: User not found
-        500:
-          description: Internal server error
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -1087,15 +1226,23 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [fail]
+                    example: fail
                   data:
                     type: object
                     properties:
                       error:
                         type: string
-                        enum:
-                          - Failed to generate token
-                          - Failed to generate refresh token
+              examples:
+                tokenError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate token
+                refreshTokenError:
+                  value:
+                    status: fail
+                    data:
+                      error: Failed to generate refresh token
   /panel/createscore:
     post:
       summary: Create a new score
