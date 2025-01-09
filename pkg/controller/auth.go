@@ -157,13 +157,13 @@ func SignUp(c echo.Context) error {
 		})
 	}
 
-	if err = utils.GenerateOTP(ctx, req.Email); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to generate OTP"},
-		})
-	}
+	// if err = utils.GenerateOTP(ctx, req.Email); err != nil {
+	// 	logger.Errorf(logger.InternalError, err.Error())
+	// 	return c.JSON(http.StatusInternalServerError, &models.Response{
+	// 		Status: "fail",
+	// 		Data:   map[string]string{"error": "Failed to generate OTP"},
+	// 	})
+	// }
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",

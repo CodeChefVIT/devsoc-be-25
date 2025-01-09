@@ -14,7 +14,7 @@ func main() {
 	utils.InitCache()
 	utils.InitDB()
 	utils.InitValidator()
-	utils.InitMailer()
+	// utils.InitMailer()
 
 	e := echo.New()
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
@@ -28,6 +28,7 @@ func main() {
 	router.AdminRoutes(e)
 	router.SubmissionRoutes(e)
 	router.AuthRoutes(e)
+	router.TeamRoutes(e)
 	router.PanelRoutes(e)
 	router.InfoRoutes(e)
 	e.Start(":" + utils.Config.Port)

@@ -22,7 +22,7 @@ func Protected() echo.MiddlewareFunc {
 
 func JWTMiddleware() echo.MiddlewareFunc {
 	config := echojwt.Config{
-		SigningKey:  []byte(os.Getenv("JWT_SECRET")),
+		SigningKey:  []byte(utils.Config.JwtSecret),
 		TokenLookup: "cookie:jwt",
 		SuccessHandler: func(c echo.Context) {
 			token := c.Get("user").(*jwt.Token)
@@ -50,7 +50,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			return c.JSON(http.StatusUnauthorized, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
-					"error": "Invalid or expired token",
+					"error": err.Error(),
 				},
 			})
 		},

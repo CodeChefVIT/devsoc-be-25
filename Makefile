@@ -17,13 +17,13 @@ generate:
 	@sqlc generate
 
 up:
-	goose -dir ./database/schema postgres "$(DB_URL)" up
+	~/go/bin/goose -dir ./database/schema postgres "$(DB_URL)" up
 
 status:
 	goose -dir ./database/schema postgres "$(DB_URL)" status
 
 down:
-	goose -dir ./database/schema postgres "$(DB_URL)" down
+	~/go/bin/goose -dir ./database/schema postgres "$(DB_URL)" down
 	
 fixtures:
 	goose -dir ./database/schema postgres "$(DB_URL)" up
