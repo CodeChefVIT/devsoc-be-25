@@ -12,7 +12,7 @@ func CheckAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(db.User)
 		if !ok {
-			return c.JSON(http.StatusUnauthorized, models.Response{
+			return c.JSON(http.StatusUnauthorized, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "Jwt is invalid or missing",
@@ -21,7 +21,7 @@ func CheckAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if user.Role != "admin" {
-			return c.JSON(http.StatusForbidden, models.Response{
+			return c.JSON(http.StatusForbidden, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"error": "Access denied. Not panel",
@@ -37,7 +37,7 @@ func CheckPanel(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(db.User)
 		if !ok {
-			return c.JSON(http.StatusUnauthorized, models.Response{
+			return c.JSON(http.StatusUnauthorized, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "Jwt is invalid or missing",
@@ -46,7 +46,7 @@ func CheckPanel(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if user.Role != "panel" {
-			return c.JSON(http.StatusForbidden, models.Response{
+			return c.JSON(http.StatusForbidden, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "Access denied",

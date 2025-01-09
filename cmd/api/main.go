@@ -29,5 +29,6 @@ func main() {
 	router.SubmissionRoutes(e)
 	router.AuthRoutes(e)
 	router.PanelRoutes(e)
+	router.InfoRoutes(e)
 	e.Start(":" + utils.Config.Port)
 }

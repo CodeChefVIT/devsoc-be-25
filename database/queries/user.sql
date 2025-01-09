@@ -58,8 +58,17 @@ WHERE email = $1;
 
 -- name: UpdateUser :exec
 UPDATE users
-SET first_name = $1, last_name = $2, phone_no = $3
-WHERE id = $4;
+SET first_name = $2,
+    last_name = $3,
+    email = $4,
+    phone_no = $5,
+    gender = $6,
+    reg_no = $7,
+    vit_email = $8,
+    hostel_block = $9,
+    room_no = $10,
+    github_profile = $11
+WHERE id = $1;
 
 -- name: GetUser :one
 SELECT * FROM users WHERE id = $1;

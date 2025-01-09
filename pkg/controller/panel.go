@@ -53,7 +53,7 @@ func UpdateScore(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(points); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
@@ -120,7 +120,7 @@ func DeleteScore(c echo.Context) error {
 	err = utils.Queries.DeleteScore(ctx, scoreUuid)
 	if err != nil {
 		logger.Errorf(logger.DatabaseError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to delete score",
@@ -129,7 +129,7 @@ func DeleteScore(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "Score deleted successfully",
@@ -151,7 +151,7 @@ func CreateScore(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(points); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})

@@ -17,7 +17,7 @@ func GetUserSubmission(c echo.Context) error {
 	teamId := c.Param("teamId")
 	user, ok := c.Get("user").(db.User)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid user"},
 		})
@@ -26,21 +26,21 @@ func GetUserSubmission(c echo.Context) error {
 	teamUuid, err := uuid.Parse(teamId)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
 	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of any team"},
 		})
 	}
 
 	if user.TeamID.UUID.String() != teamId {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of the team"},
 		})
@@ -48,13 +48,13 @@ func GetUserSubmission(c echo.Context) error {
 	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": err.Error()},
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: dto.Submission{
 			GithubLink: submission.GithubLink,
@@ -71,7 +71,7 @@ func CreateSubmission(c echo.Context) error {
 	var req models.CreateSubmissionRequest
 
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
 		})
@@ -79,14 +79,14 @@ func CreateSubmission(c echo.Context) error {
 
 	teamUuid, err := uuid.Parse(req.TeamID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
 	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of any team"},
 		})
@@ -94,14 +94,14 @@ func CreateSubmission(c echo.Context) error {
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid user"},
 		})
 	}
 
 	if user.TeamID.UUID.String() != req.TeamID {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of the team"},
 		})
@@ -119,13 +119,13 @@ func CreateSubmission(c echo.Context) error {
 
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": err.Error()},
 		})
 	}
 
-	return c.JSON(http.StatusCreated, models.Response{
+	return c.JSON(http.StatusCreated, &models.Response{
 		Status: "success",
 		Data: dto.Submission{
 			TeamID:     submission.TeamID.String(),
@@ -143,7 +143,7 @@ func UpdateSubmission(c echo.Context) error {
 	var req models.UpdateSubmissionRequest
 
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
 		})
@@ -151,14 +151,14 @@ func UpdateSubmission(c echo.Context) error {
 
 	teamUuid, err := uuid.Parse(teamId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
 	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of any team"},
 		})
@@ -166,14 +166,14 @@ func UpdateSubmission(c echo.Context) error {
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid user"},
 		})
 	}
 
 	if user.TeamID.UUID.String() != teamId {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of the team"},
 		})
@@ -189,13 +189,13 @@ func UpdateSubmission(c echo.Context) error {
 
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": err.Error()},
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: dto.Submission{
 			TeamID:     submission.TeamID.String(),
@@ -213,14 +213,14 @@ func DeleteSubmission(c echo.Context) error {
 
 	teamUuid, err := uuid.Parse(teamId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid team ID format"},
 		})
 	}
 
 	if teamUuid == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of any team"},
 		})
@@ -228,14 +228,14 @@ func DeleteSubmission(c echo.Context) error {
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid user"},
 		})
 	}
 
 	if user.TeamID.UUID.String() != teamId {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User is not part of the team"},
 		})
@@ -244,13 +244,13 @@ func DeleteSubmission(c echo.Context) error {
 	err = utils.Queries.DeleteSubmission(ctx, teamUuid)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": err.Error()},
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data:   map[string]string{"message": "Submission deleted successfully"},
 	})
