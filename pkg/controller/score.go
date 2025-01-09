@@ -19,7 +19,7 @@ func GetScore(c echo.Context) error {
 	teamUuid, err := uuid.Parse(teamId)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Invalid team ID format",
@@ -30,7 +30,7 @@ func GetScore(c echo.Context) error {
 	teamScore, err := utils.Queries.GetTeamScores(ctx, teamUuid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, models.Response{
+			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "No scores found for the team",
@@ -40,7 +40,7 @@ func GetScore(c echo.Context) error {
 		}
 
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to fetch team scores",
@@ -61,7 +61,7 @@ func GetScore(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Scores fetched successfully",

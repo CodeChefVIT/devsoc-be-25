@@ -23,7 +23,7 @@ func GetTeamId(c echo.Context) error {
 
 	teamId, err := utils.Queries.GetTeamIDByCode(ctx, teamCode)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to fetch team ID",
@@ -91,21 +91,19 @@ func JoinTeam(c echo.Context) error {
 	return utils.WriteJSON(c, 200, "Team joined successfully")
 }
 
-
 //KICK MEMBER
 
 func KickMemeber(c echo.Context) error {
 	var payload models.KickMember
 	ctx := context.Background()
-	if err := c.Bind(&payload); err!=nil{
-		utils.WriteError(c, echo.ErrBadRequest.Code,err)
+	if err := c.Bind(&payload); err != nil {
+		utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
-
 
 	user := c.Get("user").(db.User)
 
 	if user.IsLeader != true {
-		return utils.WriteError(c, echo.ErrBadRequest.Code,errors.New("Only leader can kick User"));
+		return utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Only leader can kick User"))
 	}
 
 	member, err := utils.Queries.GetUserByID(ctx, payload.UserID)
@@ -124,7 +122,7 @@ func KickMemeber(c echo.Context) error {
 	}
 
 	count, err := utils.Queries.CountTeamMembers(ctx, nullableTeamID)
-	if(count <= 0 || err != nil){
+	if count <= 0 || err != nil {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Cannot leave Team. Team is already empty"))
 	}
 
@@ -133,19 +131,17 @@ func KickMemeber(c echo.Context) error {
 	}
 
 	if err := utils.Queries.RemoveUserFromTeam(ctx, db.RemoveUserFromTeamParams{
-        TeamID:  nullableMemberID,
-		ID: member.ID,
-    }); err != nil {
-        return utils.WriteError(c, echo.ErrBadRequest.Code, err)
-    }
-
-	
-	if err := utils.Queries.DecreaseUserCountTeam(ctx,nullableTeamID.UUID);err!=nil{
-		utils.WriteError(c,echo.ErrBadRequest.Code,errors.New("Failed to leave team"))
+		TeamID: nullableMemberID,
+		ID:     member.ID,
+	}); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
+	if err := utils.Queries.DecreaseUserCountTeam(ctx, nullableTeamID.UUID); err != nil {
+		utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Failed to leave team"))
+	}
 
-	return utils.WriteJSON(c, 200,"Member kicked successfully")
+	return utils.WriteJSON(c, 200, "Member kicked successfully")
 }
 
 // CREATE TEAM
@@ -154,8 +150,8 @@ func CreateTeam(c echo.Context) error {
 	var payload models.CreateTeam
 
 	ctx := context.Background()
-	if err := c.Bind(&payload);err!=nil{
-		return utils.WriteError(c, echo.ErrBadRequest.Code,err)
+	if err := c.Bind(&payload); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
 	payload.Name = strings.TrimSpace(payload.Name)
@@ -171,44 +167,44 @@ func CreateTeam(c echo.Context) error {
 	}
 
 	if user.TeamID.Valid {
-		return utils.WriteError( c, echo.ErrExpectationFailed.Code, errors.New("user already in a team"))
+		return utils.WriteError(c, echo.ErrExpectationFailed.Code, errors.New("user already in a team"))
 	}
 
 	fmt.Println(user.TeamID.UUID.String())
 
 	params := db.CreateTeamParams{
-		ID: 	uuid.New(),
-		Name:	payload.Name,
-		Code:	uuid.NewString(),
+		ID:             uuid.New(),
+		Name:           payload.Name,
+		Code:           uuid.NewString(),
 		NumberOfPeople: 1,
-		RoundQualified : pgtype.Int4{Int32: 0, Valid: true},
+		RoundQualified: pgtype.Int4{Int32: 0, Valid: true},
 	}
 
-	team,err := utils.Queries.CreateTeam(ctx,params)
-	if err != nil{
+	team, err := utils.Queries.CreateTeam(ctx, params)
+	if err != nil {
 		return err
 	}
 
 	err = utils.Queries.UpdateUserTeam(ctx, db.UpdateUserTeamParams{
-		TeamID:   uuid.NullUUID{
+		TeamID: uuid.NullUUID{
 			UUID:  team.ID,
 			Valid: true,
 		},
 		IsLeader: true,
-		ID : user.ID,
+		ID:       user.ID,
 	})
 
 	if err != nil {
 		var pgerr *pgconn.PgError
 		if errors.As(err, &pgerr) {
 			if pgerr.Code == "23505" {
-				return utils.WriteError(c, 23505,errors.New("team name already exists"));
+				return utils.WriteError(c, 23505, errors.New("team name already exists"))
 			}
 		}
-		return utils.WriteError(c, echo.ErrInternalServerError.Code,err)
+		return utils.WriteError(c, echo.ErrInternalServerError.Code, err)
 	}
 
-	return utils.WriteJSON(c, 200, team);
+	return utils.WriteJSON(c, 200, team)
 }
 
 //LEAVE TEAM
@@ -216,8 +212,8 @@ func CreateTeam(c echo.Context) error {
 func LeaveTeam(c echo.Context) error {
 	var payload models.LeaveTeam
 	ctx := context.Background()
-	if err := c.Bind(&payload);err != nil{
-		return utils.WriteError(c, echo.ErrBadRequest.Code,err)
+	if err := c.Bind(&payload); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
 	user, ok := c.Get("user").(db.User)
@@ -229,8 +225,7 @@ func LeaveTeam(c echo.Context) error {
 		return utils.WriteError(c, echo.ErrForbidden.Code, errors.New("you can only leave your own team"))
 	}
 
-
-	if (!user.TeamID.Valid || user.TeamID.UUID == uuid.Nil) {
+	if !user.TeamID.Valid || user.TeamID.UUID == uuid.Nil {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("you are not part of a team"))
 	}
 
@@ -239,10 +234,10 @@ func LeaveTeam(c echo.Context) error {
 	}
 
 	if err := utils.Queries.RemoveUserFromTeam(ctx, db.RemoveUserFromTeamParams{
-        ID:  user.TeamID.UUID,
-    }); err != nil {
-        return utils.WriteError(c, echo.ErrBadRequest.Code, err)
-    }
+		ID: user.TeamID.UUID,
+	}); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
+	}
 
 	nullableTeamID := uuid.NullUUID{
 		UUID:  user.TeamID.UUID,
@@ -250,7 +245,7 @@ func LeaveTeam(c echo.Context) error {
 	}
 
 	count, err := utils.Queries.CountTeamMembers(ctx, nullableTeamID)
-	if(count <= 0 || err != nil){
+	if count <= 0 || err != nil {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Cannot leave Team. Team is already empty"))
 	}
 
@@ -258,11 +253,11 @@ func LeaveTeam(c echo.Context) error {
 		return err
 	}
 
-	if err := utils.Queries.DecreaseUserCountTeam(ctx,nullableTeamID.UUID);err!=nil{
-		utils.WriteError(c,echo.ErrBadRequest.Code,errors.New("Failed to leave team"))
+	if err := utils.Queries.DecreaseUserCountTeam(ctx, nullableTeamID.UUID); err != nil {
+		utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Failed to leave team"))
 	}
 
-	return utils.WriteJSON(c, 200,"Team Left Successfully");
+	return utils.WriteJSON(c, 200, "Team Left Successfully")
 }
 
 //DELETE TEAM
@@ -275,8 +270,8 @@ func DeleteTeam(c echo.Context) error {
 		return utils.WriteError(c, echo.ErrUnauthorized.Code, errors.New("unauthorized"))
 	}
 
-	if !user.IsLeader{
-		return utils.WriteError(c,echo.ErrBadRequest.Code, errors.New("Only leader can delete the team"))
+	if !user.IsLeader {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Only leader can delete the team"))
 	}
 
 	nullableTeamID := uuid.NullUUID{
@@ -284,18 +279,18 @@ func DeleteTeam(c echo.Context) error {
 		Valid: true,
 	}
 
-	if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil{
+	if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
-	if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil{
+	if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil {
 		return utils.WriteError(c, echo.ErrBadGateway.Code, err)
 	}
 
 	if err := utils.Queries.UpdateLeader(ctx, db.UpdateLeaderParams{
 		IsLeader: false,
-		ID: user.ID,
-	});err != nil{
+		ID:       user.ID,
+	}); err != nil {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 	user.TeamID = uuid.NullUUID{}
@@ -308,8 +303,8 @@ func DeleteTeam(c echo.Context) error {
 func UpdateTeamName(c echo.Context) error {
 	var payload models.UpdateTeamName
 	ctx := context.Background()
-	if err := c.Bind(&payload);err != nil{
-		return utils.WriteError(c, echo.ErrBadRequest.Code,err)
+	if err := c.Bind(&payload); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
 	user, ok := c.Get("user").(db.User)
@@ -321,10 +316,10 @@ func UpdateTeamName(c echo.Context) error {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, errors.New("Only Leader can update name"))
 	}
 
-	if err := utils.Queries.UpdateTeamName(ctx,db.UpdateTeamNameParams{
+	if err := utils.Queries.UpdateTeamName(ctx, db.UpdateTeamNameParams{
 		Name: payload.Name,
-		ID: user.TeamID.UUID,
-	});err != nil {
+		ID:   user.TeamID.UUID,
+	}); err != nil {
 		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 

@@ -39,7 +39,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 		},
 		ErrorHandler: func(c echo.Context, err error) error {
 			if err == echojwt.ErrJWTMissing {
-				return c.JSON(http.StatusUnauthorized, models.Response{
+				return c.JSON(http.StatusUnauthorized, &models.Response{
 					Status: "fail",
 					Data: map[string]string{
 						"error": "Missing or malformed JWT",
@@ -47,7 +47,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 				})
 			}
 
-			return c.JSON(http.StatusUnauthorized, models.Response{
+			return c.JSON(http.StatusUnauthorized, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"error": "Invalid or expired token",

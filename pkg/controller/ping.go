@@ -12,7 +12,7 @@ import (
 func Ping(c echo.Context) error {
 	// user, ok := c.Get("user").(db.User)
 	// if !ok {
-	// 	return c.JSON(http.StatusForbidden, models.Response{
+	// 	return c.JSON(http.StatusForbidden, &models.Response{
 	// 		Status: "fail",
 	// 		Data: map[string]string{
 	// 			"message": "Forbidden",
@@ -22,7 +22,7 @@ func Ping(c echo.Context) error {
 	// }
 
 	// logger.Infof("User: %+v", user)
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "pong",

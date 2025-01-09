@@ -376,23 +376,46 @@ func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) 
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET first_name = $1, last_name = $2, phone_no = $3
-WHERE id = $4
+SET first_name = $2,
+    last_name = $3,
+    email = $4,
+    phone_no = $5,
+    gender = $6,
+    reg_no = $7,
+    vit_email = $8,
+    hostel_block = $9,
+    room_no = $10,
+    github_profile = $11
+WHERE id = $1
 `
 
 type UpdateUserParams struct {
-	FirstName string
-	LastName  string
-	PhoneNo   string
-	ID        uuid.UUID
+	ID            uuid.UUID
+	FirstName     string
+	LastName      string
+	Email         string
+	PhoneNo       string
+	Gender        string
+	RegNo         string
+	VitEmail      string
+	HostelBlock   string
+	RoomNo        int32
+	GithubProfile string
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
 		arg.FirstName,
 		arg.LastName,
+		arg.Email,
 		arg.PhoneNo,
-		arg.ID,
+		arg.Gender,
+		arg.RegNo,
+		arg.VitEmail,
+		arg.HostelBlock,
+		arg.RoomNo,
+		arg.GithubProfile,
 	)
 	return err
 }
