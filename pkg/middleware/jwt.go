@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -38,6 +39,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			c.Set("user", user)
 		},
 		ErrorHandler: func(c echo.Context, err error) error {
+			fmt.Println(err)
 			if err == echojwt.ErrJWTMissing {
 				return c.JSON(http.StatusUnauthorized, &models.Response{
 					Status: "fail",

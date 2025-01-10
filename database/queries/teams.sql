@@ -80,3 +80,18 @@ WHERE id = $2;
 UPDATE teams
 SET name = $1
 WHERE id = $2;
+
+-- name: GetTeamMembers :many
+SELECT first_name , last_name , github_profile, vit_email, reg_no, phone_no
+FROM users
+Where team_id = $1;
+
+-- name: GetTeamUsers :many
+SELECT first_name, last_name
+From users
+Where team_id = $1;
+
+-- name: GetTeamUsersEmails :many
+SELECT vit_email
+From users
+where team_id = $1;
