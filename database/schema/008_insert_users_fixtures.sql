@@ -16,7 +16,8 @@ INSERT INTO users (
     role,
     is_leader,
     is_verified,
-    is_banned
+    is_banned,
+    is_profile_complete
 ) VALUES
     (
         '9f9bfe51-6b8d-4ff1-8a84-5457a5b8a3c7',
@@ -35,7 +36,8 @@ INSERT INTO users (
         'admin',
         TRUE,
         TRUE,
-        FALSE
+        FALSE,
+        TRUE
     ),
     (
         '0fd44650-776b-11ec-bf63-0242ac130002',
@@ -54,7 +56,8 @@ INSERT INTO users (
         'student',
         FALSE,
         TRUE,
-        FALSE
+        FALSE,
+        TRUE
     );
 
 -- +goose Down
