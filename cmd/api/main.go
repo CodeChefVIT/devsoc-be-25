@@ -23,6 +23,7 @@ func main() {
 		LogError:      true,
 		LogValuesFunc: logger.RouteLogger,
 	}))
+	router.TeamRoutes(e)
 	router.RegisterRoutes(e)
 	router.IdeaRoutes(e)
 	router.AdminRoutes(e)

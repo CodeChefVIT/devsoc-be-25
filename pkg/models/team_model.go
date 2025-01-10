@@ -16,7 +16,7 @@ type CreateTeam struct {
 }
 
 type JoinTeam struct {
-	Code string `json:"code" validate:"reuqired" `
+	Code string `json:"code" validate:"required" `
 }
 
 type KickMember struct {
@@ -42,4 +42,18 @@ type DeleteTeam struct {
 
 type UpdateTeamName struct {
 	Name string `json:"name" validate:"required"`
+}
+
+type GetTeamMembers struct {
+	FirstName string `json:"first_name" validate:"required"`
+	LastName string `json:"last_name" validate:"required"`
+	GithubProfile string `json:"github_profile" validate:"required,url"`
+	VitEmail      string `json:"vit_email" validate:"required,email,endswith=@vitstudent.ac.in"`
+	RegNo         string `json:"reg_no" validate:"required"`
+	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
+}
+
+type GetTeamUsers struct {
+	FirstName string `json:"first_name" validate:"required"`
+	LastName string `json:"last_name" validate:"required"`
 }
