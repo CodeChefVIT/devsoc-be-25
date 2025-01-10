@@ -7,8 +7,92 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+type UserData struct {
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
+	Email         string `json:"email"`
+	RegNo         string `json:"reg_no"`
+	PhoneNo       string `json:"phone_no"`
+	Gender        string `json:"gender"`
+	VitEmail      string `json:"vit_email"`
+	HostelBlock   string `json:"hostel_block"`
+	RoomNo        int    `json:"room_no"`
+	GithubProfile string `json:"github_profile"`
+	IsLeader      bool   `json:"is_leader"`
+}
+
+type TeamMember struct {
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
+	Email         string `json:"email"`
+	PhoneNo       string `json:"phone_no"`
+	GithubProfile string `json:"github_profile"`
+	IsLeader      bool   `json:"is_leader"`
+}
+
+type TeamData struct {
+	Name           string       `json:"team_name"`
+	NumberOfPeople int          `json:"number_of_people"`
+	RoundQualified int          `json:"round_qualified"`
+	Code           string       `json:"code"`
+	Members        []TeamMember `json:"members"`
+}
+
+type ResponseData struct {
+	Message string   `json:"message"`
+	User    UserData `json:"user"`
+	Team    TeamData `json:"team"`
+}
+
+func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData {
+	var response ResponseData
+
+	for _, entry := range data {
+		if entry.ID == userID {
+			response.User = UserData{
+				FirstName:     entry.FirstName,
+				LastName:      entry.LastName,
+				Email:         entry.Email,
+				RegNo:         entry.RegNo,
+				PhoneNo:       entry.PhoneNo,
+				Gender:        entry.Gender,
+				VitEmail:      entry.VitEmail,
+				HostelBlock:   entry.HostelBlock,
+				RoomNo:        int(entry.RoomNo),
+				GithubProfile: entry.GithubProfile,
+				IsLeader:      entry.IsLeader,
+			}
+
+			response.Team = TeamData{
+				Name:           entry.Name,
+				NumberOfPeople: int(entry.NumberOfPeople),
+				RoundQualified: int(entry.RoundQualified.Int32),
+				Code:           entry.Code,
+				Members:        []TeamMember{},
+			}
+			break
+		}
+	}
+
+	for _, entry := range data {
+		if entry.ID != userID {
+			member := TeamMember{
+				FirstName:     entry.FirstName,
+				LastName:      entry.LastName,
+				Email:         entry.Email,
+				PhoneNo:       entry.PhoneNo,
+				GithubProfile: entry.GithubProfile,
+			}
+			response.Team.Members = append(response.Team.Members, member)
+		}
+	}
+
+	return response
+}
 
 func GetDetails(c echo.Context) error {
 	ctx := c.Request().Context()
@@ -23,7 +107,17 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	userData, err := utils.Queries.GetUser(ctx, user.ID)
+	if user.TeamID.Valid == false {
+		return c.JSON(http.StatusForbidden, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"message": "Forbidden",
+				"error":   "User is not part of any team",
+			},
+		})
+	}
+
+	userData, err := utils.Queries.GetUserAndTeamDetails(ctx, user.TeamID.UUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -34,25 +128,11 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	fetchedUser := map[string]interface{}{
-		"first_name":     userData.FirstName,
-		"last_name":      userData.LastName,
-		"email":          userData.Email,
-		"phone_no":       userData.PhoneNo,
-		"gender":         userData.Gender,
-		"reg_no":         userData.RegNo,
-		"vit_email":      userData.VitEmail,
-		"hostel_block":   userData.HostelBlock,
-		"room_no":        int32(userData.RoomNo),
-		"github_profile": userData.GithubProfile,
-	}
-
+	marshallData := Marshall(userData, user.ID)
+	marshallData.Message = "User details fetched successfully"
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
-		Data: map[string]interface{}{
-			"message": "User fetched successfully",
-			"user":    fetchedUser,
-		},
+		Data: marshallData,
 	})
 }
 

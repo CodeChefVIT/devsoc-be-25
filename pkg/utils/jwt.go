@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -17,10 +16,10 @@ type JWTClaims struct {
 
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
-func GenerateToken(user *db.User, isRefresh bool) (string, error) {
+func GenerateToken(userId *uuid.UUID, isRefresh bool) (string, error) {
 	if isRefresh {
 		claims := JWTClaims{
-			user.ID,
+			*userId,
 			jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -31,7 +30,7 @@ func GenerateToken(user *db.User, isRefresh bool) (string, error) {
 	}
 
 	claims := JWTClaims{
-		user.ID,
+		*userId,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

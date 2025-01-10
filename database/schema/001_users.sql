@@ -17,6 +17,7 @@ CREATE TABLE users (
     is_leader BOOLEAN NOT NULL,
     is_verified BOOLEAN NOT NULL,
     is_banned BOOLEAN NOT NULL,
+    is_profile_complete BOOLEAN NOT NULL,
     PRIMARY KEY (id)
 );
 

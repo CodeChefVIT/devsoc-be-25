@@ -1,9 +1,13 @@
 package models
 
 type SignupRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type CompleteProfileRequest struct {
 	FirstName     string `json:"first_name" validate:"required"`
 	LastName      string `json:"last_name" validate:"required"`
-	Email         string `json:"email" validate:"required,email"`
 	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
 	Gender        string `json:"gender" validate:"required,len=1"`
 	RegNo         string `json:"reg_no" validate:"required"`
@@ -11,7 +15,6 @@ type SignupRequest struct {
 	HostelBlock   string `json:"hostel_block" validate:"required"`
 	RoomNumber    int    `json:"room_no" validate:"required"`
 	GithubProfile string `json:"github_profile" validate:"required,url"`
-	Password      string `json:"password" validate:"required"`
 }
 
 type VerifyOTPRequest struct {
