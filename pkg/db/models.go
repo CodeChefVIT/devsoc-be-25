@@ -30,12 +30,14 @@ type Score struct {
 }
 
 type Submission struct {
-	ID         uuid.UUID
-	GithubLink string
-	FigmaLink  string
-	PptLink    string
-	OtherLink  string
-	TeamID     uuid.UUID
+	ID          uuid.UUID
+	Title       string
+	Description string
+	GithubLink  string
+	FigmaLink   string
+	PptLink     string
+	OtherLink   string
+	TeamID      uuid.UUID
 }
 
 type Team struct {

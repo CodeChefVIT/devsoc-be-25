@@ -42,11 +42,13 @@ func GetUserSubmission(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: dto.Submission{
-			GithubLink: submission.GithubLink,
-			FigmaLink:  submission.FigmaLink,
-			PptLink:    submission.PptLink,
-			OtherLink:  submission.OtherLink,
-			TeamID:     submission.TeamID.String(),
+			Title:       submission.Title,
+			Description: submission.Description,
+			GithubLink:  submission.GithubLink,
+			FigmaLink:   submission.FigmaLink,
+			PptLink:     submission.PptLink,
+			OtherLink:   submission.OtherLink,
+			TeamID:      submission.TeamID.String(),
 		},
 	})
 }
@@ -90,12 +92,14 @@ func CreateSubmission(c echo.Context) error {
 
 	submission_id, _ := uuid.NewV7()
 	submission, err := utils.Queries.CreateSubmission(ctx, db.CreateSubmissionParams{
-		ID:         submission_id,
-		TeamID:     teamUuid,
-		GithubLink: req.GithubLink,
-		FigmaLink:  req.FigmaLink,
-		PptLink:    req.PptLink,
-		OtherLink:  req.OtherLink,
+		ID:          submission_id,
+		Title:       req.Title,
+		Description: req.Description,
+		TeamID:      teamUuid,
+		GithubLink:  req.GithubLink,
+		FigmaLink:   req.FigmaLink,
+		PptLink:     req.PptLink,
+		OtherLink:   req.OtherLink,
 	})
 
 	if err != nil {
@@ -109,11 +113,13 @@ func CreateSubmission(c echo.Context) error {
 	return c.JSON(http.StatusCreated, &models.Response{
 		Status: "success",
 		Data: dto.Submission{
-			TeamID:     submission.TeamID.String(),
-			GithubLink: submission.GithubLink,
-			FigmaLink:  submission.FigmaLink,
-			PptLink:    submission.PptLink,
-			OtherLink:  submission.OtherLink,
+			TeamID:      submission.TeamID.String(),
+			Title:       submission.Title,
+			Description: submission.Description,
+			GithubLink:  submission.GithubLink,
+			FigmaLink:   submission.FigmaLink,
+			PptLink:     submission.PptLink,
+			OtherLink:   submission.OtherLink,
 		},
 	})
 }
@@ -163,11 +169,13 @@ func UpdateSubmission(c echo.Context) error {
 	}
 
 	submission, err := utils.Queries.UpdateSubmission(ctx, db.UpdateSubmissionParams{
-		TeamID:     teamUuid,
-		GithubLink: req.GithubLink,
-		FigmaLink:  req.FigmaLink,
-		PptLink:    req.PptLink,
-		OtherLink:  req.OtherLink,
+		TeamID:      teamUuid,
+		Title:       req.Title,
+		Description: req.Description,
+		GithubLink:  req.GithubLink,
+		FigmaLink:   req.FigmaLink,
+		PptLink:     req.PptLink,
+		OtherLink:   req.OtherLink,
 	})
 
 	if err != nil {
@@ -181,11 +189,13 @@ func UpdateSubmission(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: dto.Submission{
-			TeamID:     submission.TeamID.String(),
-			GithubLink: submission.GithubLink,
-			FigmaLink:  submission.FigmaLink,
-			PptLink:    submission.PptLink,
-			OtherLink:  submission.OtherLink,
+			TeamID:      submission.TeamID.String(),
+			Title:       submission.Title,
+			Description: submission.Description,
+			GithubLink:  submission.GithubLink,
+			FigmaLink:   submission.FigmaLink,
+			PptLink:     submission.PptLink,
+			OtherLink:   submission.OtherLink,
 		},
 	})
 }
