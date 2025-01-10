@@ -254,7 +254,18 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	err = utils.Queries.CompleteProfile(ctx, user.Email)
+	err = utils.Queries.CompleteProfile(ctx, db.CompleteProfileParams{
+		Email:         user.Email,
+		FirstName:     req.FirstName,
+		LastName:      req.LastName,
+		PhoneNo:       req.PhoneNo,
+		Gender:        req.Gender,
+		RegNo:         req.RegNo,
+		VitEmail:      req.VitEmail,
+		HostelBlock:   req.HostelBlock,
+		RoomNo:        int32(req.RoomNumber),
+		GithubProfile: req.GithubProfile,
+	})
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{

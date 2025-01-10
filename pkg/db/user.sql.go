@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const banUser = `-- name: BanUser :exec
@@ -24,12 +25,46 @@ func (q *Queries) BanUser(ctx context.Context, email string) error {
 
 const completeProfile = `-- name: CompleteProfile :exec
 UPDATE users
-SET is_profile_complete = TRUE
+SET 
+    first_name = $2,
+    last_name = $3,
+    phone_no = $4,
+    gender = $5,
+    reg_no = $6,
+    vit_email = $7,
+    hostel_block = $8,
+    room_no = $9,
+    github_profile = $10,
+    is_profile_complete = TRUE
 WHERE email = $1
 `
 
-func (q *Queries) CompleteProfile(ctx context.Context, email string) error {
-	_, err := q.db.Exec(ctx, completeProfile, email)
+type CompleteProfileParams struct {
+	Email         string
+	FirstName     string
+	LastName      string
+	PhoneNo       string
+	Gender        string
+	RegNo         string
+	VitEmail      string
+	HostelBlock   string
+	RoomNo        int32
+	GithubProfile string
+}
+
+func (q *Queries) CompleteProfile(ctx context.Context, arg CompleteProfileParams) error {
+	_, err := q.db.Exec(ctx, completeProfile,
+		arg.Email,
+		arg.FirstName,
+		arg.LastName,
+		arg.PhoneNo,
+		arg.Gender,
+		arg.RegNo,
+		arg.VitEmail,
+		arg.HostelBlock,
+		arg.RoomNo,
+		arg.GithubProfile,
+	)
 	return err
 }
 
@@ -247,6 +282,120 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.IsProfileComplete,
 	)
 	return i, err
+}
+
+const getUserAndTeamDetails = `-- name: GetUserAndTeamDetails :many
+
+SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code, 
+	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile
+	FROM teams
+	INNER JOIN users ON users.team_id = teams.id
+	LEFT JOIN submission ON submission.team_id = teams.id
+	LEFT JOIN ideas ON ideas.team_id = teams.id 
+WHERE teams.id = $1
+`
+
+type GetUserAndTeamDetailsRow struct {
+	Name           string
+	NumberOfPeople int32
+	RoundQualified pgtype.Int4
+	Code           string
+	ID             uuid.UUID
+	FirstName      string
+	LastName       string
+	Email          string
+	RegNo          string
+	PhoneNo        string
+	Gender         string
+	VitEmail       string
+	HostelBlock    string
+	RoomNo         int32
+	GithubProfile  string
+}
+
+// Goofy ahh query hai, but kaam karega
+// SELECT
+//
+//	(json_build_object(
+//	  'user', json_strip_nulls(json_build_object(
+//	    'first_name', u.first_name,
+//	    'last_name', u.last_name,
+//	    'email', u.email,
+//	    'phone_no', u.phone_no,
+//	    'gender', u.gender,
+//	    'reg_no', u.reg_no,
+//	    'vit_email', u.vit_email,
+//	    'hostel_block', u.hostel_block,
+//	    'room_no', u.room_no,
+//	    'github_profile', u.github_profile,
+//	    'role', u.role
+//	  )),
+//	  'team', json_build_object(
+//	    'team_name', t.name,
+//	    'number_of_people', t.number_of_people,
+//	    'round_qualified', t.round_qualified,
+//	    'code', t.code,
+//	    'members', (
+//	      SELECT json_agg(json_strip_nulls(json_build_object(
+//	        'first_name', members.first_name,
+//	        'last_name', members.last_name,
+//	        'email', members.email,
+//	        'phone_no', members.phone_no,
+//	        'github_profile', members.github_profile,
+//	        'role', members.role,
+//	        'is_leader', members.is_leader
+//	      )))
+//	      FROM users members
+//	      WHERE members.team_id = t.id AND members.id != u.id
+//	    )
+//	  )
+//	))::json AS result
+//
+// FROM
+//
+//	users u
+//
+// JOIN
+//
+//	teams t ON u.team_id = t.id
+//
+// WHERE
+//
+//	u.id = $1;
+func (q *Queries) GetUserAndTeamDetails(ctx context.Context, id uuid.UUID) ([]GetUserAndTeamDetailsRow, error) {
+	rows, err := q.db.Query(ctx, getUserAndTeamDetails, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserAndTeamDetailsRow
+	for rows.Next() {
+		var i GetUserAndTeamDetailsRow
+		if err := rows.Scan(
+			&i.Name,
+			&i.NumberOfPeople,
+			&i.RoundQualified,
+			&i.Code,
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.RegNo,
+			&i.PhoneNo,
+			&i.Gender,
+			&i.VitEmail,
+			&i.HostelBlock,
+			&i.RoomNo,
+			&i.GithubProfile,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
