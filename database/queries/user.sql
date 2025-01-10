@@ -140,7 +140,7 @@ WHERE email = $1;
 
 -- name: GetUserAndTeamDetails :many
 SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code, 
-	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile
+	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile, users.is_leader
 	FROM teams
 	INNER JOIN users ON users.team_id = teams.id
 	LEFT JOIN submission ON submission.team_id = teams.id

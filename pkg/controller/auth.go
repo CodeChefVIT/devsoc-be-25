@@ -476,10 +476,8 @@ func Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
-			"message": "User logged in successfully",
-			"info": map[string]interface{}{
-				"is_profile_complete": user.IsProfileComplete,
-			},
+			"message":             "User logged in successfully",
+			"is_profile_complete": user.IsProfileComplete,
 		},
 	})
 }

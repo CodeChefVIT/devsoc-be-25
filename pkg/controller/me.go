@@ -22,6 +22,7 @@ type UserData struct {
 	HostelBlock   string `json:"hostel_block"`
 	RoomNo        int    `json:"room_no"`
 	GithubProfile string `json:"github_profile"`
+	IsLeader      bool   `json:"is_leader"`
 }
 
 type TeamMember struct {
@@ -30,6 +31,7 @@ type TeamMember struct {
 	Email         string `json:"email"`
 	PhoneNo       string `json:"phone_no"`
 	GithubProfile string `json:"github_profile"`
+	IsLeader      bool   `json:"is_leader"`
 }
 
 type TeamData struct {
@@ -41,8 +43,9 @@ type TeamData struct {
 }
 
 type ResponseData struct {
-	User UserData `json:"user"`
-	Team TeamData `json:"team"`
+	Message string   `json:"message"`
+	User    UserData `json:"user"`
+	Team    TeamData `json:"team"`
 }
 
 func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData {
@@ -61,6 +64,7 @@ func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData
 				HostelBlock:   entry.HostelBlock,
 				RoomNo:        int(entry.RoomNo),
 				GithubProfile: entry.GithubProfile,
+				IsLeader:      entry.IsLeader,
 			}
 
 			response.Team = TeamData{
@@ -125,12 +129,10 @@ func GetDetails(c echo.Context) error {
 	}
 
 	marshallData := Marshall(userData, user.ID)
+	marshallData.Message = "User details fetched successfully"
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
-		Data: map[string]interface{}{
-			"message": "User fetched successfully",
-			"info":    marshallData,
-		},
+		Data: marshallData,
 	})
 }
 
