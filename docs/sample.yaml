@@ -180,6 +180,69 @@ paths:
                 $ref: "#/components/schemas/User"
         "404":
           description: Team leader not found
+
+   /admin/members/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get all team members
+      description: Retrieve all members of a team using the team ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The UUID of the team.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully retrieved team members.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        FirstName:
+                          type: string
+                          description: First name of the team member.
+                        LastName:
+                          type: string
+                          description: Last name of the team member.
+                        GithubProfile:
+                          type: string
+                          description: GitHub profile URL of the team member.
+                        VitEmail:
+                          type: string
+                          description: VIT email of the team member.
+                        RegNo:
+                          type: string
+                          description: Registration number of the team member.
+                        PhoneNo:
+                          type: string
+                          description: Phone number of the team member.
+        '400':
+          description: Failed to retrieve team members.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: Cannot get Members of the team
+
   /submission:
     post:
       tags:
@@ -1670,9 +1733,16 @@ paths:
                   message:
                     type: string
         "400":
-          description: Bad request or invalid team code.
-        "500":
-          description: Internal server error.
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
   /team/create:
     post:
       summary: Create a team
@@ -1696,9 +1766,17 @@ paths:
                   team:
                     $ref: "#/components/schemas/Team"
         "400":
-          description: Bad request or team name already exists.
-        "500":
-          description: Internal server error.
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  paths:
   /team/leave:
     post:
       summary: Leave a team
@@ -1722,9 +1800,17 @@ paths:
                   message:
                     type: string
         "400":
-          description: Bad request or user not part of a team.
-        "500":
-          description: Internal server error.
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+
   /team/kick:
     post:
       summary: Kick a team member
@@ -1748,9 +1834,16 @@ paths:
                   message:
                     type: string
         "400":
-          description: Bad request or unauthorized access.
-        "500":
-          description: Internal server error.
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
   /team/delete:
     post:
       summary: Delete a team
@@ -1767,10 +1860,20 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: Team Deleted
         "400":
-          description: Bad request or unauthorized access.
-        "500":
-          description: Internal server error.
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: Unauthorized or error details
   /team/update:
     put:
       summary: Update team name
@@ -1796,9 +1899,70 @@ paths:
                   data:
                     type: string
         "400":
-          description: Bad request or unauthorized access.
-        "500":
-          description: Internal server error.
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  /team/users:
+    get:
+      summary: Get all team users name
+      description: Retrieve the first and last name of users in a team.
+      tags:
+        - Team
+      responses:
+        '200':
+          description: Successfully retrieved team users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        FirstName:
+                          type: string
+                          description: First name of the team user.
+                        LastName:
+                          type: string
+                          description: Last name of the team user.
+        '400':
+          description: Failed to retrieve team users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: Cannot get Members of the team
+        '401':
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: unauthorized
 
 components:
   schemas:
