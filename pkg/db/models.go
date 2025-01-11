@@ -33,9 +33,9 @@ type Submission struct {
 	ID          uuid.UUID
 	Title       string
 	Description string
+	Track       string
 	GithubLink  string
 	FigmaLink   string
-	PptLink     string
 	OtherLink   string
 	TeamID      uuid.UUID
 }

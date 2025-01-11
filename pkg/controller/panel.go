@@ -29,11 +29,12 @@ func GetSubmission(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.Submission{
-		GithubLink: submission.GithubLink,
-		FigmaLink:  submission.FigmaLink,
-		PptLink:    submission.PptLink,
-		OtherLink:  submission.OtherLink,
-		TeamID:     submission.TeamID.String(),
+		Title:       submission.Title,
+		Description: submission.Description,
+		GithubLink:  submission.GithubLink,
+		FigmaLink:   submission.FigmaLink,
+		OtherLink:   submission.OtherLink,
+		TeamID:      submission.TeamID.String(),
 	},
 	)
 }

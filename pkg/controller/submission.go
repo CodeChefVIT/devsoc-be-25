@@ -44,9 +44,9 @@ func GetUserSubmission(c echo.Context) error {
 		Data: dto.Submission{
 			Title:       submission.Title,
 			Description: submission.Description,
+			Track:       submission.Track,
 			GithubLink:  submission.GithubLink,
 			FigmaLink:   submission.FigmaLink,
-			PptLink:     submission.PptLink,
 			OtherLink:   submission.OtherLink,
 			TeamID:      submission.TeamID.String(),
 		},
@@ -95,10 +95,10 @@ func CreateSubmission(c echo.Context) error {
 		ID:          submission_id,
 		Title:       req.Title,
 		Description: req.Description,
+		Track:       req.Track,
 		TeamID:      teamUuid,
 		GithubLink:  req.GithubLink,
 		FigmaLink:   req.FigmaLink,
-		PptLink:     req.PptLink,
 		OtherLink:   req.OtherLink,
 	})
 
@@ -116,9 +116,9 @@ func CreateSubmission(c echo.Context) error {
 			TeamID:      submission.TeamID.String(),
 			Title:       submission.Title,
 			Description: submission.Description,
+			Track:       submission.Track,
 			GithubLink:  submission.GithubLink,
 			FigmaLink:   submission.FigmaLink,
-			PptLink:     submission.PptLink,
 			OtherLink:   submission.OtherLink,
 		},
 	})
@@ -172,9 +172,9 @@ func UpdateSubmission(c echo.Context) error {
 		TeamID:      teamUuid,
 		Title:       req.Title,
 		Description: req.Description,
+		Track:       req.Track,
 		GithubLink:  req.GithubLink,
 		FigmaLink:   req.FigmaLink,
-		PptLink:     req.PptLink,
 		OtherLink:   req.OtherLink,
 	})
 
@@ -192,9 +192,9 @@ func UpdateSubmission(c echo.Context) error {
 			TeamID:      submission.TeamID.String(),
 			Title:       submission.Title,
 			Description: submission.Description,
+			Track:       submission.Track,
 			GithubLink:  submission.GithubLink,
 			FigmaLink:   submission.FigmaLink,
-			PptLink:     submission.PptLink,
 			OtherLink:   submission.OtherLink,
 		},
 	})
