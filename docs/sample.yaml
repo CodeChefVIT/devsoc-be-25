@@ -181,7 +181,7 @@ paths:
         "404":
           description: Team leader not found
 
-   /admin/members/{id}:
+  /admin/members/{id}:
     get:
       tags:
         - Admin
@@ -196,7 +196,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Successfully retrieved team members.
           content:
             application/json:
@@ -229,7 +229,7 @@ paths:
                         PhoneNo:
                           type: string
                           description: Phone number of the team member.
-        '400':
+        "400":
           description: Failed to retrieve team members.
           content:
             application/json:
@@ -1822,7 +1822,6 @@ paths:
                     type: string
                   error:
                     type: string
-  paths:
   /team/leave:
     post:
       summary: Leave a team
@@ -1962,7 +1961,7 @@ paths:
       tags:
         - Team
       responses:
-        '200':
+        "200":
           description: Successfully retrieved team users.
           content:
             application/json:
@@ -1983,7 +1982,7 @@ paths:
                         LastName:
                           type: string
                           description: Last name of the team user.
-        '400':
+        "400":
           description: Failed to retrieve team users.
           content:
             application/json:
@@ -1996,7 +1995,7 @@ paths:
                   data:
                     type: string
                     example: Cannot get Members of the team
-        '401':
+        "401":
           description: Unauthorized access.
           content:
             application/json:
