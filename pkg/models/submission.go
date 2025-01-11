@@ -6,7 +6,6 @@ type CreateSubmissionRequest struct {
 	Track       string `json:"track" validate:"required"`
 	GithubLink  string `json:"github_link" validate:"required,url"`
 	FigmaLink   string `json:"figma_link" validate:"required,url"`
-	PptLink     string `json:"ppt_link" validate:"required,url"`
 	OtherLink   string `json:"other_link" validate:"omitempty,url"`
 }
 
@@ -16,7 +15,6 @@ type UpdateSubmissionRequest struct {
 	Track       string `json:"track" validate:"required"`
 	GithubLink  string `json:"github_link" validate:"required,url"`
 	FigmaLink   string `json:"figma_link" validate:"required,url"`
-	PptLink     string `json:"ppt_link" validate:"omitempty,url"`
 	OtherLink   string `json:"other_link" validate:"omitempty,url"`
 }
 

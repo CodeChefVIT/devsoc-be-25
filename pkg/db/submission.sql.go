@@ -20,9 +20,8 @@ INSERT INTO submission (
     track,
     github_link,
     figma_link,
-    ppt_link,
     other_link
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, title, description, track, github_link, figma_link, ppt_link, other_link, team_id
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, title, description, track, github_link, figma_link, other_link, team_id
 `
 
 type CreateSubmissionParams struct {
@@ -33,7 +32,6 @@ type CreateSubmissionParams struct {
 	Track       string
 	GithubLink  string
 	FigmaLink   string
-	PptLink     string
 	OtherLink   string
 }
 
@@ -46,7 +44,6 @@ func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionPara
 		arg.Track,
 		arg.GithubLink,
 		arg.FigmaLink,
-		arg.PptLink,
 		arg.OtherLink,
 	)
 	var i Submission
@@ -57,7 +54,6 @@ func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionPara
 		&i.Track,
 		&i.GithubLink,
 		&i.FigmaLink,
-		&i.PptLink,
 		&i.OtherLink,
 		&i.TeamID,
 	)
@@ -74,7 +70,7 @@ func (q *Queries) DeleteSubmission(ctx context.Context, teamID uuid.UUID) error 
 }
 
 const getSubmissionByTeamID = `-- name: GetSubmissionByTeamID :one
-SELECT id, title, description, track, github_link, figma_link, ppt_link, other_link, team_id FROM submission WHERE team_id = $1
+SELECT id, title, description, track, github_link, figma_link, other_link, team_id FROM submission WHERE team_id = $1
 `
 
 func (q *Queries) GetSubmissionByTeamID(ctx context.Context, teamID uuid.UUID) (Submission, error) {
@@ -87,7 +83,6 @@ func (q *Queries) GetSubmissionByTeamID(ctx context.Context, teamID uuid.UUID) (
 		&i.Track,
 		&i.GithubLink,
 		&i.FigmaLink,
-		&i.PptLink,
 		&i.OtherLink,
 		&i.TeamID,
 	)
@@ -98,20 +93,18 @@ const updateSubmission = `-- name: UpdateSubmission :one
 UPDATE submission
 SET github_link = $2,
     figma_link = $3,
-    ppt_link = $4,
-    other_link = $5,
-    title = $6,
-    description = $7,
-    track = $8
+    other_link = $4,
+    title = $5,
+    description = $6,
+    track = $7
 WHERE team_id = $1
-RETURNING id, title, description, track, github_link, figma_link, ppt_link, other_link, team_id
+RETURNING id, title, description, track, github_link, figma_link, other_link, team_id
 `
 
 type UpdateSubmissionParams struct {
 	TeamID      uuid.UUID
 	GithubLink  string
 	FigmaLink   string
-	PptLink     string
 	OtherLink   string
 	Title       string
 	Description string
@@ -123,7 +116,6 @@ func (q *Queries) UpdateSubmission(ctx context.Context, arg UpdateSubmissionPara
 		arg.TeamID,
 		arg.GithubLink,
 		arg.FigmaLink,
-		arg.PptLink,
 		arg.OtherLink,
 		arg.Title,
 		arg.Description,
@@ -137,7 +129,6 @@ func (q *Queries) UpdateSubmission(ctx context.Context, arg UpdateSubmissionPara
 		&i.Track,
 		&i.GithubLink,
 		&i.FigmaLink,
-		&i.PptLink,
 		&i.OtherLink,
 		&i.TeamID,
 	)

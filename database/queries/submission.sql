@@ -10,19 +10,17 @@ INSERT INTO submission (
     track,
     github_link,
     figma_link,
-    ppt_link,
     other_link
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;
 
 -- name: UpdateSubmission :one
 UPDATE submission
 SET github_link = $2,
     figma_link = $3,
-    ppt_link = $4,
-    other_link = $5,
-    title = $6,
-    description = $7,
-    track = $8
+    other_link = $4,
+    title = $5,
+    description = $6,
+    track = $7
 WHERE team_id = $1
 RETURNING *;
 

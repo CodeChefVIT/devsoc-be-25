@@ -36,7 +36,6 @@ type Submission struct {
 	Track       string
 	GithubLink  string
 	FigmaLink   string
-	PptLink     string
 	OtherLink   string
 	TeamID      uuid.UUID
 }

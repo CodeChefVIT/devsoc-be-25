@@ -6,7 +6,6 @@ CREATE TABLE submission (
     track TEXT NOT NULL DEFAULT '',
     github_link TEXT NOT NULL DEFAULT '',
     figma_link TEXT NOT NULL DEFAULT '',
-    ppt_link TEXT NOT NULL DEFAULT '',
     other_link TEXT NOT NULL DEFAULT '',
     team_id UUID NOT NULL UNIQUE,
     PRIMARY KEY (id)
