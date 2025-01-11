@@ -211,6 +211,7 @@ paths:
                 team_id:
                   type: string
                   format: uuid
+              $ref: "#/components/schemas/CreateSubmissionRequest"
       responses:
         201:
           description: Submission created successfully
@@ -278,6 +279,7 @@ paths:
                       error:
                         type: string
                         nullable: true
+                    $ref: "#/components/schemas/Submission"
         400:
           description: Invalid request or invalid input data
           content:
