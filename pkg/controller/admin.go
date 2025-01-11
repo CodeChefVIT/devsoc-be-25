@@ -16,7 +16,7 @@ import (
 )
 
 func GetAllUsers(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	users, err := utils.Queries.GetAllUsers(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -38,7 +38,7 @@ func GetAllUsers(c echo.Context) error {
 }
 
 func GetAllVitians(c echo.Context) error {
-	users, err := utils.Queries.GetAllVitians(context.Background())
+	users, err := utils.Queries.GetAllVitians(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -60,7 +60,7 @@ func GetAllVitians(c echo.Context) error {
 
 func GetUsersByEmail(c echo.Context) error {
 	email := c.Param("email")
-	user, err := utils.Queries.GetUserByEmail(context.Background(), email)
+	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
@@ -109,7 +109,7 @@ func BanUser(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.Queries.GetUserByEmail(context.Background(), payload.Email)
+	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
@@ -167,7 +167,7 @@ func UnbanUser(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.Queries.GetUserByEmail(context.Background(), payload.Email)
+	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
@@ -206,7 +206,7 @@ func UnbanUser(c echo.Context) error {
 }
 
 func GetTeams(c echo.Context) error {
-	teams, err := utils.Queries.GetTeams(context.Background())
+	teams, err := utils.Queries.GetTeams(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -239,7 +239,7 @@ func GetTeamById(c echo.Context) error {
 		})
 	}
 
-	team, err := utils.Queries.GetTeamById(context.Background(), teamId)
+	team, err := utils.Queries.GetTeamById(c.Request().Context(), teamId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -277,7 +277,7 @@ func GetTeamLeader(c echo.Context) error {
 		Valid: true,
 	}
 
-	user, err := utils.Queries.GetTeamLeader(context.Background(), nullUUID)
+	user, err := utils.Queries.GetTeamLeader(c.Request().Context(), nullUUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
