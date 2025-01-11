@@ -1,7 +1,11 @@
 package utils
 
 import (
+	//"context"
+	"context"
 	"fmt"
+	"math/rand"
+	"time"
 
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/labstack/echo/v4"
@@ -30,4 +34,28 @@ func WriteError(c echo.Context, status int, err error) error {
 	}
 	logger.Errorf(fmt.Sprintf("Error Response: %+v", response))
 	return c.JSON(status, response)
+}
+
+const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func GenerateRandomString(length int) string {
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(result)
+}
+
+func SendTeamEmail(ctx context.Context, emails[] string) error {
+	html_body := "Your Leader has deleted the team.You are requested to join other team or create a new team to continue"
+
+	for i:= 0 ; i<len(emails); i++ {
+		err := SendEmail(emails[i], "Team Deleted", fmt.Sprintf(html_body))
+		if err != nil {
+			return nil
+		}
+	}
+	return nil
 }

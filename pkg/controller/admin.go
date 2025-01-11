@@ -16,10 +16,10 @@ import (
 )
 
 func GetAllUsers(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	users, err := utils.Queries.GetAllUsers(ctx)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to fetch users",
@@ -28,7 +28,7 @@ func GetAllUsers(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Users fetched successfully",
@@ -38,9 +38,9 @@ func GetAllUsers(c echo.Context) error {
 }
 
 func GetAllVitians(c echo.Context) error {
-	users, err := utils.Queries.GetAllVitians(context.Background())
+	users, err := utils.Queries.GetAllVitians(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to fetch users",
@@ -49,7 +49,7 @@ func GetAllVitians(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Users fetched successfully",
@@ -60,10 +60,10 @@ func GetAllVitians(c echo.Context) error {
 
 func GetUsersByEmail(c echo.Context) error {
 	email := c.Param("email")
-	user, err := utils.Queries.GetUserByEmail(context.Background(), email)
+	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, models.Response{
+			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "User not found",
@@ -72,7 +72,7 @@ func GetUsersByEmail(c echo.Context) error {
 			})
 
 		}
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -80,7 +80,7 @@ func GetUsersByEmail(c echo.Context) error {
 			},
 		})
 	}
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "User fetched successfully",
@@ -93,7 +93,7 @@ func BanUser(c echo.Context) error {
 	var payload models.BanUserReq
 
 	if err := c.Bind(&payload); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Improper request",
@@ -103,16 +103,16 @@ func BanUser(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(payload); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
-	user, err := utils.Queries.GetUserByEmail(context.Background(), payload.Email)
+	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, models.Response{
+			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "User does not exist",
@@ -120,7 +120,7 @@ func BanUser(c echo.Context) error {
 				},
 			})
 		}
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -130,7 +130,7 @@ func BanUser(c echo.Context) error {
 	}
 
 	if err := utils.Queries.BanUser(context.Background(), user.Email); err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -139,7 +139,7 @@ func BanUser(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "user banned successfully",
@@ -151,7 +151,7 @@ func UnbanUser(c echo.Context) error {
 	var payload models.BanUserReq
 
 	if err := c.Bind(&payload); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Improper request",
@@ -161,16 +161,16 @@ func UnbanUser(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(payload); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
-	user, err := utils.Queries.GetUserByEmail(context.Background(), payload.Email)
+	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, models.Response{
+			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
 					"message": "User does not exist",
@@ -178,7 +178,7 @@ func UnbanUser(c echo.Context) error {
 				},
 			})
 		}
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -188,7 +188,7 @@ func UnbanUser(c echo.Context) error {
 	}
 
 	if err := utils.Queries.UnbanUser(context.Background(), user.Email); err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -197,7 +197,7 @@ func UnbanUser(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "user unbanned successfully",
@@ -206,9 +206,9 @@ func UnbanUser(c echo.Context) error {
 }
 
 func GetTeams(c echo.Context) error {
-	teams, err := utils.Queries.GetTeams(context.Background())
+	teams, err := utils.Queries.GetTeams(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to fetch teams",
@@ -217,7 +217,7 @@ func GetTeams(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Teams fetched successfully",
@@ -230,7 +230,7 @@ func GetTeamById(c echo.Context) error {
 	teamIdParam := c.Param("id")
 	teamId, err := uuid.Parse(teamIdParam)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -239,9 +239,9 @@ func GetTeamById(c echo.Context) error {
 		})
 	}
 
-	team, err := utils.Queries.GetTeamById(context.Background(), teamId)
+	team, err := utils.Queries.GetTeamById(c.Request().Context(), teamId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -250,7 +250,7 @@ func GetTeamById(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Team fetched successfully",
@@ -263,7 +263,7 @@ func GetTeamLeader(c echo.Context) error {
 	teamIdParam := c.Param("id")
 	teamId, err := uuid.Parse(teamIdParam)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -277,9 +277,9 @@ func GetTeamLeader(c echo.Context) error {
 		Valid: true,
 	}
 
-	user, err := utils.Queries.GetTeamLeader(context.Background(), nullUUID)
+	user, err := utils.Queries.GetTeamLeader(c.Request().Context(), nullUUID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "some error occured",
@@ -288,7 +288,7 @@ func GetTeamLeader(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Team leader fetched successfully",
@@ -302,7 +302,7 @@ func CreatePanel(c echo.Context) error {
 	panel := new(models.CreatePanel)
 	if err := c.Bind(panel); err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Invalid request body",
@@ -312,7 +312,7 @@ func CreatePanel(c echo.Context) error {
 	}
 
 	if err := utils.Validate.Struct(panel); err != nil {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
@@ -321,7 +321,7 @@ func CreatePanel(c echo.Context) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(panel.Password), bcrypt.DefaultCost)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to hash password",
@@ -331,19 +331,23 @@ func CreatePanel(c echo.Context) error {
 	}
 
 	panelDb := db.CreateUserParams{
-		Name:     panel.Name,
-		Email:    panel.Email,
-		RegNo:    panel.RegNo,
-		Password: string(hashedPassword),
-		PhoneNo:  panel.PhoneNo,
+		FirstName:     panel.FirstName,
+		LastName:      panel.LastName,
+		Email:         panel.Email,
+		VitEmail:      panel.VitEmail,
+		RegNo:         panel.RegNo,
+		Password:      string(hashedPassword),
+		PhoneNo:       panel.PhoneNo,
+		Role:          "panel",
+		IsLeader:      true,
+		IsVerified:    true,
+		IsBanned:      false,
+		Gender:        panel.Gender,
+		HostelBlock:   panel.HostelBlock,
+		RoomNo:        int32(panel.RoomNumber),
+		GithubProfile: panel.GithubProfile,
 	}
 	panelDb.ID, _ = uuid.NewV7()
-	panelDb.Role = "panel"
-	panelDb.IsVerified = true
-	panelDb.IsLeader = true
-	panelDb.IsVitian = true
-	panelDb.IsBanned = false
-	panelDb.College = "VIT"
 	panelDb.TeamID = uuid.NullUUID{
 		Valid: false,
 	}
@@ -351,7 +355,7 @@ func CreatePanel(c echo.Context) error {
 	err = utils.Queries.CreateUser(ctx, panelDb)
 	if err != nil {
 		logger.Errorf(logger.DatabaseError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to create user",
@@ -360,8 +364,34 @@ func CreatePanel(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data:   "Panel created successfully",
 	})
 }
+
+func GetAllTeamMembers (c echo.Context) error {
+	teamIdParam := c.Param("id")
+	teamId, err := uuid.Parse(teamIdParam)
+	ctx := c.Request().Context()
+
+	nullUUID := uuid.NullUUID{
+		UUID:  teamId,
+		Valid: true,
+	}	
+
+	team_members, err := utils.Queries.GetTeamMembers(ctx,nullUUID)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:"Cannot get Members of the team",
+		})
+	}
+
+	return c.JSON(http.StatusOK, models.Response{
+		Status:"success",
+		Data:team_members,
+	})
+}
+

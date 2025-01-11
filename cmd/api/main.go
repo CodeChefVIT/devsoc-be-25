@@ -23,11 +23,13 @@ func main() {
 		LogError:      true,
 		LogValuesFunc: logger.RouteLogger,
 	}))
+	router.TeamRoutes(e)
 	router.RegisterRoutes(e)
 	router.IdeaRoutes(e)
 	router.AdminRoutes(e)
 	router.SubmissionRoutes(e)
 	router.AuthRoutes(e)
 	router.PanelRoutes(e)
+	router.InfoRoutes(e)
 	e.Start(":" + utils.Config.Port)
 }

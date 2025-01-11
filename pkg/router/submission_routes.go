@@ -10,8 +10,8 @@ func SubmissionRoutes(incomingRoutes *echo.Echo) {
 	submission := incomingRoutes.Group("/submission")
 	submission.Use(middleware.JWTMiddleware())
 
-	submission.POST("", controller.CreateSubmission)
-	submission.GET("", controller.GetUserSubmission)
-	submission.POST("/:teamId", controller.UpdateSubmission)
-	submission.DELETE("/:teamId", controller.DeleteSubmission)
+	submission.POST("/create", controller.CreateSubmission)
+	submission.GET("/get", controller.GetUserSubmission)
+	submission.POST("/update", controller.UpdateSubmission)
+	submission.DELETE("/delete", controller.DeleteSubmission)
 }

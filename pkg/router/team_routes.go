@@ -8,14 +8,15 @@ import (
 )
 
 func TeamRoutes(incomingRoutes *echo.Echo) {
-	auth := incomingRoutes.Group("/team")
+	team := incomingRoutes.Group("/team")
 
-	auth.Use(middleware.JWTMiddleware())
+	team.Use(middleware.JWTMiddleware())
 
-	auth.POST("/join", controller.JoinTeam)
-	auth.POST("/create",controller.CreateTeam)
-	auth.POST("/leave",controller.LeaveTeam)
-	auth.POST("/kick",controller.KickMemeber)
-	auth.POST("/delete",controller.DeleteTeam)
-	auth.PUT("/update",controller.UpdateTeamName)
+	team.POST("/join", controller.JoinTeam)
+	team.POST("/create",controller.CreateTeam)
+	team.POST("/leave",controller.LeaveTeam)
+	team.POST("/kick",controller.KickMemeber)
+	team.POST("/delete",controller.DeleteTeam)
+	team.PUT("/update",controller.UpdateTeamName)
+	team.GET("/users",controller.GetAllTeamUsers)
 }

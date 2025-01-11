@@ -4,18 +4,16 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
-	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var validate = validator.New()
 
 func SignUp(c echo.Context) error {
 	ctx := c.Request().Context()
@@ -23,7 +21,7 @@ func SignUp(c echo.Context) error {
 
 	if err := c.Bind(&req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
 		})
@@ -31,291 +29,85 @@ func SignUp(c echo.Context) error {
 
 	if err := utils.Validate.Struct(req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
 	existingUserByEmail, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err == nil && existingUserByEmail.ID != uuid.Nil {
-		return c.JSON(http.StatusConflict, models.Response{
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByEmail.ID != uuid.Nil {
+		return c.JSON(http.StatusConflict, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "User with this email already exists"},
 		})
 	}
 
-	existingUserByRegNo, err := utils.Queries.GetUserByRegNo(ctx, req.RegNo)
-	if err == nil && existingUserByRegNo.ID != uuid.Nil {
-		return c.JSON(http.StatusConflict, models.Response{
+	userId, err := uuid.NewV7()
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "User with this registration number already exists"},
+			Data:   map[string]string{"error": "Failed to generate user ID"},
 		})
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to hash password"},
 		})
 	}
 
-	userId, _ := uuid.NewV7()
-	user := &db.User{
-		ID:   userId,
-		Name: req.UserName,
-		TeamID: uuid.NullUUID{
-			Valid: false,
-		},
-		Email:      req.Email,
-		IsVitian:   true,
-		RegNo:      req.RegNo,
-		Password:   string(hashedPassword),
-		PhoneNo:    req.PhoneNo,
-		Role:       "student",
-		IsLeader:   false,
-		College:    "VIT",
-		IsVerified: false,
-		IsBanned:   false,
-	}
-
 	err = utils.Queries.CreateUser(ctx, db.CreateUserParams{
-		ID:         user.ID,
-		Name:       user.Name,
-		TeamID:     user.TeamID,
-		Email:      user.Email,
-		IsVitian:   user.IsVitian,
-		RegNo:      user.RegNo,
-		Password:   user.Password,
-		PhoneNo:    user.PhoneNo,
-		Role:       user.Role,
-		IsLeader:   user.IsLeader,
-		College:    user.College,
-		IsVerified: user.IsVerified,
-		IsBanned:   user.IsBanned,
+		ID:                userId,
+		TeamID:            uuid.NullUUID{Valid: false},
+		Email:             req.Email,
+		Password:          string(hashedPassword),
+		Role:              "student",
+		IsLeader:          false,
+		IsVerified:        false,
+		IsBanned:          false,
+		IsProfileComplete: false,
 	})
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to create user"},
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "User signed up successfully",
-		},
-	})
-}
-
-func SendOTP(c echo.Context) error {
-	ctx := c.Request().Context()
-	var req models.SendOTPRequest
-
-	if err := c.Bind(&req); err != nil {
+	if err = utils.GenerateOTP(ctx, req.Email); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
-		})
-	}
-
-	if err := utils.Validate.Struct(req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
-		})
-	}
-
-	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			logger.Errorf(logger.InternalError, err.Error())
-			return c.JSON(http.StatusNotFound, models.Response{
-				Status: "fail",
-				Data:   map[string]string{"error": "User not found"},
-			})
-		}
-
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to get user"},
-		})
-	}
-
-	err = utils.GenerateOTP(ctx, req.Email)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate OTP"},
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "OTP sent successfully",
-		},
-	})
-}
-
-func VerifyOTP(c echo.Context) error {
-	ctx := c.Request().Context()
-	var req models.VerifyOTPRequest
-
-	if err := c.Bind(&req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
-		})
-	}
-
-	if err := utils.Validate.Struct(req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
-		})
-	}
-
-	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			logger.Errorf(logger.InternalError, err.Error())
-			return c.JSON(http.StatusNotFound, models.Response{
-				Status: "fail",
-				Data:   map[string]string{"error": "User not found"},
-			})
-		}
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to get user"},
-		})
-	}
-
-	otp, err := utils.RedisClient.Get(ctx, req.Email).Result()
+	token, err := utils.GenerateToken(&userId, false)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusNotFound, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "OTP invalid/expired"},
-		})
-	}
-
-	if otp != req.OTP {
-		return c.JSON(http.StatusUnauthorized, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid OTP"},
-		})
-	}
-
-	err = utils.RedisClient.Del(ctx, req.Email).Err()
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to delete OTP"},
-		})
-	}
-
-	err = utils.Queries.VerifyUser(ctx, req.Email)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to verify user"},
-		})
-	}
-
-	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "User verified successfully",
-		},
-	})
-}
-
-func Login(c echo.Context) error {
-	ctx := c.Request().Context()
-	var req models.LoginRequest
-
-	if err := c.Bind(&req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
-		})
-	}
-
-	if err := utils.Validate.Struct(req); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
-		})
-	}
-
-	user, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			logger.Errorf(logger.InternalError, err.Error())
-			return c.JSON(http.StatusNotFound, models.Response{
-				Status: "fail",
-				Data:   map[string]string{"error": "User not found"},
-			})
-		}
-
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to get user"},
-		})
-	}
-
-	if !user.IsVerified {
-		return c.JSON(http.StatusUnauthorized, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User not verified"},
-		})
-	}
-
-	if user.IsBanned {
-		return c.JSON(http.StatusUnauthorized, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User banned"},
-		})
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusUnauthorized, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Invalid password"},
-		})
-	}
-
-	token, err := utils.GenerateToken(&user, false)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate token"},
 		})
 	}
 
-	refreshToken, err := utils.GenerateToken(&user, true)
+	refreshToken, err := utils.GenerateToken(&userId, true)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate refresh token"},
 		})
@@ -341,10 +133,351 @@ func Login(c echo.Context) error {
 		SameSite: http.SameSiteNoneMode,
 	})
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
-			"message": "User logged in successfully",
+			"message": "User signed up successfully. OTP has been sent to email",
+		},
+	})
+}
+
+func CompleteProfile(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	var req models.CompleteProfileRequest
+	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid request body"},
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	req.FirstName = strings.TrimSpace(req.FirstName)
+	req.LastName = strings.TrimSpace(req.LastName)
+
+	if req.FirstName == "" || req.LastName == "" {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "First name and last name cannot be empty"},
+		})
+	}
+
+	if req.Gender != "M" && req.Gender != "F" && req.Gender != "O" {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Gender must be M, F or O"},
+		})
+	}
+
+	existingUserByVitEmail, err := utils.Queries.GetUserByVitEmail(ctx, req.VitEmail)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByVitEmail.ID != uuid.Nil {
+		return c.JSON(http.StatusConflict, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User with this VIT email already exists"},
+		})
+	}
+
+	existingUserByPhoneNo, err := utils.Queries.GetUserByPhoneNo(ctx, req.PhoneNo)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByPhoneNo.ID != uuid.Nil {
+		return c.JSON(http.StatusConflict, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User with this phone number already exists"},
+		})
+	}
+
+	existingUserByRegNo, err := utils.Queries.GetUserByRegNo(ctx, req.RegNo)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Database error"},
+		})
+	}
+	if existingUserByRegNo.ID != uuid.Nil {
+		return c.JSON(http.StatusConflict, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User with this registration number already exists"},
+		})
+	}
+
+	user, ok := c.Get("user").(db.User)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to get user"},
+		})
+	}
+
+	if !user.IsVerified {
+		err := utils.GenerateOTP(ctx, user.Email)
+		if err != nil {
+			logger.Errorf(logger.InternalError, err.Error())
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "Failed to generate OTP"},
+			})
+		}
+
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User not verified. OTP has been sent to email"},
+		})
+	}
+
+	if user.IsProfileComplete {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Profile already completed"},
+		})
+	}
+
+	err = utils.Queries.CompleteProfile(ctx, db.CompleteProfileParams{
+		Email:         user.Email,
+		FirstName:     req.FirstName,
+		LastName:      req.LastName,
+		PhoneNo:       req.PhoneNo,
+		Gender:        req.Gender,
+		RegNo:         req.RegNo,
+		VitEmail:      req.VitEmail,
+		HostelBlock:   req.HostelBlock,
+		RoomNo:        int32(req.RoomNumber),
+		GithubProfile: req.GithubProfile,
+	})
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to complete profile"},
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status: "success",
+		Data: map[string]string{
+			"message": "Profile completed successfully",
+		},
+	})
+}
+
+func VerifyOTP(c echo.Context) error {
+	ctx := c.Request().Context()
+	var req models.VerifyOTPRequest
+
+	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid request body"},
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	user, err := utils.Queries.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			logger.Errorf(logger.InternalError, err.Error())
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "User not found"},
+			})
+		}
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to get user"},
+		})
+	}
+
+	if user.IsVerified {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User already verified"},
+		})
+	}
+
+	otp, err := utils.RedisClient.Get(ctx, req.Email).Result()
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusNotFound, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "OTP invalid/expired"},
+		})
+	}
+
+	if otp != req.OTP {
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid OTP"},
+		})
+	}
+
+	err = utils.RedisClient.Del(ctx, req.Email).Err()
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to delete OTP"},
+		})
+	}
+
+	err = utils.Queries.VerifyUser(ctx, req.Email)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to verify user"},
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status: "success",
+		Data: map[string]string{
+			"message": "User verified successfully",
+		},
+	})
+}
+
+func Login(c echo.Context) error {
+	ctx := c.Request().Context()
+	var req models.LoginRequest
+
+	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid request body"},
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	user, err := utils.Queries.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			logger.Errorf(logger.InternalError, err.Error())
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "User not found"},
+			})
+		}
+
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to get user"},
+		})
+	}
+
+	if user.IsBanned {
+		return c.JSON(http.StatusTeapot, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User banned"},
+		})
+	}
+
+	if !user.IsVerified {
+		err := utils.GenerateOTP(ctx, req.Email)
+		if err != nil {
+			logger.Errorf(logger.InternalError, err.Error())
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "Failed to generate OTP"},
+			})
+		}
+
+		return c.JSON(http.StatusExpectationFailed, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "User not verified. OTP has been sent to email"},
+		})
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Invalid password"},
+		})
+	}
+
+	token, err := utils.GenerateToken(&user.ID, false)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to generate token"},
+		})
+	}
+
+	refreshToken, err := utils.GenerateToken(&user.ID, true)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to generate refresh token"},
+		})
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		MaxAge:   7200,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status: "success",
+		Data: map[string]interface{}{
+			"message":             "User logged in successfully",
+			"is_profile_complete": user.IsProfileComplete,
 		},
 	})
 }
@@ -355,7 +488,7 @@ func UpdatePassword(c echo.Context) error {
 
 	if err := c.Bind(&req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid request body"},
 		})
@@ -363,7 +496,7 @@ func UpdatePassword(c echo.Context) error {
 
 	if err := utils.Validate.Struct(req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
@@ -373,14 +506,14 @@ func UpdatePassword(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			logger.Errorf(logger.InternalError, err.Error())
-			return c.JSON(http.StatusNotFound, models.Response{
+			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
 				Data:   map[string]string{"error": "User not found"},
 			})
 		}
 
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to get user"},
 		})
@@ -389,23 +522,32 @@ func UpdatePassword(c echo.Context) error {
 	storedOTP, err := utils.RedisClient.Get(ctx, req.Email).Result()
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "OTP expired or invalid"},
 		})
 	}
 
 	if storedOTP != req.OTP {
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid OTP"},
+		})
+	}
+
+	err = utils.RedisClient.Del(ctx, req.Email).Err()
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data:   map[string]string{"error": "Failed to delete OTP"},
 		})
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to hash password"},
 		})
@@ -417,13 +559,13 @@ func UpdatePassword(c echo.Context) error {
 	})
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to update password"},
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "Password updated successfully",
@@ -432,11 +574,10 @@ func UpdatePassword(c echo.Context) error {
 }
 
 func RefreshToken(c echo.Context) error {
-	ctx := c.Request().Context()
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusUnauthorized, models.Response{
+		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Refresh token not found"},
 		})
@@ -445,34 +586,25 @@ func RefreshToken(c echo.Context) error {
 	refreshClaims, err := utils.ValidateRefreshToken(refreshToken.Value)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusUnauthorized, models.Response{
+		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Invalid refresh token"},
 		})
 	}
 
-	dbUser, err := utils.Queries.GetUserByID(ctx, refreshClaims.UserID)
+	token, err := utils.GenerateToken(&refreshClaims.UserID, false)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusNotFound, models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "User not found"},
-		})
-	}
-
-	token, err := utils.GenerateToken(&dbUser, false)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate token"},
 		})
 	}
 
-	newRefreshToken, err := utils.GenerateToken(&dbUser, true)
+	newRefreshToken, err := utils.GenerateToken(&refreshClaims.UserID, true)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, models.Response{
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data:   map[string]string{"error": "Failed to generate refresh token"},
 		})
@@ -498,7 +630,7 @@ func RefreshToken(c echo.Context) error {
 		SameSite: http.SameSiteNoneMode,
 	})
 
-	return c.JSON(http.StatusOK, models.Response{
+	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: map[string]string{
 			"message": "Token refreshed successfully",

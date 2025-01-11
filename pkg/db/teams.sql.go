@@ -150,6 +150,105 @@ func (q *Queries) GetTeamIDByCode(ctx context.Context, code string) (uuid.UUID, 
 	return id, err
 }
 
+const getTeamMembers = `-- name: GetTeamMembers :many
+SELECT first_name , last_name , github_profile, vit_email, reg_no, phone_no
+FROM users
+Where team_id = $1
+`
+
+type GetTeamMembersRow struct {
+	FirstName     string
+	LastName      string
+	GithubProfile string
+	VitEmail      string
+	RegNo         string
+	PhoneNo       string
+}
+
+func (q *Queries) GetTeamMembers(ctx context.Context, teamID uuid.NullUUID) ([]GetTeamMembersRow, error) {
+	rows, err := q.db.Query(ctx, getTeamMembers, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTeamMembersRow
+	for rows.Next() {
+		var i GetTeamMembersRow
+		if err := rows.Scan(
+			&i.FirstName,
+			&i.LastName,
+			&i.GithubProfile,
+			&i.VitEmail,
+			&i.RegNo,
+			&i.PhoneNo,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTeamUsers = `-- name: GetTeamUsers :many
+SELECT first_name, last_name
+From users
+Where team_id = $1
+`
+
+type GetTeamUsersRow struct {
+	FirstName string
+	LastName  string
+}
+
+func (q *Queries) GetTeamUsers(ctx context.Context, teamID uuid.NullUUID) ([]GetTeamUsersRow, error) {
+	rows, err := q.db.Query(ctx, getTeamUsers, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTeamUsersRow
+	for rows.Next() {
+		var i GetTeamUsersRow
+		if err := rows.Scan(&i.FirstName, &i.LastName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTeamUsersEmails = `-- name: GetTeamUsersEmails :many
+SELECT vit_email
+From users
+where team_id = $1
+`
+
+func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) ([]string, error) {
+	rows, err := q.db.Query(ctx, getTeamUsersEmails, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var vit_email string
+		if err := rows.Scan(&vit_email); err != nil {
+			return nil, err
+		}
+		items = append(items, vit_email)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTeams = `-- name: GetTeams :many
 SELECT id, name, number_of_people, round_qualified, code FROM teams
 `
@@ -181,7 +280,7 @@ func (q *Queries) GetTeams(ctx context.Context) ([]Team, error) {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, team_id, email, is_vitian, reg_no, password, phone_no, role, is_leader, college, is_verified, is_banned FROM users WHERE id = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -189,18 +288,23 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.TeamID,
+		&i.FirstName,
+		&i.LastName,
 		&i.Email,
-		&i.IsVitian,
-		&i.RegNo,
-		&i.Password,
 		&i.PhoneNo,
+		&i.Gender,
+		&i.RegNo,
+		&i.VitEmail,
+		&i.HostelBlock,
+		&i.RoomNo,
+		&i.GithubProfile,
+		&i.Password,
 		&i.Role,
 		&i.IsLeader,
-		&i.College,
 		&i.IsVerified,
 		&i.IsBanned,
+		&i.IsProfileComplete,
 	)
 	return i, err
 }
