@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
@@ -9,6 +10,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,6 +34,12 @@ func GetUserSubmission(c echo.Context) error {
 
 	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "Submission not found"},
+			})
+		}
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
