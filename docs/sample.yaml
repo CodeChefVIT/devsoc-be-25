@@ -668,13 +668,13 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: User signed up successfully. OTP has been sent to email
+                    enum: [success]
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User signed up successfully. OTP has been sent to email
         "400":
           description: Bad Request
           content:
@@ -684,23 +684,26 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                    enum: [fail]
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
-                    data:
-                      error: Invalid request body
+                    error: true
+                    message: Invalid request body
                 validationError:
                   value:
                     status: fail
+                    error: true
+                    message: Validation errors
                     data:
-                      error: Validation failed for multiple fields
+                      email: must be a valid email
+                      password: is required
         "409":
           description: Conflict
           content:
@@ -710,13 +713,13 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User with this email already exists
+                    enum: [fail]
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User with this email already exists
         "500":
           description: Internal Server Error
           content:
@@ -726,48 +729,48 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                    enum: [fail]
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Database error
+                    error: true
+                    message: Database error
                 uuidError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate user ID
+                    error: true
+                    message: Failed to generate user ID
                 hashError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to hash password
+                    error: true
+                    message: Failed to hash password
                 createError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to create user
+                    error: true
+                    message: Failed to create user
                 otpError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate OTP
+                    error: true
+                    message: Failed to generate OTP
                 tokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate token
+                    error: true
+                    message: Failed to generate token
                 refreshTokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate refresh token
+                    error: true
+                    message: Failed to generate refresh token
   /auth/complete-profile:
     post:
       tags:
@@ -832,12 +835,12 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Profile completed successfully
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Profile completed successfully
         "400":
           description: Bad Request
           content:
@@ -848,32 +851,47 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
-                    data:
-                      error: Invalid request body
+                    error: true
+                    message: Invalid request body
+                validationError:
+                    value:
+                      status: fail
+                      error: true
+                      message: Validation errors
+                      data:
+                        first_name: is required
+                        last_name: is required
+                        phone_no: is required
+                        gender: must be M, F or O
+                        reg_no: is required
+                        vit_email: is required
+                        hostel_block: is required
+                        room_no: is required
+                        github_profile: is required
                 emptyName:
                   value:
                     status: fail
-                    data:
-                      error: First name and last name cannot be empty
+                    error: true
+                    message: First name and last name cannot be empty
                 invalidGender:
                   value:
                     status: fail
-                    data:
-                      error: Gender must be M, F or O
+                    error: true
+                    message: Gender must be M, F or O
                 alreadyComplete:
                   value:
                     status: fail
-                    data:
-                      error: Profile already completed
+                    error: true
+                    message: Profile already completed
         "401":
           description: Unauthorized
           content:
@@ -884,12 +902,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not verified. OTP has been sent to email
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User not verified. OTP has been sent to email
         "409":
           description: Conflict
           content:
@@ -900,27 +918,27 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 vitEmailExists:
                   value:
                     status: fail
-                    data:
-                      error: User with this VIT email already exists
+                    error: true
+                    message: User with this VIT email already exists
                 phoneExists:
                   value:
                     status: fail
-                    data:
-                      error: User with this phone number already exists
+                    error: true
+                    message: User with this phone number already exists
                 regNoExists:
                   value:
                     status: fail
-                    data:
-                      error: User with this registration number already exists
+                    error: true
+                    message: User with this registration number already exists
         "500":
           description: Internal Server Error
           content:
@@ -931,32 +949,32 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Database error
+                    error: true
+                    message: Database error
                 userError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    error: true
+                    message: Failed to get user
                 otpError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate OTP
+                    error: true
+                    message: Failed to generate OTP
                 updateError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to complete profile
+                    error: true
+                    message: Failed to complete profile
   /auth/verify-otp:
     post:
       tags:
@@ -990,12 +1008,12 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: User verified successfully
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User verified successfully
         "400":
           description: Bad Request
           content:
@@ -1006,17 +1024,30 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
+                    error: true
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    error: true
+                    message: Validation errors
                     data:
-                      error: Invalid request body
+                      email: must be a valid email
+                      otp: is required
+                alreadyVerified:
+                  value:
+                    status: fail
+                    error: true
+                    message: User already verified
         "401":
           description: Unauthorized - Invalid OTP
           content:
@@ -1027,12 +1058,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: Invalid OTP
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Invalid OTP
         "404":
           description: Not Found
           content:
@@ -1043,22 +1074,22 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 userNotFound:
                   value:
                     status: fail
-                    data:
-                      error: User not found
+                    error: true
+                    message: User not found
                 otpExpired:
                   value:
                     status: fail
-                    data:
-                      error: OTP invalid/expired
+                    error: true
+                    message: OTP invalid/expired
         "500":
           description: Internal Server Error
           content:
@@ -1069,27 +1100,27 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    error: true
+                    message: Failed to get user
                 redisError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to delete OTP
+                    error: true
+                    message: Failed to delete OTP
                 verifyError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to verify user
+                    error: true
+                    message: Failed to verify user
   /auth/login:
     post:
       tags:
@@ -1130,12 +1161,15 @@ paths:
                   status:
                     type: string
                     example: success
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User logged in successfully
                   data:
                     type: object
                     properties:
-                      message:
-                        type: string
-                        example: User logged in successfully
                       is_profile_complete:
                         type: boolean
                         example: false
@@ -1149,22 +1183,25 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
-                    data:
-                      error: Invalid request body
+                    error: true
+                    message: Invalid request body
                 validationError:
                   value:
                     status: fail
+                    error: true
+                    message: Validation errors
                     data:
-                      error: Validation failed for multiple fields
+                      email: must be a valid email
+                      password: is required
         "401":
           description: Unauthorized
           content:
@@ -1175,12 +1212,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: Invalid password
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Invalid password
         "404":
           description: Not Found
           content:
@@ -1191,12 +1228,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User not found
         "417":
           description: Expectation Failed - User not verified
           content:
@@ -1207,12 +1244,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not verified. OTP has been sent to email
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User not verified. OTP has been sent to email
         "418":
           description: I'm a teapot - User banned
           content:
@@ -1223,12 +1260,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User banned
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User banned
         "500":
           description: Internal Server Error
           content:
@@ -1239,32 +1276,32 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    error: true
+                    message: Failed to get user
                 otpError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate OTP
+                    error: true
+                    message: Failed to generate OTP
                 tokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate token
+                    error: true
+                    message: Failed to generate token
                 refreshTokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate refresh token
+                    error: true
+                    message: Failed to generate refresh token
   /auth/update-password:
     post:
       tags:
@@ -1302,12 +1339,12 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Password updated successfully
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Password updated successfully
         "400":
           description: Bad Request
           content:
@@ -1318,27 +1355,36 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
+                    error: true
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    error: true
+                    message: Validation errors
                     data:
-                      error: Invalid request body
+                      email: must be a valid email
+                      otp: is required
+                      new_password: is required
                 invalidOTP:
                   value:
                     status: fail
-                    data:
-                      error: Invalid OTP
+                    error: true
+                    message: Invalid OTP
                 expiredOTP:
                   value:
                     status: fail
-                    data:
-                      error: OTP expired or invalid
+                    error: true
+                    message: OTP expired or invalid
         "404":
           description: Not Found
           content:
@@ -1349,12 +1395,12 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User not found
         "500":
           description: Internal Server Error
           content:
@@ -1365,27 +1411,32 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    error: true
+                    message: Failed to get user
+                redisError:
+                  value:
+                    status: fail
+                    error: true
+                    message: Failed to delete OTP
                 hashError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to hash password
+                    error: true
+                    message: Failed to hash password
                 updateError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to update password
+                    error: true
+                    message: Failed to update password
   /auth/refresh:
     post:
       tags:
@@ -1417,12 +1468,12 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Token refreshed successfully
+                  error:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Token refreshed successfully
         "401":
           description: Unauthorized
           content:
@@ -1433,38 +1484,22 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 noToken:
                   value:
                     status: fail
-                    data:
-                      error: Refresh token not found
+                    error: true
+                    message: Refresh token not found
                 invalidToken:
                   value:
                     status: fail
-                    data:
-                      error: Invalid refresh token
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
+                    error: true
+                    message: Invalid refresh token
         "500":
           description: Internal Server Error
           content:
@@ -1475,22 +1510,22 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  error:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
               examples:
                 tokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate token
+                    error: true
+                    message: Failed to generate token
                 refreshTokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate refresh token
+                    error: true
+                    message: Failed to generate refresh token
   /info/me:
     get:
       tags:

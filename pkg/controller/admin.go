@@ -370,7 +370,7 @@ func CreatePanel(c echo.Context) error {
 	})
 }
 
-func GetAllTeamMembers (c echo.Context) error {
+func GetAllTeamMembers(c echo.Context) error {
 	teamIdParam := c.Param("id")
 	teamId, err := uuid.Parse(teamIdParam)
 	ctx := c.Request().Context()
@@ -378,20 +378,19 @@ func GetAllTeamMembers (c echo.Context) error {
 	nullUUID := uuid.NullUUID{
 		UUID:  teamId,
 		Valid: true,
-	}	
+	}
 
-	team_members, err := utils.Queries.GetTeamMembers(ctx,nullUUID)
+	team_members, err := utils.Queries.GetTeamMembers(ctx, nullUUID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Cannot get Members of the team",
+			Status: "fail",
+			Data:   "Cannot get Members of the team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:team_members,
+		Status: "success",
+		Data:   team_members,
 	})
 }
-
