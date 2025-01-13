@@ -2,14 +2,17 @@
 SELECT id FROM teams WHERE code = $1;
 
 -- name: GetTeams :many
-SELECT * FROM teams;
+SELECT * FROM teams
+WHERE id > $1
+ORDER BY id ASC
+LIMIT $2;
 
 -- name: GetTeamById :one
 SELECT * FROM teams WHERE id = $1;
 
 -- name: FindTeam :one
-SELECT id,name,code,round_qualified FROM teams 
-WHERE code = $1 
+SELECT id,name,code,round_qualified FROM teams
+WHERE code = $1
 LIMIT 1;
 
 -- name: KickMemeber :exec
@@ -18,7 +21,7 @@ SET team_id = NULL
 WHERE id = $1;
 
 -- name: LeaveTeam :exec
-UPDATE users 
+UPDATE users
 SET team_id = NULL
 WHERE id = $1;
 
@@ -31,7 +34,7 @@ INSERT INTO teams (
 RETURNING *;
 
 -- name: DeleteTeam :exec
-DELETE FROM teams 
+DELETE FROM teams
 WHERE id = $1;
 
 -- name: CountTeamMembers :one
