@@ -242,6 +242,145 @@ paths:
                   data:
                     type: string
                     example: Cannot get Members of the team
+    /admin/unban/team:
+    post:
+      summary: Unban a team
+      description: This endpoint allows an admin to unban a team.
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                team_id:
+                  type: string
+                  format: uuid
+                  description: The ID of the team to unban.
+              required:
+                - team_id
+      responses:
+        200:
+          description: Team successfully unbanned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: string
+                    example: Team UnBanned Successfully
+        400:
+          description: Validation error or failure to unban the team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: Failed to unban Team
+
+  /admin/ban/team:
+    post:
+      summary: Ban a team
+      description: This endpoint allows an admin to ban a team.
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                team_id:
+                  type: string
+                  format: uuid
+                  description: The ID of the team to ban.
+              required:
+                - team_id
+      responses:
+        200:
+          description: Team successfully banned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: string
+                    example: Team Banned Successfully
+        400:
+          description: Validation error or failure to ban the team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: Failed to ban Team
+  /admin/unban/team:
+    post:
+      summary: Unban a team
+      description: This endpoint allows an admin to unban a team.
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                team_id:
+                  type: string
+                  format: uuid
+                  description: The ID of the team to unban.
+              required:
+                - team_id
+      responses:
+        200:
+          description: Team successfully unbanned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: string
+                    example: Team UnBanned Successfully
+        400:
+          description: Validation error or failure to unban the team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: string
+                    example: Failed to unban Team
 
   /submission:
     post:

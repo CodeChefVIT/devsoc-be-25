@@ -24,9 +24,9 @@ WHERE id = $1;
 
 -- name: CreateTeam :one
 INSERT INTO teams (
-    id, name, number_of_people, round_qualified, code
+    id, name, number_of_people, round_qualified, code, is_banned
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 
@@ -84,14 +84,24 @@ WHERE id = $2;
 -- name: GetTeamMembers :many
 SELECT first_name , last_name , github_profile, vit_email, reg_no, phone_no
 FROM users
-Where team_id = $1;
+WHERE team_id = $1;
 
 -- name: GetTeamUsers :many
 SELECT first_name, last_name
 From users
-Where team_id = $1;
+WHERE team_id = $1;
 
 -- name: GetTeamUsersEmails :many
 SELECT vit_email
 From users
-where team_id = $1;
+WHERE team_id = $1;
+
+-- name: BanTeam :exec
+UPDATE teams
+SET is_banned = TRUE
+WHERE id = $1;
+
+-- name: UnBanTeam :exec
+UPDATE teams
+SET is_banned = FALSE
+WHERE id = $1;

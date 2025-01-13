@@ -395,3 +395,102 @@ func GetAllTeamMembers (c echo.Context) error {
 	})
 }
 
+//Ban Team 
+
+func BanTeam (c echo.Context) error {
+
+	var payload models.BanTeam
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"Fail",
+			Data:"unauthorized",
+		})
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:"Failed validation",
+		})
+	}
+
+	ctx := c.Request().Context()
+
+	team, err := utils.Queries.GetTeamById(ctx, payload.TeamId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data: "Team Does not exists",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: err,
+		})
+	}
+
+	if err := utils.Queries.BanTeam(ctx, team.ID); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	return c.JSON(http.StatusOK, models.Response{
+		Status:"success",
+		Data:"Team Banned SuccessFully",
+	})
+}
+
+//UnBan Team
+
+func UnBanTeam (c echo.Context) error {
+	var payload models.UnBanTeam
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:err,
+		})
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:utils.FormatValidationErrors(err),
+		})
+	}
+
+	ctx := c.Request().Context()
+
+	team, err := utils.Queries.GetTeamById(ctx, payload.TeamId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data: "Team Does not exists",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: err,
+		})
+	}
+
+	if err := utils.Queries.UnBanTeam(ctx, team.ID); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:"Failed to unban Team",
+		})
+	}
+
+	return c.JSON(http.StatusBadRequest, models.Response{
+		Status:"success",
+		Data:"Team UnBanned Successfully",
+	})
+}

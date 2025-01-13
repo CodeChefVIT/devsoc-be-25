@@ -23,4 +23,6 @@ func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin.POST("/createpanel", controller.CreatePanel)
 
 	admin.GET("/members/:id",controller.GetAllTeamMembers)
+	admin.POST("/ban/team",controller.BanTeam)
+	admin.POST("/unban/team",controller.UnBanTeam)
 }
