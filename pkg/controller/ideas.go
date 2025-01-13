@@ -66,7 +66,7 @@ func CreateIdea(c echo.Context) error {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
-				Data:   map[string]string{"error": "Submission not found"},
+				Data:   map[string]string{"error": "Idea not found"},
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, &models.Response{

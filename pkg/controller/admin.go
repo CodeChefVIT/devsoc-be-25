@@ -33,7 +33,7 @@ func GetAllUsers(c echo.Context) error {
 
 	var cursorUUID uuid.UUID
 	if cursor == "" {
-		cursorUUID = uuid.Nil // uuid.Nil is equivalent to "00000000-0000-0000-0000-000000000000"
+		cursorUUID = uuid.Nil
 	} else {
 		cursorUUID, err = uuid.Parse(cursor)
 		if err != nil {
@@ -251,7 +251,7 @@ func GetTeams(c echo.Context) error {
 
 	var cursorUUID uuid.UUID
 	if cursor == "" {
-		cursorUUID = uuid.Nil // uuid.Nil is equivalent to "00000000-0000-0000-0000-000000000000"
+		cursorUUID = uuid.Nil
 	} else {
 		cursorUUID, err = uuid.Parse(cursor)
 		if err != nil {
