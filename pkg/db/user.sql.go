@@ -25,7 +25,7 @@ func (q *Queries) BanUser(ctx context.Context, email string) error {
 
 const completeProfile = `-- name: CompleteProfile :exec
 UPDATE users
-SET 
+SET
     first_name = $2,
     last_name = $3,
     phone_no = $4,
@@ -73,7 +73,7 @@ INSERT INTO users (
     id,
     team_id,
     first_name,
-    last_name, 
+    last_name,
     email,
     phone_no,
     gender,
@@ -140,10 +140,18 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 
 const getAllUsers = `-- name: GetAllUsers :many
 SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users
+WHERE id > $1
+ORDER BY id ASC
+LIMIT $2
 `
 
-func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, getAllUsers)
+type GetAllUsersParams struct {
+	ID    uuid.UUID
+	Limit int32
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -286,12 +294,12 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 
 const getUserAndTeamDetails = `-- name: GetUserAndTeamDetails :many
 
-SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code, 
+SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code,
 	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile, users.is_leader
 	FROM teams
 	INNER JOIN users ON users.team_id = teams.id
 	LEFT JOIN submission ON submission.team_id = teams.id
-	LEFT JOIN ideas ON ideas.team_id = teams.id 
+	LEFT JOIN ideas ON ideas.team_id = teams.id
 WHERE teams.id = $1
 `
 

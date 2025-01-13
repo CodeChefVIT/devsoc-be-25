@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
@@ -17,7 +18,36 @@ import (
 
 func GetAllUsers(c echo.Context) error {
 	ctx := c.Request().Context()
-	users, err := utils.Queries.GetAllUsers(ctx)
+	limitParam := c.QueryParam("limit")
+	cursor := c.QueryParam("cursor")
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"error": "failed to convert to integer",
+			},
+		})
+	}
+
+	var cursorUUID uuid.UUID
+	if cursor == "" {
+		cursorUUID = uuid.Nil // uuid.Nil is equivalent to "00000000-0000-0000-0000-000000000000"
+	} else {
+		cursorUUID, err = uuid.Parse(cursor)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid UUID for cursor",
+			})
+		}
+	}
+
+	users, err := utils.Queries.GetAllUsers(ctx, db.GetAllUsersParams{
+		Limit: int32(limit),
+		ID:    cursorUUID,
+	})
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -206,7 +236,35 @@ func UnbanUser(c echo.Context) error {
 }
 
 func GetTeams(c echo.Context) error {
-	teams, err := utils.Queries.GetTeams(c.Request().Context())
+	limitParam := c.QueryParam("limit")
+	cursor := c.QueryParam("cursor")
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"error": "failed to convert to integer",
+			},
+		})
+	}
+
+	var cursorUUID uuid.UUID
+	if cursor == "" {
+		cursorUUID = uuid.Nil // uuid.Nil is equivalent to "00000000-0000-0000-0000-000000000000"
+	} else {
+		cursorUUID, err = uuid.Parse(cursor)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid UUID for cursor",
+			})
+		}
+	}
+	teams, err := utils.Queries.GetTeams(c.Request().Context(), db.GetTeamsParams{
+		Limit: int32(limit),
+		ID:    cursorUUID,
+	})
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -370,7 +428,7 @@ func CreatePanel(c echo.Context) error {
 	})
 }
 
-func GetAllTeamMembers (c echo.Context) error {
+func GetAllTeamMembers(c echo.Context) error {
 	teamIdParam := c.Param("id")
 	teamId, err := uuid.Parse(teamIdParam)
 	ctx := c.Request().Context()
@@ -378,20 +436,19 @@ func GetAllTeamMembers (c echo.Context) error {
 	nullUUID := uuid.NullUUID{
 		UUID:  teamId,
 		Valid: true,
-	}	
+	}
 
-	team_members, err := utils.Queries.GetTeamMembers(ctx,nullUUID)
+	team_members, err := utils.Queries.GetTeamMembers(ctx, nullUUID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Cannot get Members of the team",
+			Status: "fail",
+			Data:   "Cannot get Members of the team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:team_members,
+		Status: "success",
+		Data:   team_members,
 	})
 }
-
