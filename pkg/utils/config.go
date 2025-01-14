@@ -26,6 +26,8 @@ type cfg struct {
 	EmailPort        int         `env:"EMAIL_PORT,notEmpty"`
 	SmtpCreds        []smtpcreds `envPrefix:"MAIL"`
 	SendingEmail     string      `env:"SENDING_EMAIL,notEmpty"`
+	RepoOwner        string      `env:"REPO_OWNER,notEmpty"`
+	RepoName         string      `env:"REPO_NAME,notEmpty"`
 }
 
 var Config cfg

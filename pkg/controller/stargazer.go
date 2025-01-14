@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,11 +33,16 @@ func CheckStarred(c echo.Context) error {
 	hasStarred := false
 	page := 1
 
-	owner := os.Getenv("REPO_OWNER")
-	name := os.Getenv("REPO_NAME")
+	owner := utils.Config.RepoOwner
+	name := utils.Config.RepoName
 
 	baseURL := "https://api.github.com/repos"
-	u, _ := url.Parse(fmt.Sprintf("%s/%s/%s/stargazers?page=%d&per_page=100", baseURL, owner, name, page))
+	u, _ := url.Parse(baseURL)
+	u.Path += "/" + url.PathEscape(owner) + "/" + url.PathEscape(name) + "/stargazers"
+	query := u.Query()
+	query.Set("per_page", "100")
+	query.Set("page", fmt.Sprintf("%d", page))
+	u.RawQuery = query.Encode()
 
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -89,8 +94,8 @@ func CheckStarred(c echo.Context) error {
 
 	if !hasStarred {
 		return c.JSON(http.StatusOK, models.Response{
-			Status: "fail",
-			Data:   "user has not starred",
+			Status: "success",
+			Data:   "user has not starred. Please star the repository",
 		})
 	}
 
