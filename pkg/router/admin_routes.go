@@ -22,5 +22,8 @@ func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin.GET("/team/leader/:id", controller.GetTeamLeader)
 	admin.POST("/createpanel", controller.CreatePanel)
 
-	admin.GET("/members/:id",controller.GetAllTeamMembers)
+	admin.GET("/members/:id", controller.GetAllTeamMembers)
+
+	admin.GET("/usercsv", controller.ExportUsers)
+	admin.GET("/teamcsv", controller.ExportTeams)
 }
