@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
@@ -17,7 +18,36 @@ import (
 
 func GetAllUsers(c echo.Context) error {
 	ctx := c.Request().Context()
-	users, err := utils.Queries.GetAllUsers(ctx)
+	limitParam := c.QueryParam("limit")
+	cursor := c.QueryParam("cursor")
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"error": "failed to convert to integer",
+			},
+		})
+	}
+
+	var cursorUUID uuid.UUID
+	if cursor == "" {
+		cursorUUID = uuid.Nil
+	} else {
+		cursorUUID, err = uuid.Parse(cursor)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid UUID for cursor",
+			})
+		}
+	}
+
+	users, err := utils.Queries.GetAllUsers(ctx, db.GetAllUsersParams{
+		Limit: int32(limit),
+		ID:    cursorUUID,
+	})
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -206,7 +236,35 @@ func UnbanUser(c echo.Context) error {
 }
 
 func GetTeams(c echo.Context) error {
-	teams, err := utils.Queries.GetTeams(c.Request().Context())
+	limitParam := c.QueryParam("limit")
+	cursor := c.QueryParam("cursor")
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"error": "failed to convert to integer",
+			},
+		})
+	}
+
+	var cursorUUID uuid.UUID
+	if cursor == "" {
+		cursorUUID = uuid.Nil
+	} else {
+		cursorUUID, err = uuid.Parse(cursor)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid UUID for cursor",
+			})
+		}
+	}
+	teams, err := utils.Queries.GetTeams(c.Request().Context(), db.GetTeamsParams{
+		Limit: int32(limit),
+		ID:    cursorUUID,
+	})
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",

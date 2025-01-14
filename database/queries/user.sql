@@ -1,5 +1,8 @@
 -- name: GetAllUsers :many
-SELECT * FROM users;
+SELECT * FROM users
+WHERE id > $1
+ORDER BY id ASC
+LIMIT $2;
 
 -- name: GetAllVitians :many
 SELECT * FROM users WHERE is_vitian = TRUE;
@@ -25,7 +28,7 @@ INSERT INTO users (
     id,
     team_id,
     first_name,
-    last_name, 
+    last_name,
     email,
     phone_no,
     gender,
@@ -82,7 +85,7 @@ SELECT * FROM users WHERE vit_email = $1;
 
 -- name: CompleteProfile :exec
 UPDATE users
-SET 
+SET
     first_name = $2,
     last_name = $3,
     phone_no = $4,
@@ -139,10 +142,10 @@ WHERE email = $1;
 --   u.id = $1;
 
 -- name: GetUserAndTeamDetails :many
-SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code, 
+SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code,
 	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile, users.is_leader
 	FROM teams
 	INNER JOIN users ON users.team_id = teams.id
 	LEFT JOIN submission ON submission.team_id = teams.id
-	LEFT JOIN ideas ON ideas.team_id = teams.id 
+	LEFT JOIN ideas ON ideas.team_id = teams.id
 WHERE teams.id = $1;
