@@ -23,7 +23,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid request body",
 		})
 	}
@@ -32,7 +31,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Validation errors",
 			Data:    utils.FormatValidationErrors(err),
 		})
@@ -43,14 +41,12 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Database error",
 		})
 	}
 	if existingUserByEmail.ID != uuid.Nil {
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User with this email already exists",
 		})
 	}
@@ -60,7 +56,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate user ID",
 		})
 	}
@@ -70,7 +65,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to hash password",
 		})
 	}
@@ -90,7 +84,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to create user",
 		})
 	}
@@ -99,7 +92,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate OTP",
 		})
 	}
@@ -109,7 +101,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate token",
 		})
 	}
@@ -119,7 +110,6 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate refresh token",
 		})
 	}
@@ -146,7 +136,6 @@ func SignUp(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Error:   false,
 		Message: "User signed up successfully. OTP has been sent to email",
 	})
 }
@@ -159,7 +148,6 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid request body",
 		})
 	}
@@ -168,7 +156,6 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid request body",
 		})
 	}
@@ -179,7 +166,6 @@ func CompleteProfile(c echo.Context) error {
 	if req.FirstName == "" || req.LastName == "" {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "First name and last name cannot be empty",
 		})
 	}
@@ -187,7 +173,6 @@ func CompleteProfile(c echo.Context) error {
 	if req.Gender != "M" && req.Gender != "F" && req.Gender != "O" {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Gender must be M, F or O",
 		})
 	}
@@ -197,14 +182,12 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Database error",
 		})
 	}
 	if existingUserByVitEmail.ID != uuid.Nil {
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User with this VIT email already exists",
 		})
 	}
@@ -214,14 +197,12 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Database error",
 		})
 	}
 	if existingUserByPhoneNo.ID != uuid.Nil {
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User with this phone number already exists",
 		})
 	}
@@ -231,14 +212,12 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Database error",
 		})
 	}
 	if existingUserByRegNo.ID != uuid.Nil {
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User with this registration number already exists",
 		})
 	}
@@ -247,7 +226,6 @@ func CompleteProfile(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to get user",
 		})
 	}
@@ -258,14 +236,12 @@ func CompleteProfile(c echo.Context) error {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
-				Error:   true,
 				Message: "Failed to generate OTP",
 			})
 		}
 
 		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User not verified. OTP has been sent to email",
 		})
 	}
@@ -273,7 +249,6 @@ func CompleteProfile(c echo.Context) error {
 	if user.IsProfileComplete {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Profile already completed",
 		})
 	}
@@ -294,14 +269,12 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to complete profile",
 		})
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Error:   false,
 		Message: "Profile completed successfully",
 	})
 }
@@ -314,7 +287,6 @@ func VerifyOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid request body",
 		})
 	}
@@ -323,7 +295,6 @@ func VerifyOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Validation errors",
 			Data:    utils.FormatValidationErrors(err),
 		})
@@ -335,14 +306,12 @@ func VerifyOTP(c echo.Context) error {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status:  "fail",
-				Error:   true,
 				Message: "User not found",
 			})
 		}
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to get user",
 		})
 	}
@@ -350,7 +319,6 @@ func VerifyOTP(c echo.Context) error {
 	if user.IsVerified {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User already verified",
 		})
 	}
@@ -360,7 +328,6 @@ func VerifyOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusNotFound, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "OTP invalid/expired",
 		})
 	}
@@ -368,7 +335,6 @@ func VerifyOTP(c echo.Context) error {
 	if otp != req.OTP {
 		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid OTP",
 		})
 	}
@@ -378,7 +344,6 @@ func VerifyOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to delete OTP",
 		})
 	}
@@ -388,14 +353,12 @@ func VerifyOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to verify user",
 		})
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Error:   false,
 		Message: "User verified successfully",
 	})
 }
@@ -408,7 +371,6 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid request body",
 		})
 	}
@@ -417,7 +379,6 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Validation errors",
 			Data:    utils.FormatValidationErrors(err),
 		})
@@ -429,7 +390,6 @@ func Login(c echo.Context) error {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status:  "fail",
-				Error:   true,
 				Message: "User not found",
 			})
 		}
@@ -437,7 +397,6 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to get user",
 		})
 	}
@@ -445,7 +404,6 @@ func Login(c echo.Context) error {
 	if user.IsBanned {
 		return c.JSON(http.StatusTeapot, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User banned",
 		})
 	}
@@ -456,14 +414,12 @@ func Login(c echo.Context) error {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
-				Error:   true,
 				Message: "Failed to generate OTP",
 			})
 		}
 
 		return c.JSON(http.StatusExpectationFailed, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "User not verified. OTP has been sent to email",
 		})
 	}
@@ -472,7 +428,6 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid password",
 		})
 	}
@@ -482,7 +437,6 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate token",
 		})
 	}
@@ -492,7 +446,6 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate refresh token",
 		})
 	}
@@ -519,7 +472,6 @@ func Login(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Error:   false,
 		Message: "User logged in successfully",
 		Data: map[string]interface{}{
 			"is_profile_complete": user.IsProfileComplete,
@@ -535,7 +487,6 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid request body",
 		})
 	}
@@ -544,7 +495,6 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Validation errors",
 			Data:    utils.FormatValidationErrors(err),
 		})
@@ -556,7 +506,6 @@ func UpdatePassword(c echo.Context) error {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status:  "fail",
-				Error:   true,
 				Message: "User not found",
 			})
 		}
@@ -564,7 +513,6 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to get user",
 		})
 	}
@@ -574,7 +522,6 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "OTP expired or invalid",
 		})
 	}
@@ -582,7 +529,6 @@ func UpdatePassword(c echo.Context) error {
 	if storedOTP != req.OTP {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid OTP",
 		})
 	}
@@ -592,7 +538,6 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to delete OTP",
 		})
 	}
@@ -602,7 +547,6 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to hash password",
 		})
 	}
@@ -615,14 +559,12 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to update password",
 		})
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Error:   false,
 		Message: "Password updated successfully",
 	})
 }
@@ -633,7 +575,6 @@ func RefreshToken(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Refresh token not found",
 		})
 	}
@@ -643,7 +584,6 @@ func RefreshToken(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Invalid refresh token",
 		})
 	}
@@ -653,7 +593,6 @@ func RefreshToken(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate token",
 		})
 	}
@@ -663,7 +602,6 @@ func RefreshToken(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Error:   true,
 			Message: "Failed to generate refresh token",
 		})
 	}
@@ -690,7 +628,6 @@ func RefreshToken(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Error:   false,
 		Message: "Token refreshed successfully",
 	})
 }
