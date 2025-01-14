@@ -13,7 +13,6 @@ func RegisterRoutes(e *echo.Echo) {
 	admin.Use(echojwt.JWT(utils.Config.JwtSecret))
 	admin.GET("/ping", controller.Ping)
 
-	e.POST("/star", controller.CheckStarred)
 	e.GET("/ping", controller.Ping)
 	e.GET("/docs", controller.Docs)
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/labstack/echo/v4"
@@ -17,10 +19,7 @@ type StargazerResponse []struct {
 	Login string `json:"login"`
 }
 
-const (
-	REPO_OWNER = "CodeChefVIT"
-	REPO_NAME  = "cookoff-9.0-backend"
-)
+var Client = http.Client{}
 
 func CheckStarred(c echo.Context) error {
 	var request StarCheckRequest
@@ -34,11 +33,13 @@ func CheckStarred(c echo.Context) error {
 	hasStarred := false
 	page := 1
 
-	client := &http.Client{}
+	owner := os.Getenv("REPO_OWNER")
+	name := os.Getenv("REPO_NAME")
 
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/stargazers?page=%d&per_page=100", REPO_OWNER, REPO_NAME, page)
+	baseURL := "https://api.github.com/repos"
+	u, _ := url.Parse(fmt.Sprintf("%s/%s/%s/stargazers?page=%d&per_page=100", baseURL, owner, name, page))
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
@@ -48,7 +49,7 @@ func CheckStarred(c echo.Context) error {
 
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
-	resp, err := client.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.Response{
 			Status: "fail",
@@ -87,7 +88,7 @@ func CheckStarred(c echo.Context) error {
 	}
 
 	if !hasStarred {
-		return c.JSON(http.StatusNotFound, models.Response{
+		return c.JSON(http.StatusOK, models.Response{
 			Status: "fail",
 			Data:   "user has not starred",
 		})
