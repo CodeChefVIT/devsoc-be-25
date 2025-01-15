@@ -28,6 +28,17 @@ func (q *Queries) AddUserToTeam(ctx context.Context, arg AddUserToTeamParams) er
 	return err
 }
 
+const banTeam = `-- name: BanTeam :exec
+UPDATE teams
+SET is_banned = TRUE
+WHERE id = $1
+`
+
+func (q *Queries) BanTeam(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, banTeam, id)
+	return err
+}
+
 const countTeamMembers = `-- name: CountTeamMembers :one
 SELECT COUNT(*) FROM users
 WHERE team_id = $1
@@ -42,11 +53,11 @@ func (q *Queries) CountTeamMembers(ctx context.Context, teamID uuid.NullUUID) (i
 
 const createTeam = `-- name: CreateTeam :one
 INSERT INTO teams (
-    id, name, number_of_people, round_qualified, code
+    id, name, number_of_people, round_qualified, code, is_banned
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
-RETURNING id, name, number_of_people, round_qualified, code
+RETURNING id, name, number_of_people, round_qualified, code, is_banned
 `
 
 type CreateTeamParams struct {
@@ -55,6 +66,7 @@ type CreateTeamParams struct {
 	NumberOfPeople int32
 	RoundQualified pgtype.Int4
 	Code           string
+	IsBanned       bool
 }
 
 func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error) {
@@ -64,6 +76,7 @@ func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, e
 		arg.NumberOfPeople,
 		arg.RoundQualified,
 		arg.Code,
+		arg.IsBanned,
 	)
 	var i Team
 	err := row.Scan(
@@ -72,6 +85,7 @@ func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, e
 		&i.NumberOfPeople,
 		&i.RoundQualified,
 		&i.Code,
+		&i.IsBanned,
 	)
 	return i, err
 }
@@ -123,7 +137,7 @@ func (q *Queries) FindTeam(ctx context.Context, code string) (FindTeamRow, error
 }
 
 const getTeamById = `-- name: GetTeamById :one
-SELECT id, name, number_of_people, round_qualified, code FROM teams WHERE id = $1
+SELECT id, name, number_of_people, round_qualified, code, is_banned FROM teams WHERE id = $1
 `
 
 func (q *Queries) GetTeamById(ctx context.Context, id uuid.UUID) (Team, error) {
@@ -135,6 +149,7 @@ func (q *Queries) GetTeamById(ctx context.Context, id uuid.UUID) (Team, error) {
 		&i.NumberOfPeople,
 		&i.RoundQualified,
 		&i.Code,
+		&i.IsBanned,
 	)
 	return i, err
 }
@@ -250,7 +265,7 @@ func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) 
 }
 
 const getTeams = `-- name: GetTeams :many
-SELECT id, name, number_of_people, round_qualified, code FROM teams
+SELECT id, name, number_of_people, round_qualified, code, is_banned FROM teams
 WHERE id > $1
 ORDER BY id ASC
 LIMIT $2
@@ -276,6 +291,7 @@ func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, err
 			&i.NumberOfPeople,
 			&i.RoundQualified,
 			&i.Code,
+			&i.IsBanned,
 		); err != nil {
 			return nil, err
 		}
@@ -377,6 +393,17 @@ func (q *Queries) RemoveUserFromTeam(ctx context.Context, arg RemoveUserFromTeam
 	return err
 }
 
+const unBanTeam = `-- name: UnBanTeam :exec
+UPDATE teams
+SET is_banned = FALSE
+WHERE id = $1
+`
+
+func (q *Queries) UnBanTeam(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, unBanTeam, id)
+	return err
+}
+
 const updateLeader = `-- name: UpdateLeader :exec
 UPDATE users
 SET is_leader = $1
@@ -406,6 +433,22 @@ type UpdateTeamNameParams struct {
 
 func (q *Queries) UpdateTeamName(ctx context.Context, arg UpdateTeamNameParams) error {
 	_, err := q.db.Exec(ctx, updateTeamName, arg.Name, arg.ID)
+	return err
+}
+
+const updateTeamRound = `-- name: UpdateTeamRound :exec
+UPDATE teams
+SET round_qualified = $1
+WHERE id = $2
+`
+
+type UpdateTeamRoundParams struct {
+	RoundQualified pgtype.Int4
+	ID             uuid.UUID
+}
+
+func (q *Queries) UpdateTeamRound(ctx context.Context, arg UpdateTeamRoundParams) error {
+	_, err := q.db.Exec(ctx, updateTeamRound, arg.RoundQualified, arg.ID)
 	return err
 }
 

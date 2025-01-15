@@ -12,6 +12,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -424,7 +425,9 @@ func CreatePanel(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
-		Data:   "Panel created successfully",
+		Data: map[string]interface{}{
+			"message": "Panel Created SuccessFully",
+		},
 	})
 }
 
@@ -443,12 +446,182 @@ func GetAllTeamMembers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Cannot get Members of the team",
+			Data: map[string]string{
+				"message": "Cannot get Team Memebrs",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data:   team_members,
+		Status:"success",
+		Data: map[string]interface{}{
+			"message": "Team fetched successfully",
+			"team":    team_members,
+		},
+	})
+}
+
+//Ban Team
+
+func BanTeam (c echo.Context) error {
+	var payload models.UnBanTeam
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data: map[string]string{
+				"message": "Improper request",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:utils.FormatValidationErrors(err),
+		})
+	}
+
+	ctx := c.Request().Context()
+
+	team, err := utils.Queries.GetTeamById(ctx, payload.TeamId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data: "Team Does not exists",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: err,
+		})
+	}
+
+	if err := utils.Queries.BanTeam(ctx, team.ID); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data: map[string]string{
+				"message": "Failed to Ban Team",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	return c.JSON(http.StatusOK, models.Response{
+		Status:"success",
+		Data:"Team Banned Successfully",
+	})
+}
+
+//UnBan Team
+
+func UnBanTeam (c echo.Context) error {
+	var payload models.UnBanTeam
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data: map[string]string{
+				"message": "Improper request",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:utils.FormatValidationErrors(err),
+		})
+	}
+
+	ctx := c.Request().Context()
+
+	team, err := utils.Queries.GetTeamById(ctx, payload.TeamId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data: map[string]string{
+					"message": "Failed to Find team",
+					"error":   err.Error(),
+				},
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status: "fail",
+			Data: err,
+		})
+	}
+
+	if err := utils.Queries.UnBanTeam(ctx, team.ID); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data:"Failed to unban Team",
+		})
+	}
+
+	return c.JSON(http.StatusOK, models.Response{
+		Status:"success",
+		Data:"Team UnBanned Successfully",
+	})
+}
+
+func UpdateTeamRounds (c echo.Context) error {
+
+	var payload models.TeamRoundQualified
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(http.StatusBadRequest,models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"message": "Improper request",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data: utils.FormatValidationErrors(err),
+		})
+	}
+
+	ctx := c.Request().Context()
+
+	team,err := utils.Queries.GetTeamById(ctx,payload.TeamId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status:"fail",
+			Data: map[string]string{
+				"message": "Team does not exists",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	if err:= utils.Queries.UpdateTeamRound(ctx, db.UpdateTeamRoundParams{
+		RoundQualified: (pgtype.Int4{
+			Int32: int32(payload.RoundQualified),
+			Valid:true,
+		}),
+		ID: team.ID,
+	}); err != nil {
+		return c.JSON(http.StatusBadRequest,models.Response{
+			Status:"fail",
+			Data: map[string]string{
+				"message": "failed ot update round",
+				"error":   err.Error(),
+			},
+		})
+	}
+
+	return c.JSON(http.StatusOK, models.Response{
+		Status:"success",
+		Data:"Rounds qualified by team Updated",
 	})
 }

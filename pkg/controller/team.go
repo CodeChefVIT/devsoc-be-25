@@ -274,6 +274,7 @@ func CreateTeam(c echo.Context) error {
 		Code:           utils.GenerateRandomString(6),
 		NumberOfPeople: 1,
 		RoundQualified: pgtype.Int4{Int32: 0, Valid: true},
+		IsBanned:	false,
 	}
 
 	team, err := utils.Queries.CreateTeam(ctx, params)

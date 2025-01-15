@@ -7,6 +7,9 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const exportAllTeams = `-- name: ExportAllTeams :many
@@ -14,15 +17,23 @@ SELECT id, name, number_of_people, round_qualified, code
 FROM teams
 `
 
-func (q *Queries) ExportAllTeams(ctx context.Context) ([]Team, error) {
+type ExportAllTeamsRow struct {
+	ID             uuid.UUID
+	Name           string
+	NumberOfPeople int32
+	RoundQualified pgtype.Int4
+	Code           string
+}
+
+func (q *Queries) ExportAllTeams(ctx context.Context) ([]ExportAllTeamsRow, error) {
 	rows, err := q.db.Query(ctx, exportAllTeams)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Team
+	var items []ExportAllTeamsRow
 	for rows.Next() {
-		var i Team
+		var i ExportAllTeamsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
