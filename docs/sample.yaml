@@ -181,7 +181,7 @@ paths:
         "404":
           description: Team leader not found
 
-   /admin/members/{id}:
+  /admin/members/{id}:
     get:
       tags:
         - Admin
@@ -196,7 +196,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Successfully retrieved team members.
           content:
             application/json:
@@ -229,7 +229,7 @@ paths:
                         PhoneNo:
                           type: string
                           description: Phone number of the team member.
-        '400':
+        "400":
           description: Failed to retrieve team members.
           content:
             application/json:
@@ -256,18 +256,23 @@ paths:
             schema:
               type: object
               required:
+                - title
+                - description
+                - track
                 - github_link
                 - figma_link
-                - ppt_link
                 - team_id
               properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                track:
+                  type: string
                 github_link:
                   type: string
                   format: url
                 figma_link:
-                  type: string
-                  format: url
-                ppt_link:
                   type: string
                   format: url
                 other_link:
@@ -291,13 +296,16 @@ paths:
                   data:
                     type: object
                     properties:
+                      title:
+                        type: string
+                      description:
+                        type: string
+                      track:
+                        type: string
                       github_link:
                         type: string
                         format: url
                       figma_link:
-                        type: string
-                        format: url
-                      ppt_link:
                         type: string
                         format: url
                       other_link:
@@ -471,7 +479,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /submission/{teamId}:
+  /submission/get:
     get:
       tags:
         - Submission
@@ -499,13 +507,16 @@ paths:
                   data:
                     type: object
                     properties:
+                      title:
+                        type: string
+                      description:
+                        type: string
+                      track:
+                        type: string
                       github_link:
                         type: string
                         format: url
                       figma_link:
-                        type: string
-                        format: url
-                      ppt_link:
                         type: string
                         format: url
                       other_link:
@@ -534,6 +545,7 @@ paths:
                           - Invalid team ID format
                           - User is not part of any team
                           - User is not part of the team
+  /submission/update:
     post:
       tags:
         - Submission
@@ -580,13 +592,16 @@ paths:
                   data:
                     type: object
                     properties:
+                      title:
+                        type: string
+                      description:
+                        type: string
+                      track:
+                        type: string
                       github_link:
                         type: string
                         format: url
                       figma_link:
-                        type: string
-                        format: url
-                      ppt_link:
                         type: string
                         format: url
                       other_link:
@@ -1824,7 +1839,6 @@ paths:
                     type: string
                   error:
                     type: string
-  paths:
   /team/leave:
     post:
       summary: Leave a team
@@ -1964,7 +1978,7 @@ paths:
       tags:
         - Team
       responses:
-        '200':
+        "200":
           description: Successfully retrieved team users.
           content:
             application/json:
@@ -1985,7 +1999,7 @@ paths:
                         LastName:
                           type: string
                           description: Last name of the team user.
-        '400':
+        "400":
           description: Failed to retrieve team users.
           content:
             application/json:
@@ -1998,7 +2012,7 @@ paths:
                   data:
                     type: string
                     example: Cannot get Members of the team
-        '401':
+        "401":
           description: Unauthorized access.
           content:
             application/json:
@@ -2067,6 +2081,12 @@ components:
         team_id:
           type: string
           format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
         github_link:
           type: string
           format: url
@@ -2353,11 +2373,15 @@ components:
     Submissions:
       type: object
       properties:
+        title:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
         github_link:
           type: string
         figma_link:
-          type: string
-        ppt_link:
           type: string
         other_link:
           type: string

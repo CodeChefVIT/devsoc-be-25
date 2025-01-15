@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
@@ -9,6 +10,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,6 +34,12 @@ func GetUserSubmission(c echo.Context) error {
 
 	submission, err := utils.Queries.GetSubmissionByTeamID(ctx, teamUuid)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status: "fail",
+				Data:   map[string]string{"error": "Submission not found"},
+			})
+		}
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
@@ -44,9 +52,9 @@ func GetUserSubmission(c echo.Context) error {
 		Data: dto.Submission{
 			Title:       submission.Title,
 			Description: submission.Description,
+			Track:       submission.Track,
 			GithubLink:  submission.GithubLink,
 			FigmaLink:   submission.FigmaLink,
-			PptLink:     submission.PptLink,
 			OtherLink:   submission.OtherLink,
 			TeamID:      submission.TeamID.String(),
 		},
@@ -95,10 +103,10 @@ func CreateSubmission(c echo.Context) error {
 		ID:          submission_id,
 		Title:       req.Title,
 		Description: req.Description,
+		Track:       req.Track,
 		TeamID:      teamUuid,
 		GithubLink:  req.GithubLink,
 		FigmaLink:   req.FigmaLink,
-		PptLink:     req.PptLink,
 		OtherLink:   req.OtherLink,
 	})
 
@@ -116,9 +124,9 @@ func CreateSubmission(c echo.Context) error {
 			TeamID:      submission.TeamID.String(),
 			Title:       submission.Title,
 			Description: submission.Description,
+			Track:       submission.Track,
 			GithubLink:  submission.GithubLink,
 			FigmaLink:   submission.FigmaLink,
-			PptLink:     submission.PptLink,
 			OtherLink:   submission.OtherLink,
 		},
 	})
@@ -172,9 +180,9 @@ func UpdateSubmission(c echo.Context) error {
 		TeamID:      teamUuid,
 		Title:       req.Title,
 		Description: req.Description,
+		Track:       req.Track,
 		GithubLink:  req.GithubLink,
 		FigmaLink:   req.FigmaLink,
-		PptLink:     req.PptLink,
 		OtherLink:   req.OtherLink,
 	})
 
@@ -192,9 +200,9 @@ func UpdateSubmission(c echo.Context) error {
 			TeamID:      submission.TeamID.String(),
 			Title:       submission.Title,
 			Description: submission.Description,
+			Track:       submission.Track,
 			GithubLink:  submission.GithubLink,
 			FigmaLink:   submission.FigmaLink,
-			PptLink:     submission.PptLink,
 			OtherLink:   submission.OtherLink,
 		},
 	})

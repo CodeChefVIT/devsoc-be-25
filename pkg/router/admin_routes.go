@@ -16,11 +16,15 @@ func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin.GET("/user/:email", controller.GetUsersByEmail)
 	admin.POST("/ban", controller.BanUser)
 	admin.POST("/unban", controller.UnbanUser)
+	admin.POST("/star", controller.CheckStarred)
 
 	admin.GET("/teams", controller.GetTeams)
 	admin.GET("/teams/:id", controller.GetTeamById)
 	admin.GET("/team/leader/:id", controller.GetTeamLeader)
 	admin.POST("/createpanel", controller.CreatePanel)
 
-	admin.GET("/members/:id",controller.GetAllTeamMembers)
+	admin.GET("/members/:id", controller.GetAllTeamMembers)
+
+	admin.GET("/usercsv", controller.ExportUsers)
+	admin.GET("/teamcsv", controller.ExportTeams)
 }

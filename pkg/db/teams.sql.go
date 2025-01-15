@@ -88,7 +88,7 @@ func (q *Queries) DecreaseUserCountTeam(ctx context.Context, id uuid.UUID) error
 }
 
 const deleteTeam = `-- name: DeleteTeam :exec
-DELETE FROM teams 
+DELETE FROM teams
 WHERE id = $1
 `
 
@@ -98,8 +98,8 @@ func (q *Queries) DeleteTeam(ctx context.Context, id uuid.UUID) error {
 }
 
 const findTeam = `-- name: FindTeam :one
-SELECT id,name,code,round_qualified FROM teams 
-WHERE code = $1 
+SELECT id,name,code,round_qualified FROM teams
+WHERE code = $1
 LIMIT 1
 `
 
@@ -251,10 +251,18 @@ func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) 
 
 const getTeams = `-- name: GetTeams :many
 SELECT id, name, number_of_people, round_qualified, code FROM teams
+WHERE id > $1
+ORDER BY id ASC
+LIMIT $2
 `
 
-func (q *Queries) GetTeams(ctx context.Context) ([]Team, error) {
-	rows, err := q.db.Query(ctx, getTeams)
+type GetTeamsParams struct {
+	ID    uuid.UUID
+	Limit int32
+}
+
+func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, error) {
+	rows, err := q.db.Query(ctx, getTeams, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +340,7 @@ func (q *Queries) KickMemeber(ctx context.Context, id uuid.UUID) error {
 }
 
 const leaveTeam = `-- name: LeaveTeam :exec
-UPDATE users 
+UPDATE users
 SET team_id = NULL
 WHERE id = $1
 `
