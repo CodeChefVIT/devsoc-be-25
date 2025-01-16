@@ -46,6 +46,7 @@ type Team struct {
 	NumberOfPeople int32
 	RoundQualified pgtype.Int4
 	Code           string
+	IsBanned       bool
 }
 
 type User struct {

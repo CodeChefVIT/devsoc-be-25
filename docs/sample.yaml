@@ -86,7 +86,7 @@ paths:
     post:
       tags:
         - Admin
-      summary: Ban user
+      summary: Ban a user
       requestBody:
         required: true
         content:
@@ -95,7 +95,7 @@ paths:
               $ref: "#/components/schemas/BanUserReq"
       responses:
         "201":
-          description: User banned
+          description: User banned successfully
           content:
             application/json:
               schema:
@@ -103,12 +103,31 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: user banned successfully
+                    example: User banned successfully
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Failed to ban user
+                      error:
+                        type: string
+                        example: "Detailed error message"
   /admin/unban:
     post:
       tags:
         - Admin
-      summary: Unban user
+      summary: Unban a user
       requestBody:
         required: true
         content:
@@ -117,7 +136,7 @@ paths:
               $ref: "#/components/schemas/BanUserReq"
       responses:
         "201":
-          description: User unbanned
+          description: User unbanned successfully
           content:
             application/json:
               schema:
@@ -125,7 +144,88 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: user unbanned successfully
+                    example: User unbanned successfully
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Failed to unban user
+                      error:
+                        type: string
+                        example: "Detailed error message"
+  /admin/team/rounds:
+    post:
+      summary: Update Team Rounds
+      description: Updates the round information for a specific team.
+      tags:
+        - Team Management
+      requestBody:
+        description: Object containing team ID and updated round information.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teamId:
+                  type: string
+                  description: The unique identifier of the team.
+                  example: "team123"
+                round:
+                  type: integer
+                  description: The updated round number for the team.
+                  example: 3
+      responses:
+        '200':
+          description: Team round updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Team round updated successfully."
+        '400':
+          description: Invalid input data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid team ID or round data."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "An error occurred while updating the team round."
   /admin/teams:
     get:
       tags:
