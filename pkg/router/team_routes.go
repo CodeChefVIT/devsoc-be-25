@@ -11,6 +11,7 @@ func TeamRoutes(incomingRoutes *echo.Echo) {
 	team := incomingRoutes.Group("/team")
 
 	team.Use(middleware.JWTMiddleware())
+	team.Use(middleware.CheckUserBan)
 
 	team.POST("/join", controller.JoinTeam)
 	team.POST("/create",controller.CreateTeam)

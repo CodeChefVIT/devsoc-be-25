@@ -8,6 +8,7 @@ import (
 func InfoRoutes(incomingRoutes *echo.Echo) {
     info := incomingRoutes.Group("/info")
     info.Use(middleware.JWTMiddleware())
+    info.Use(middleware.CheckUserBan)
 
     info.GET("/me", controller.GetDetails)
     info.POST("/me", controller.UpdateUser)
