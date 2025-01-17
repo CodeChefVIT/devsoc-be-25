@@ -12,6 +12,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -389,13 +390,15 @@ func CreatePanel(c echo.Context) error {
 	}
 
 	panelDb := db.CreateUserParams{
-		FirstName:     panel.FirstName,
-		LastName:      panel.LastName,
-		Email:         panel.Email,
-		VitEmail:      panel.VitEmail,
-		RegNo:         panel.RegNo,
-		Password:      string(hashedPassword),
-		PhoneNo:       panel.PhoneNo,
+		FirstName: panel.FirstName,
+		LastName:  panel.LastName,
+		Email:     panel.Email,
+		VitEmail:  &panel.VitEmail,
+		RegNo:     &panel.RegNo,
+		Password:  string(hashedPassword),
+		PhoneNo: pgtype.Text{
+			String: panel.PhoneNo,
+		},
 		Role:          "panel",
 		IsLeader:      true,
 		IsVerified:    true,

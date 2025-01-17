@@ -160,9 +160,9 @@ type GetTeamMembersRow struct {
 	FirstName     string
 	LastName      string
 	GithubProfile string
-	VitEmail      string
-	RegNo         string
-	PhoneNo       string
+	VitEmail      *string
+	RegNo         *string
+	PhoneNo       pgtype.Text
 }
 
 func (q *Queries) GetTeamMembers(ctx context.Context, teamID uuid.NullUUID) ([]GetTeamMembersRow, error) {
@@ -229,15 +229,15 @@ From users
 where team_id = $1
 `
 
-func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) ([]string, error) {
+func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) ([]*string, error) {
 	rows, err := q.db.Query(ctx, getTeamUsersEmails, teamID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []*string
 	for rows.Next() {
-		var vit_email string
+		var vit_email *string
 		if err := rows.Scan(&vit_email); err != nil {
 			return nil, err
 		}

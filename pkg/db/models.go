@@ -54,10 +54,10 @@ type User struct {
 	FirstName         string
 	LastName          string
 	Email             string
-	PhoneNo           string
+	PhoneNo           pgtype.Text
 	Gender            string
-	RegNo             string
-	VitEmail          string
+	RegNo             *string
+	VitEmail          *string
 	HostelBlock       string
 	RoomNo            int32
 	GithubProfile     string

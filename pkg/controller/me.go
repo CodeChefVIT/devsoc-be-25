@@ -8,6 +8,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -57,10 +58,10 @@ func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData
 				FirstName:     entry.FirstName,
 				LastName:      entry.LastName,
 				Email:         entry.Email,
-				RegNo:         entry.RegNo,
-				PhoneNo:       entry.PhoneNo,
+				RegNo:         *entry.RegNo,
+				PhoneNo:       entry.PhoneNo.String,
 				Gender:        entry.Gender,
-				VitEmail:      entry.VitEmail,
+				VitEmail:      *entry.VitEmail,
 				HostelBlock:   entry.HostelBlock,
 				RoomNo:        int(entry.RoomNo),
 				GithubProfile: entry.GithubProfile,
@@ -84,7 +85,7 @@ func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData
 				FirstName:     entry.FirstName,
 				LastName:      entry.LastName,
 				Email:         entry.Email,
-				PhoneNo:       entry.PhoneNo,
+				PhoneNo:       entry.PhoneNo.String,
 				GithubProfile: entry.GithubProfile,
 			}
 			response.Team.Members = append(response.Team.Members, member)
@@ -132,7 +133,7 @@ func GetDetails(c echo.Context) error {
 	marshallData.Message = "User details fetched successfully"
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
-		Data: marshallData,
+		Data:   marshallData,
 	})
 }
 
@@ -199,14 +200,16 @@ func UpdateUser(c echo.Context) error {
 	}
 
 	err := utils.Queries.UpdateUser(ctx, db.UpdateUserParams{
-		ID:            user.ID,
-		FirstName:     req.FirstName,
-		LastName:      req.LastName,
-		Email:         req.Email,
-		PhoneNo:       req.PhoneNo,
+		ID:        user.ID,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		PhoneNo: pgtype.Text{
+			String: req.PhoneNo,
+		},
 		Gender:        req.Gender,
-		RegNo:         req.RegNo,
-		VitEmail:      req.VitEmail,
+		RegNo:         &req.RegNo,
+		VitEmail:      &req.VitEmail,
 		HostelBlock:   req.HostelBlock,
 		RoomNo:        int32(req.RoomNumber),
 		GithubProfile: req.GithubProfile,
