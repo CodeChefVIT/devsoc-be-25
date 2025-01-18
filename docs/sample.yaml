@@ -187,7 +187,7 @@ paths:
                   description: The updated round number for the team.
                   example: 3
       responses:
-        '200':
+        "200":
           description: Team round updated successfully.
           content:
             application/json:
@@ -200,7 +200,7 @@ paths:
                   message:
                     type: string
                     example: "Team round updated successfully."
-        '400':
+        "400":
           description: Invalid input data.
           content:
             application/json:
@@ -213,7 +213,7 @@ paths:
                   message:
                     type: string
                     example: "Invalid team ID or round data."
-        '500':
+        "500":
           description: Internal server error.
           content:
             application/json:
@@ -1510,12 +1510,12 @@ paths:
                   status:
                     type: string
                     example: success
+                  message:
+                    type: string
+                    example: User details fetched successfully
                   data:
                     type: object
                     properties:
-                      message:
-                        type: string
-                        example: User fetched successfully
                       user:
                         type: object
                         properties:
@@ -1543,6 +1543,8 @@ paths:
                           github_profile:
                             type: string
                             format: uri
+                          is_leader:
+                            type: boolean
                       team:
                         type: object
                         properties:
@@ -1571,6 +1573,8 @@ paths:
                                 github_profile:
                                   type: string
                                   format: uri
+                                is_leader:
+                                  type: boolean
         "403":
           description: Forbidden
           content:
@@ -1581,26 +1585,22 @@ paths:
                   status:
                     type: string
                     example: fail
+                  message:
+                    type: string
                   data:
                     type: object
-                    properties:
-                      message:
-                        type: string
-                      error:
-                        type: string
+                    nullable: true
               examples:
                 notAuthenticated:
                   value:
                     status: fail
-                    data:
-                      message: Forbidden
-                      error: User not found
+                    message: User not found
+                    data: null
                 noTeam:
                   value:
                     status: fail
-                    data:
-                      message: Forbidden
-                      error: User is not part of any team
+                    message: User is not part of any team
+                    data: null
         "500":
           description: Internal Server Error
           content:
@@ -1611,14 +1611,174 @@ paths:
                   status:
                     type: string
                     example: fail
+                  message:
+                    type: string
+                    example: Failed to fetch user details
+                  data:
+                    type: object
+                    nullable: true
+    post:
+      tags:
+        - User Information
+      summary: Update user details
+      description: Update authenticated user's profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name
+                - last_name
+                - email
+                - phone_no
+                - gender
+                - reg_no
+                - vit_email
+                - hostel_block
+                - room_no
+                - github_profile
+              properties:
+                first_name:
+                  type: string
+                  minLength: 1
+                last_name:
+                  type: string
+                  minLength: 1
+                email:
+                  type: string
+                  format: email
+                phone_no:
+                  type: string
+                  minLength: 10
+                  maxLength: 10
+                gender:
+                  type: string
+                  enum: [M, F, O]
+                  description: Must be either M, F or O
+                reg_no:
+                  type: string
+                vit_email:
+                  type: string
+                  format: email
+                  pattern: "@vitstudent.ac.in$"
+                hostel_block:
+                  type: string
+                room_no:
+                  type: integer
+                  minimum: 1
+                github_profile:
+                  type: string
+                  format: uri
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User updated successfully
                   data:
                     type: object
                     properties:
-                      message:
+                      first_name:
                         type: string
-                        example: Failed to fetch user details
-                      error:
+                      last_name:
                         type: string
+                      email:
+                        type: string
+                        format: email
+                      phone_no:
+                        type: string
+                      gender:
+                        type: string
+                        enum: [M, F, O]
+                      reg_no:
+                        type: string
+                      vit_email:
+                        type: string
+                        format: email
+                      hostel_block:
+                        type: string
+                      room_no:
+                        type: integer
+                      github_profile:
+                        type: string
+                        format: uri
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              examples:
+                invalidBody:
+                  value:
+                    status: fail
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    message: Validation failed
+                    data:
+                      first_name: is required
+                      email: must be a valid email
+                emptyName:
+                  value:
+                    status: fail
+                    message: First name and last name cannot be empty
+                invalidGender:
+                  value:
+                    status: fail
+                    message: Gender must be M, F or O
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: User not found
+                  data:
+                    type: object
+                    nullable: true
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Failed to update user
+                  data:
+                    type: object
+                    nullable: true
   /panel/createscore:
     post:
       summary: Create a new score
