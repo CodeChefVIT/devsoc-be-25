@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"sync"
+
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"gopkg.in/gomail.v2"
 )
@@ -10,7 +12,10 @@ type mails struct {
 	Conn   gomail.SendCloser
 }
 
-var mailers chan mails
+var (
+	mailers chan mails
+	mu      sync.Mutex
+)
 
 func InitMailer() {
 	mailers = make(chan mails, len(Config.SmtpCreds))
@@ -19,11 +24,11 @@ func InitMailer() {
 		dialer := gomail.NewDialer(Config.EmailHost, Config.EmailPort, creds.User, creds.Password)
 		mail, err := createConnection(dialer)
 		if err != nil {
-			logger.Infof("Unable to connect to SMTP server due to error: ", err.Error())
+			logger.Infof("Unable to connect to SMTP server due to error: %v", err)
 			continue
 		}
 		mailers <- mail
-		logger.Infof("Created mailer with: " + creds.User)
+		logger.Infof("Created mailer with: %s", creds.User)
 	}
 	logger.Infof("Successfully initialized mailers")
 }
@@ -40,8 +45,28 @@ func createConnection(dialer *gomail.Dialer) (mails, error) {
 	}, nil
 }
 
+func reinitMailers() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(mailers) > 0 {
+		return
+	}
+
+	logger.Infof("Reinitializing mailers")
+	InitMailer()
+}
+
 func SendEmail(to, subject, body string) error {
-	mail := <-mailers
+	var mail mails
+
+	select {
+	case mail = <-mailers:
+	default:
+		logger.Errorf("No mailer available, reinitializing mailers")
+		reinitMailers()
+		mail = <-mailers
+	}
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", Config.SendingEmail)
@@ -50,17 +75,9 @@ func SendEmail(to, subject, body string) error {
 	m.SetBody("text/html", body)
 
 	if err := gomail.Send(mail.Conn, m); err != nil {
-		logger.Errorf("Unable to send mail, trying to reconnect to server: ", err.Error())
+		logger.Errorf("Unable to send mail: ", err.Error())
 		_ = mail.Conn.Close()
-		mail, err = createConnection(mail.Dialer)
-		if err != nil {
-			logger.Infof("Unable to connect, skipping: ", err.Error())
-			return err
-		}
-		err = gomail.Send(mail.Conn, m)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	mailers <- mail
 	logger.Infof("Sent mail using: " + Config.SendingEmail)
