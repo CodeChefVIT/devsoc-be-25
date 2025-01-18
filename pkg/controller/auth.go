@@ -11,6 +11,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -177,7 +178,7 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	existingUserByVitEmail, err := utils.Queries.GetUserByVitEmail(ctx, req.VitEmail)
+	existingUserByVitEmail, err := utils.Queries.GetUserByVitEmail(ctx, &req.VitEmail)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -192,7 +193,9 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	existingUserByPhoneNo, err := utils.Queries.GetUserByPhoneNo(ctx, req.PhoneNo)
+	existingUserByPhoneNo, err := utils.Queries.GetUserByPhoneNo(ctx, pgtype.Text{
+		String: req.PhoneNo,
+	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -207,7 +210,7 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	existingUserByRegNo, err := utils.Queries.GetUserByRegNo(ctx, req.RegNo)
+	existingUserByRegNo, err := utils.Queries.GetUserByRegNo(ctx, &req.RegNo)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -254,13 +257,15 @@ func CompleteProfile(c echo.Context) error {
 	}
 
 	err = utils.Queries.CompleteProfile(ctx, db.CompleteProfileParams{
-		Email:         user.Email,
-		FirstName:     req.FirstName,
-		LastName:      req.LastName,
-		PhoneNo:       req.PhoneNo,
+		Email:     user.Email,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		PhoneNo: pgtype.Text{
+			String: req.PhoneNo,
+		},
 		Gender:        req.Gender,
-		RegNo:         req.RegNo,
-		VitEmail:      req.VitEmail,
+		RegNo:         &req.RegNo,
+		VitEmail:      &req.VitEmail,
 		HostelBlock:   req.HostelBlock,
 		RoomNo:        int32(req.RoomNumber),
 		GithubProfile: req.GithubProfile,

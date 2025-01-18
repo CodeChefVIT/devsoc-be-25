@@ -43,10 +43,10 @@ type CompleteProfileParams struct {
 	Email         string
 	FirstName     string
 	LastName      string
-	PhoneNo       string
+	PhoneNo       pgtype.Text
 	Gender        string
-	RegNo         string
-	VitEmail      string
+	RegNo         *string
+	VitEmail      *string
 	HostelBlock   string
 	RoomNo        int32
 	GithubProfile string
@@ -99,10 +99,10 @@ type CreateUserParams struct {
 	FirstName         string
 	LastName          string
 	Email             string
-	PhoneNo           string
+	PhoneNo           pgtype.Text
 	Gender            string
-	RegNo             string
-	VitEmail          string
+	RegNo             *string
+	VitEmail          *string
 	HostelBlock       string
 	RoomNo            int32
 	GithubProfile     string
@@ -312,10 +312,10 @@ type GetUserAndTeamDetailsRow struct {
 	FirstName      string
 	LastName       string
 	Email          string
-	RegNo          string
-	PhoneNo        string
+	RegNo          *string
+	PhoneNo        pgtype.Text
 	Gender         string
-	VitEmail       string
+	VitEmail       *string
 	HostelBlock    string
 	RoomNo         int32
 	GithubProfile  string
@@ -442,7 +442,7 @@ const getUserByPhoneNo = `-- name: GetUserByPhoneNo :one
 SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE phone_no = $1
 `
 
-func (q *Queries) GetUserByPhoneNo(ctx context.Context, phoneNo string) (User, error) {
+func (q *Queries) GetUserByPhoneNo(ctx context.Context, phoneNo pgtype.Text) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByPhoneNo, phoneNo)
 	var i User
 	err := row.Scan(
@@ -472,7 +472,7 @@ const getUserByRegNo = `-- name: GetUserByRegNo :one
 SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE reg_no = $1
 `
 
-func (q *Queries) GetUserByRegNo(ctx context.Context, regNo string) (User, error) {
+func (q *Queries) GetUserByRegNo(ctx context.Context, regNo *string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByRegNo, regNo)
 	var i User
 	err := row.Scan(
@@ -502,7 +502,7 @@ const getUserByVitEmail = `-- name: GetUserByVitEmail :one
 SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE vit_email = $1
 `
 
-func (q *Queries) GetUserByVitEmail(ctx context.Context, vitEmail string) (User, error) {
+func (q *Queries) GetUserByVitEmail(ctx context.Context, vitEmail *string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByVitEmail, vitEmail)
 	var i User
 	err := row.Scan(
@@ -575,10 +575,10 @@ type UpdateUserParams struct {
 	FirstName     string
 	LastName      string
 	Email         string
-	PhoneNo       string
+	PhoneNo       pgtype.Text
 	Gender        string
-	RegNo         string
-	VitEmail      string
+	RegNo         *string
+	VitEmail      *string
 	HostelBlock   string
 	RoomNo        int32
 	GithubProfile string
