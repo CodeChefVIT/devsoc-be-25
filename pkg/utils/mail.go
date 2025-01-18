@@ -49,8 +49,9 @@ func reinitMailers() {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if len(mailers) > 0 {
-		return
+	for len(mailers) > 0 {
+		mail := <-mailers
+		mail.Conn.Close()
 	}
 
 	logger.Infof("Reinitializing mailers")
@@ -75,7 +76,7 @@ func SendEmail(to, subject, body string) error {
 	m.SetBody("text/html", body)
 
 	if err := gomail.Send(mail.Conn, m); err != nil {
-		logger.Errorf("Unable to send mail: ", err.Error())
+		logger.Errorf("Unable to send mail: %v", err)
 		_ = mail.Conn.Close()
 		return err
 	}
