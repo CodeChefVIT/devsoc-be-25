@@ -940,7 +940,7 @@ paths:
                       first_name: is required
                       last_name: is required
                       phone_no: is required
-                      gender: must be M, F or O
+                      gender: is required
                       reg_no: is required
                       vit_email: is required
                       hostel_block: is required
