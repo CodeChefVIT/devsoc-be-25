@@ -29,6 +29,7 @@ type cfg struct {
 	RepoOwner        string      `env:"REPO_OWNER,notEmpty"`
 	RepoName         string      `env:"REPO_NAME,notEmpty"`
 	Recipients       string      `env:"RECIPIENETS"`
+	CookieSecure     bool        `env:"SECURE" envDefault:"false"`
 }
 
 var Config cfg
