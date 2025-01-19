@@ -120,7 +120,7 @@ func SignUp(c echo.Context) error {
 		Value:    token,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -130,7 +130,7 @@ func SignUp(c echo.Context) error {
 		Value:    refreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -460,7 +460,7 @@ func Login(c echo.Context) error {
 		Value:    token,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -470,7 +470,7 @@ func Login(c echo.Context) error {
 		Value:    refreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -616,7 +616,7 @@ func RefreshToken(c echo.Context) error {
 		Value:    token,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -626,7 +626,7 @@ func RefreshToken(c echo.Context) error {
 		Value:    newRefreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
