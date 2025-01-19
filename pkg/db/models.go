@@ -46,6 +46,7 @@ type Team struct {
 	NumberOfPeople int32
 	RoundQualified pgtype.Int4
 	Code           string
+	IsBanned       bool
 }
 
 type User struct {
@@ -54,10 +55,10 @@ type User struct {
 	FirstName         string
 	LastName          string
 	Email             string
-	PhoneNo           string
+	PhoneNo           pgtype.Text
 	Gender            string
-	RegNo             string
-	VitEmail          string
+	RegNo             *string
+	VitEmail          *string
 	HostelBlock       string
 	RoomNo            int32
 	GithubProfile     string

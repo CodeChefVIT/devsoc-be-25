@@ -46,29 +46,29 @@ func JoinTeam(c echo.Context) error {
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: err,
+			Data:   err,
 		})
 	}
 
 	ctx := c.Request().Context()
 
 	if err := utils.Validate.Struct(payload); err != nil {
-        validationErrors := utils.FormatValidationErrors(err)
-        return c.JSON(http.StatusBadRequest, models.Response{
+		validationErrors := utils.FormatValidationErrors(err)
+		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
 		})
-    }
+	}
 
 	user := c.Get("user").(db.User)
-	// fmt.Println(user)  -- For testing 
+	// fmt.Println(user)  -- For testing
 
-	member,err := utils.Queries.GetUser(ctx, user.ID)
+	member, err := utils.Queries.GetUser(ctx, user.ID)
 	fmt.Println(member.TeamID)
 	if member.TeamID.UUID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: "user already in a team",
+			Data:   "user already in a team",
 		})
 	}
 
@@ -77,13 +77,13 @@ func JoinTeam(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return c.JSON(http.StatusBadRequest, models.Response{
-				Status:"fail",
-				Data:err,
+				Status: "fail",
+				Data:   err,
 			})
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"failed to join team",
+			Status: "fail",
+			Data:   "failed to join team",
 		})
 	}
 
@@ -95,39 +95,38 @@ func JoinTeam(c echo.Context) error {
 	count, err := utils.Queries.CountTeamMembers(ctx, nullableTeamID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"failed to get team member count",
+			Status: "fail",
+			Data:   "failed to get team member count",
 		})
 	}
 
 	if count >= 5 {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Cannot join Team. Team is already full",
+			Status: "fail",
+			Data:   "Cannot join Team. Team is already full",
 		})
 	}
-
 
 	if err := utils.Queries.AddUserToTeam(ctx, db.AddUserToTeamParams{
 		TeamID: nullableTeamID,
 		ID:     user.ID,
 	}); err != nil {
 		return c.JSON(http.StatusBadGateway, models.Response{
-			Status:"fail",
-			Data:"Cannot join Team",
+			Status: "fail",
+			Data:   "Cannot join Team",
 		})
 	}
 
 	if err := utils.Queries.IncreaseCountTeam(ctx, nullableTeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:"Failed to add member to team",
+			Data:   "Failed to add member to team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"Team joined successfully",
+		Status: "success",
+		Data:   "Team joined successfully",
 	})
 }
 
@@ -139,20 +138,20 @@ func KickMemeber(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	if err := c.Bind(&payload); err!=nil{
+	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
 	if err := utils.Validate.Struct(payload); err != nil {
-        validationErrors := utils.FormatValidationErrors(err)
-        return c.JSON(http.StatusBadRequest, models.Response{
+		validationErrors := utils.FormatValidationErrors(err)
+		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
 		})
-    }
+	}
 
 	user := c.Get("user").(db.User)
 
@@ -160,22 +159,22 @@ func KickMemeber(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: err,
+			Data:   err,
 		})
 	}
 
 	if leader.IsLeader != true {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: "Only leader can kick Members",
+			Data:   "Only leader can kick Members",
 		})
 	}
 
 	member, err := utils.Queries.GetUserByID(ctx, payload.UserID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"User not found",
+			Status: "fail",
+			Data:   "User not found",
 		})
 	}
 
@@ -192,15 +191,15 @@ func KickMemeber(c echo.Context) error {
 	count, err := utils.Queries.CountTeamMembers(ctx, nullableTeamID)
 	if count <= 0 || err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Cannot leave team. Team is already empty",
+			Status: "fail",
+			Data:   "Cannot leave team. Team is already empty",
 		})
 	}
 
 	if user.TeamID.UUID != member.TeamID.UUID {
 		return c.JSON(http.StatusBadGateway, models.Response{
-			Status:"fail",
-			Data:"User is not a member of your team",
+			Status: "fail",
+			Data:   "User is not a member of your team",
 		})
 	}
 
@@ -209,21 +208,21 @@ func KickMemeber(c echo.Context) error {
 		ID:     member.ID,
 	}); err != nil {
 		return c.JSON(http.StatusBadGateway, models.Response{
-			Status:"fail",
-			Data:"Failed to kick user",
+			Status: "fail",
+			Data:   "Failed to kick user",
 		})
 	}
 
 	if err := utils.Queries.DecreaseUserCountTeam(ctx, nullableTeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadGateway, models.Response{
-			Status:"fail",
-			Data:"Failed to leave Team",
+			Status: "fail",
+			Data:   "Failed to leave Team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"User kicked successfully",
+		Status: "success",
+		Data:   "User kicked successfully",
 	})
 }
 
@@ -234,35 +233,35 @@ func CreateTeam(c echo.Context) error {
 	var payload models.CreateTeam
 
 	ctx := context.Background()
-	if err := c.Bind(&payload);err!=nil{
-		return utils.WriteError(c, echo.ErrBadRequest.Code,err)
+	if err := c.Bind(&payload); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
 	if err := utils.Validate.Struct(payload); err != nil {
-        validationErrors := utils.FormatValidationErrors(err)
-        return c.JSON(http.StatusBadRequest, models.Response{
+		validationErrors := utils.FormatValidationErrors(err)
+		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
 		})
-    }
+	}
 
 	payload.Name = strings.TrimSpace(payload.Name)
 
-	user,ok := c.Get("user").(db.User)
+	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"unauthorized",
+			Status: "fail",
+			Data:   "unauthorized",
 		})
 	}
-	// fmt.Println(user)  -- For testing 
+	// fmt.Println(user)  -- For testing
 
-	member,err := utils.Queries.GetUser(ctx, user.ID)
+	member, err := utils.Queries.GetUser(ctx, user.ID)
 	//fmt.Println(member.TeamID) -- For testing
 	if member.TeamID.UUID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: "user already in a team",
+			Data:   "user already in a team",
 		})
 	}
 
@@ -274,13 +273,14 @@ func CreateTeam(c echo.Context) error {
 		Code:           utils.GenerateRandomString(6),
 		NumberOfPeople: 1,
 		RoundQualified: pgtype.Int4{Int32: 0, Valid: true},
+		IsBanned:	false,
 	}
 
 	team, err := utils.Queries.CreateTeam(ctx, params)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
@@ -299,19 +299,19 @@ func CreateTeam(c echo.Context) error {
 			if pgerr.Code == "23505" {
 				return c.JSON(http.StatusBadRequest, models.Response{
 					Status: "fail",
-					Data:"Team name already exists",
+					Data:   "Team name already exists",
 				})
 			}
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:team,
+		Status: "success",
+		Data:   team,
 	})
 }
 
@@ -323,35 +323,35 @@ func LeaveTeam(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	if err := c.Bind(&payload);err != nil{
+	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data: err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
 	if err := utils.Validate.Struct(payload); err != nil {
-        validationErrors := utils.FormatValidationErrors(err)
-        return c.JSON(http.StatusBadRequest, models.Response{
+		validationErrors := utils.FormatValidationErrors(err)
+		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
 		})
-    }
+	}
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"unauthorized",
+			Status: "fail",
+			Data:   "unauthorized",
 		})
 	}
 
-	member,err := utils.Queries.GetUser(ctx, user.ID)
+	member, err := utils.Queries.GetUser(ctx, user.ID)
 
 	if member.TeamID.UUID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: "user not in a team",
+			Data:   "user not in a team",
 		})
 	}
 
@@ -363,8 +363,8 @@ func LeaveTeam(c echo.Context) error {
 	count, err := utils.Queries.CountTeamMembers(ctx, nullableTeamID)
 	if count <= 0 || err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Cannot leave Team. Team is already empty",
+			Status: "fail",
+			Data:   "Cannot leave Team. Team is already empty",
 		})
 	}
 
@@ -375,48 +375,55 @@ func LeaveTeam(c echo.Context) error {
 		}
 
 		emails, err := utils.Queries.GetTeamUsersEmails(ctx, user.TeamID)
-		if err != nil{
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
-				Status:"fail",
-				Data:"Failed to get email id's",
+				Status: "fail",
+				Data:   "Failed to get email id's",
 			})
 		}
-	
-		if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil{
+
+		if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
-				Status:"fail",
-				Data:err,
+				Status: "fail",
+				Data:   err,
 			})
 		}
-	
-		if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil{
+
+		if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
-				Status:"fail",
-				Data:err,
+				Status: "fail",
+				Data:   err,
 			})
 		}
-	
+
 		if err := utils.Queries.UpdateLeader(ctx, db.UpdateLeaderParams{
 			IsLeader: false,
-			ID: user.ID,
-		});err != nil{
+			ID:       user.ID,
+		}); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
-				Status:"fail",
-				Data:err,
+				Status: "fail",
+				Data:   err,
 			})
 		}
 		user.TeamID = uuid.NullUUID{}
 
-		if err := utils.SendTeamEmail(ctx, emails); err!= nil {
+		emailStrings := make([]string, 0, len(emails))
+		for _, email := range emails {
+			if email != nil {
+				emailStrings = append(emailStrings, *email)
+			}
+		}
+
+		if err := utils.SendTeamEmail(ctx, emailStrings); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
-				Status:"fail",
-				Data:"Failed send emails",
+				Status: "fail",
+				Data:   "Failed send emails",
 			})
 		}
 
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"success",
-			Data:"Team Left and Deleted successfully",
+			Status: "success",
+			Data:   "Team Left and Deleted successfully",
 		})
 	}
 
@@ -424,27 +431,27 @@ func LeaveTeam(c echo.Context) error {
 		ID: user.TeamID.UUID,
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
 	if err := utils.Queries.LeaveTeam(ctx, payload.UserID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
-	if err := utils.Queries.DecreaseUserCountTeam(ctx,nullableTeamID.UUID);err!=nil{
+	if err := utils.Queries.DecreaseUserCountTeam(ctx, nullableTeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Failed to leave team",
+			Status: "fail",
+			Data:   "Failed to leave team",
 		})
 	}
-	return c.JSON(http.StatusOK,models.Response{
-		Status:"success",
-		Data:"Team Left Successfully",
+	return c.JSON(http.StatusOK, models.Response{
+		Status: "success",
+		Data:   "Team Left Successfully",
 	})
 }
 
@@ -456,15 +463,15 @@ func DeleteTeam(c echo.Context) error {
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"unauthorized",
+			Status: "fail",
+			Data:   "unauthorized",
 		})
 	}
 
-	if !user.IsLeader{
+	if !user.IsLeader {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Only leader can delete the team",
+			Status: "fail",
+			Data:   "Only leader can delete the team",
 		})
 	}
 
@@ -474,48 +481,55 @@ func DeleteTeam(c echo.Context) error {
 	}
 
 	emails, err := utils.Queries.GetTeamUsersEmails(ctx, user.TeamID)
-	if err != nil{
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-				Data:"Failed to get email id's",
+			Status: "fail",
+			Data:   "Failed to get email id's",
 		})
 	}
 
-	if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil{
+	if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
-	if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil{
+	if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
 	if err := utils.Queries.UpdateLeader(ctx, db.UpdateLeaderParams{
 		IsLeader: false,
-		ID: user.ID,
-	});err != nil{
+		ID:       user.ID,
+	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 	user.TeamID = uuid.NullUUID{}
 
-	if err := utils.SendTeamEmail(ctx, emails); err!= nil {
+	emailStrings := make([]string, 0, len(emails))
+	for _, email := range emails {
+		if email != nil {
+			emailStrings = append(emailStrings, *email)
+		}
+	}
+
+	if err := utils.SendTeamEmail(ctx, emailStrings); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Failed send emails",
+			Status: "fail",
+			Data:   "Failed send emails",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"Team Deleted",
+		Status: "success",
+		Data:   "Team Deleted",
 	})
 }
 
@@ -527,30 +541,30 @@ func UpdateTeamName(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	if err := c.Bind(&payload);err != nil {
-		return utils.WriteError(c, echo.ErrBadRequest.Code,err)
+	if err := c.Bind(&payload); err != nil {
+		return utils.WriteError(c, echo.ErrBadRequest.Code, err)
 	}
 
 	if err := utils.Validate.Struct(payload); err != nil {
-        validationErrors := utils.FormatValidationErrors(err)
-        return c.JSON(http.StatusBadRequest, models.Response{
+		validationErrors := utils.FormatValidationErrors(err)
+		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
 		})
-    }
+	}
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data: "unauthorized",
+			Data:   "unauthorized",
 		})
 	}
 
 	if !user.IsLeader {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Only Leader can update me",
+			Status: "fail",
+			Data:   "Only Leader can update me",
 		})
 	}
 
@@ -559,42 +573,42 @@ func UpdateTeamName(c echo.Context) error {
 		ID:   user.TeamID.UUID,
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:err,
+			Status: "fail",
+			Data:   err,
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"Team name updated successfully",
+		Status: "success",
+		Data:   "Team name updated successfully",
 	})
 }
 
-//Get All users in a team
-func GetAllTeamUsers (c echo.Context) error {
+// Get All users in a team
+func GetAllTeamUsers(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	user,ok := c.Get("user").(db.User)
+	user, ok := c.Get("user").(db.User)
 
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"unauthorized",
+			Status: "fail",
+			Data:   "unauthorized",
 		})
 	}
 
-	team_members, err := utils.Queries.GetTeamUsers(ctx,user.TeamID)
+	team_members, err := utils.Queries.GetTeamUsers(ctx, user.TeamID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Cannot get Members of the team",
+			Status: "fail",
+			Data:   "Cannot get Members of the team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:team_members,
+		Status: "success",
+		Data:   team_members,
 	})
 }

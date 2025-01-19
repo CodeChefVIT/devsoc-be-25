@@ -9,6 +9,7 @@ type Team struct {
 	Submission       uuid.UUID `json:"submission" db:"submission"`
 	RoundQualified   int       `json:"round_qualified" db:"round_qualified" default:"0"`
 	Code             string    `json:"code" db:"code"`
+	IsBanned       bool      `json:"is_banned" db:"is_banned" default:"false"`
 }
 
 type CreateTeam struct {
@@ -30,6 +31,7 @@ type GetTeams struct {
 	Submission       uuid.UUID `json:"submission" db:"submission"`
 	RoundQualified   int       `json:"round_qualified" db:"round_qualified" default:"0"`
 	Code             string    `json:"code" db:"code"`
+	IsBanned       bool      `json:"is_banned" db:"is_banned" default:"false"`
 }
 
 type LeaveTeam struct {
@@ -55,5 +57,18 @@ type GetTeamMembers struct {
 
 type GetTeamUsers struct {
 	FirstName string `json:"first_name" validate:"required"`
-	LastName string `json:"last_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+}
+
+type BanTeam struct {
+	TeamId uuid.UUID `json:"id" validate:"required"`
+}
+
+type UnBanTeam struct {
+	TeamId uuid.UUID `json:"id" validate:"required"`
+}
+
+type TeamRoundQualified struct {
+	TeamId uuid.UUID `json:"id" validate:"required"`
+	RoundQualified int `json:"round_qualified" validate:"required"`
 }

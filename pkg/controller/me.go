@@ -8,6 +8,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -57,10 +58,10 @@ func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData
 				FirstName:     entry.FirstName,
 				LastName:      entry.LastName,
 				Email:         entry.Email,
-				RegNo:         entry.RegNo,
-				PhoneNo:       entry.PhoneNo,
+				RegNo:         *entry.RegNo,
+				PhoneNo:       entry.PhoneNo.String,
 				Gender:        entry.Gender,
-				VitEmail:      entry.VitEmail,
+				VitEmail:      *entry.VitEmail,
 				HostelBlock:   entry.HostelBlock,
 				RoomNo:        int(entry.RoomNo),
 				GithubProfile: entry.GithubProfile,
@@ -84,7 +85,7 @@ func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData
 				FirstName:     entry.FirstName,
 				LastName:      entry.LastName,
 				Email:         entry.Email,
-				PhoneNo:       entry.PhoneNo,
+				PhoneNo:       entry.PhoneNo.String,
 				GithubProfile: entry.GithubProfile,
 			}
 			response.Team.Members = append(response.Team.Members, member)
@@ -99,40 +100,31 @@ func GetDetails(c echo.Context) error {
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User not found",
-			},
+			Status:  "fail",
+			Message: "User not found",
 		})
 	}
 
 	if user.TeamID.Valid == false {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User is not part of any team",
-			},
+			Status:  "fail",
+			Message: "User is not part of any team",
 		})
 	}
 
 	userData, err := utils.Queries.GetUserAndTeamDetails(ctx, user.TeamID.UUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to fetch user details",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: "Failed to fetch user details",
 		})
 	}
 
 	marshallData := Marshall(userData, user.ID)
-	marshallData.Message = "User details fetched successfully"
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: marshallData,
+		Status:  "success",
+		Message: "User details fetched successfully",
+		Data:    marshallData,
 	})
 }
 
@@ -147,7 +139,6 @@ type UpdateUserRequest struct {
 	HostelBlock   string `json:"hostel_block" validate:"required"`
 	RoomNumber    int    `json:"room_no" validate:"required"`
 	GithubProfile string `json:"github_profile" validate:"required,url"`
-	Password      string `json:"password" validate:"required"`
 }
 
 func UpdateUser(c echo.Context) error {
@@ -156,28 +147,24 @@ func UpdateUser(c echo.Context) error {
 	var req UpdateUserRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid request body",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: "Invalid request body",
 		})
 	}
 
 	if err := utils.Validate.Struct(req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
+			Status:  "fail",
+			Message: "Validation failed",
+			Data:    utils.FormatValidationErrors(err),
 		})
 	}
 
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"error": "User not found",
-			},
+			Status:  "fail",
+			Message: "User not found",
 		})
 	}
 
@@ -186,38 +173,37 @@ func UpdateUser(c echo.Context) error {
 
 	if req.FirstName == "" || req.LastName == "" {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "First name and last name cannot be empty"},
+			Status:  "fail",
+			Message: "First name and last name cannot be empty",
 		})
 	}
 
 	if req.Gender != "M" && req.Gender != "F" && req.Gender != "O" {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Gender must be M, F or O"},
+			Status:  "fail",
+			Message: "Gender must be M, F or O",
 		})
 	}
 
 	err := utils.Queries.UpdateUser(ctx, db.UpdateUserParams{
-		ID:            user.ID,
-		FirstName:     req.FirstName,
-		LastName:      req.LastName,
-		Email:         req.Email,
-		PhoneNo:       req.PhoneNo,
+		ID:        user.ID,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		PhoneNo: pgtype.Text{
+			String: req.PhoneNo,
+		},
 		Gender:        req.Gender,
-		RegNo:         req.RegNo,
-		VitEmail:      req.VitEmail,
+		RegNo:         &req.RegNo,
+		VitEmail:      &req.VitEmail,
 		HostelBlock:   req.HostelBlock,
 		RoomNo:        int32(req.RoomNumber),
 		GithubProfile: req.GithubProfile,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to update user",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: "Failed to update user",
 		})
 	}
 
@@ -235,10 +221,8 @@ func UpdateUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: map[string]interface{}{
-			"message": "User updated successfully",
-			"user":    updatedUser,
-		},
+		Status:  "success",
+		Message: "User updated successfully",
+		Data:    updatedUser,
 	})
 }

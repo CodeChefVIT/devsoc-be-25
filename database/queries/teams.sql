@@ -27,9 +27,9 @@ WHERE id = $1;
 
 -- name: CreateTeam :one
 INSERT INTO teams (
-    id, name, number_of_people, round_qualified, code
+    id, name, number_of_people, round_qualified, code, is_banned
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 
@@ -98,3 +98,18 @@ Where team_id = $1;
 SELECT vit_email
 From users
 where team_id = $1;
+
+-- name: BanTeam :exec
+UPDATE teams
+SET is_banned = TRUE
+WHERE id = $1;
+
+-- name: UnBanTeam :exec
+UPDATE teams
+SET is_banned = FALSE
+WHERE id = $1;
+
+-- name: UpdateTeamRound :exec
+UPDATE teams
+SET round_qualified = $1
+WHERE id = $2;

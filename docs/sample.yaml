@@ -86,7 +86,7 @@ paths:
     post:
       tags:
         - Admin
-      summary: Ban user
+      summary: Ban a user
       requestBody:
         required: true
         content:
@@ -95,7 +95,7 @@ paths:
               $ref: "#/components/schemas/BanUserReq"
       responses:
         "201":
-          description: User banned
+          description: User banned successfully
           content:
             application/json:
               schema:
@@ -103,12 +103,31 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: user banned successfully
+                    example: User banned successfully
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Failed to ban user
+                      error:
+                        type: string
+                        example: "Detailed error message"
   /admin/unban:
     post:
       tags:
         - Admin
-      summary: Unban user
+      summary: Unban a user
       requestBody:
         required: true
         content:
@@ -117,7 +136,7 @@ paths:
               $ref: "#/components/schemas/BanUserReq"
       responses:
         "201":
-          description: User unbanned
+          description: User unbanned successfully
           content:
             application/json:
               schema:
@@ -125,7 +144,88 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: user unbanned successfully
+                    example: User unbanned successfully
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Failed to unban user
+                      error:
+                        type: string
+                        example: "Detailed error message"
+  /admin/team/rounds:
+    post:
+      summary: Update Team Rounds
+      description: Updates the round information for a specific team.
+      tags:
+        - Team Management
+      requestBody:
+        description: Object containing team ID and updated round information.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teamId:
+                  type: string
+                  description: The unique identifier of the team.
+                  example: "team123"
+                round:
+                  type: integer
+                  description: The updated round number for the team.
+                  example: 3
+      responses:
+        "200":
+          description: Team round updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Team round updated successfully."
+        "400":
+          description: Invalid input data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid team ID or round data."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "An error occurred while updating the team round."
   /admin/teams:
     get:
       tags:
@@ -670,13 +770,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: User signed up successfully. OTP has been sent to email
+                    enum: [success]
+                  message:
+                    type: string
+                    example: User signed up successfully. OTP has been sent to email
         "400":
           description: Bad Request
           content:
@@ -686,23 +783,21 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                    enum: [fail]
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
-                    data:
-                      error: Invalid request body
+                    message: Invalid request body
                 validationError:
                   value:
                     status: fail
+                    message: Validation errors
                     data:
-                      error: Validation failed for multiple fields
+                      email: must be a valid email
+                      password: is required
         "409":
           description: Conflict
           content:
@@ -712,13 +807,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User with this email already exists
+                    enum: [fail]
+                  message:
+                    type: string
+                    example: User with this email already exists
         "500":
           description: Internal Server Error
           content:
@@ -728,56 +820,44 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                    enum: [fail]
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Database error
+                    message: Database error
                 uuidError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate user ID
+                    message: Failed to generate user ID
                 hashError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to hash password
+                    message: Failed to hash password
                 createError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to create user
+                    message: Failed to create user
                 otpError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate OTP
+                    message: Failed to generate OTP
                 tokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate token
+                    message: Failed to generate token
                 refreshTokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate refresh token
+                    message: Failed to generate refresh token
   /auth/complete-profile:
     post:
       tags:
         - Authentication
       summary: Complete user profile
       description: Complete user profile with additional details after registration
-      security:
-        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -834,12 +914,9 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Profile completed successfully
+                  message:
+                    type: string
+                    example: Profile completed successfully
         "400":
           description: Bad Request
           content:
@@ -850,32 +927,39 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    message: Validation errors
                     data:
-                      error: Invalid request body
+                      first_name: is required
+                      last_name: is required
+                      phone_no: is required
+                      gender: must be M, F or O
+                      reg_no: is required
+                      vit_email: is required
+                      hostel_block: is required
+                      room_no: is required
+                      github_profile: is required
                 emptyName:
                   value:
                     status: fail
-                    data:
-                      error: First name and last name cannot be empty
+                    message: First name and last name cannot be empty
                 invalidGender:
                   value:
                     status: fail
-                    data:
-                      error: Gender must be M, F or O
+                    message: Gender must be M, F or O
                 alreadyComplete:
                   value:
                     status: fail
-                    data:
-                      error: Profile already completed
+                    message: Profile already completed
         "401":
           description: Unauthorized
           content:
@@ -886,12 +970,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not verified. OTP has been sent to email
+                  message:
+                    type: string
+                    example: User not verified. OTP has been sent to email
         "409":
           description: Conflict
           content:
@@ -902,27 +983,21 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 vitEmailExists:
                   value:
                     status: fail
-                    data:
-                      error: User with this VIT email already exists
+                    message: User with this VIT email already exists
                 phoneExists:
                   value:
                     status: fail
-                    data:
-                      error: User with this phone number already exists
+                    message: User with this phone number already exists
                 regNoExists:
                   value:
                     status: fail
-                    data:
-                      error: User with this registration number already exists
+                    message: User with this registration number already exists
         "500":
           description: Internal Server Error
           content:
@@ -933,32 +1008,25 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Database error
+                    message: Database error
                 userError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    message: Failed to get user
                 otpError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate OTP
+                    message: Failed to generate OTP
                 updateError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to complete profile
+                    message: Failed to complete profile
   /auth/verify-otp:
     post:
       tags:
@@ -992,12 +1060,9 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: User verified successfully
+                  message:
+                    type: string
+                    example: User verified successfully
         "400":
           description: Bad Request
           content:
@@ -1008,17 +1073,24 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    message: Validation errors
                     data:
-                      error: Invalid request body
+                      email: must be a valid email
+                      otp: is required
+                alreadyVerified:
+                  value:
+                    status: fail
+                    message: User already verified
         "401":
           description: Unauthorized - Invalid OTP
           content:
@@ -1029,12 +1101,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: Invalid OTP
+                  message:
+                    type: string
+                    example: Invalid OTP
         "404":
           description: Not Found
           content:
@@ -1045,22 +1114,17 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 userNotFound:
                   value:
                     status: fail
-                    data:
-                      error: User not found
+                    message: User not found
                 otpExpired:
                   value:
                     status: fail
-                    data:
-                      error: OTP invalid/expired
+                    message: OTP invalid/expired
         "500":
           description: Internal Server Error
           content:
@@ -1071,27 +1135,21 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    message: Failed to get user
                 redisError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to delete OTP
+                    message: Failed to delete OTP
                 verifyError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to verify user
+                    message: Failed to verify user
   /auth/login:
     post:
       tags:
@@ -1132,12 +1190,12 @@ paths:
                   status:
                     type: string
                     example: success
+                  message:
+                    type: string
+                    example: User logged in successfully
                   data:
                     type: object
                     properties:
-                      message:
-                        type: string
-                        example: User logged in successfully
                       is_profile_complete:
                         type: boolean
                         example: false
@@ -1151,22 +1209,20 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
-                    data:
-                      error: Invalid request body
+                    message: Invalid request body
                 validationError:
                   value:
                     status: fail
+                    message: Validation errors
                     data:
-                      error: Validation failed for multiple fields
+                      email: must be a valid email
+                      password: is required
         "401":
           description: Unauthorized
           content:
@@ -1177,12 +1233,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: Invalid password
+                  message:
+                    type: string
+                    example: Invalid password
         "404":
           description: Not Found
           content:
@@ -1193,12 +1246,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
+                  message:
+                    type: string
+                    example: User not found
         "417":
           description: Expectation Failed - User not verified
           content:
@@ -1209,12 +1259,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not verified. OTP has been sent to email
+                  message:
+                    type: string
+                    example: User not verified. OTP has been sent to email
         "418":
           description: I'm a teapot - User banned
           content:
@@ -1225,12 +1272,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User banned
+                  message:
+                    type: string
+                    example: User banned
         "500":
           description: Internal Server Error
           content:
@@ -1241,32 +1285,25 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    message: Failed to get user
                 otpError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate OTP
+                    message: Failed to generate OTP
                 tokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate token
+                    message: Failed to generate token
                 refreshTokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate refresh token
+                    message: Failed to generate refresh token
   /auth/update-password:
     post:
       tags:
@@ -1304,12 +1341,9 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Password updated successfully
+                  message:
+                    type: string
+                    example: Password updated successfully
         "400":
           description: Bad Request
           content:
@@ -1320,27 +1354,29 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 invalidBody:
                   value:
                     status: fail
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    message: Validation errors
                     data:
-                      error: Invalid request body
+                      email: must be a valid email
+                      otp: is required
+                      new_password: is required
                 invalidOTP:
                   value:
                     status: fail
-                    data:
-                      error: Invalid OTP
+                    message: Invalid OTP
                 expiredOTP:
                   value:
                     status: fail
-                    data:
-                      error: OTP expired or invalid
+                    message: OTP expired or invalid
         "404":
           description: Not Found
           content:
@@ -1351,12 +1387,9 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
+                  message:
+                    type: string
+                    example: User not found
         "500":
           description: Internal Server Error
           content:
@@ -1367,27 +1400,25 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 databaseError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to get user
+                    message: Failed to get user
+                redisError:
+                  value:
+                    status: fail
+                    message: Failed to delete OTP
                 hashError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to hash password
+                    message: Failed to hash password
                 updateError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to update password
+                    message: Failed to update password
   /auth/refresh:
     post:
       tags:
@@ -1419,12 +1450,9 @@ paths:
                   status:
                     type: string
                     example: success
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Token refreshed successfully
+                  message:
+                    type: string
+                    example: Token refreshed successfully
         "401":
           description: Unauthorized
           content:
@@ -1435,38 +1463,17 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 noToken:
                   value:
                     status: fail
-                    data:
-                      error: Refresh token not found
+                    message: Refresh token not found
                 invalidToken:
                   value:
                     status: fail
-                    data:
-                      error: Invalid refresh token
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
-                        example: User not found
+                    message: Invalid refresh token
         "500":
           description: Internal Server Error
           content:
@@ -1477,30 +1484,23 @@ paths:
                   status:
                     type: string
                     example: fail
-                  data:
-                    type: object
-                    properties:
-                      error:
-                        type: string
+                  message:
+                    type: string
               examples:
                 tokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate token
+                    message: Failed to generate token
                 refreshTokenError:
                   value:
                     status: fail
-                    data:
-                      error: Failed to generate refresh token
+                    message: Failed to generate refresh token
   /info/me:
     get:
       tags:
         - User Information
       summary: Get user and team details
       description: Fetch authenticated user's details along with their team information
-      security:
-        - BearerAuth: []
       responses:
         "200":
           description: User and team details fetched successfully
@@ -1512,12 +1512,12 @@ paths:
                   status:
                     type: string
                     example: success
+                  message:
+                    type: string
+                    example: User details fetched successfully
                   data:
                     type: object
                     properties:
-                      message:
-                        type: string
-                        example: User fetched successfully
                       user:
                         type: object
                         properties:
@@ -1545,6 +1545,8 @@ paths:
                           github_profile:
                             type: string
                             format: uri
+                          is_leader:
+                            type: boolean
                       team:
                         type: object
                         properties:
@@ -1573,6 +1575,8 @@ paths:
                                 github_profile:
                                   type: string
                                   format: uri
+                                is_leader:
+                                  type: boolean
         "403":
           description: Forbidden
           content:
@@ -1583,26 +1587,22 @@ paths:
                   status:
                     type: string
                     example: fail
+                  message:
+                    type: string
                   data:
                     type: object
-                    properties:
-                      message:
-                        type: string
-                      error:
-                        type: string
+                    nullable: true
               examples:
                 notAuthenticated:
                   value:
                     status: fail
-                    data:
-                      message: Forbidden
-                      error: User not found
+                    message: User not found
+                    data: null
                 noTeam:
                   value:
                     status: fail
-                    data:
-                      message: Forbidden
-                      error: User is not part of any team
+                    message: User is not part of any team
+                    data: null
         "500":
           description: Internal Server Error
           content:
@@ -1613,14 +1613,174 @@ paths:
                   status:
                     type: string
                     example: fail
+                  message:
+                    type: string
+                    example: Failed to fetch user details
+                  data:
+                    type: object
+                    nullable: true
+    post:
+      tags:
+        - User Information
+      summary: Update user details
+      description: Update authenticated user's profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name
+                - last_name
+                - email
+                - phone_no
+                - gender
+                - reg_no
+                - vit_email
+                - hostel_block
+                - room_no
+                - github_profile
+              properties:
+                first_name:
+                  type: string
+                  minLength: 1
+                last_name:
+                  type: string
+                  minLength: 1
+                email:
+                  type: string
+                  format: email
+                phone_no:
+                  type: string
+                  minLength: 10
+                  maxLength: 10
+                gender:
+                  type: string
+                  enum: [M, F, O]
+                  description: Must be either M, F or O
+                reg_no:
+                  type: string
+                vit_email:
+                  type: string
+                  format: email
+                  pattern: "@vitstudent.ac.in$"
+                hostel_block:
+                  type: string
+                room_no:
+                  type: integer
+                  minimum: 1
+                github_profile:
+                  type: string
+                  format: uri
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User updated successfully
                   data:
                     type: object
                     properties:
-                      message:
+                      first_name:
                         type: string
-                        example: Failed to fetch user details
-                      error:
+                      last_name:
                         type: string
+                      email:
+                        type: string
+                        format: email
+                      phone_no:
+                        type: string
+                      gender:
+                        type: string
+                        enum: [M, F, O]
+                      reg_no:
+                        type: string
+                      vit_email:
+                        type: string
+                        format: email
+                      hostel_block:
+                        type: string
+                      room_no:
+                        type: integer
+                      github_profile:
+                        type: string
+                        format: uri
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              examples:
+                invalidBody:
+                  value:
+                    status: fail
+                    message: Invalid request body
+                validationError:
+                  value:
+                    status: fail
+                    message: Validation failed
+                    data:
+                      first_name: is required
+                      email: must be a valid email
+                emptyName:
+                  value:
+                    status: fail
+                    message: First name and last name cannot be empty
+                invalidGender:
+                  value:
+                    status: fail
+                    message: Gender must be M, F or O
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: User not found
+                  data:
+                    type: object
+                    nullable: true
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Failed to update user
+                  data:
+                    type: object
+                    nullable: true
   /panel/createscore:
     post:
       summary: Create a new score

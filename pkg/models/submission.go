@@ -17,8 +17,3 @@ type UpdateSubmissionRequest struct {
 	FigmaLink   string `json:"figma_link" validate:"required,url"`
 	OtherLink   string `json:"other_link" validate:"omitempty,url"`
 }
-
-type Response struct {
-	Status string      `json:"status"`
-	Data   interface{} `json:"data"`
-}
