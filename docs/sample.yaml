@@ -988,14 +988,10 @@ paths:
                   value:
                     status: fail
                     message: User with this VIT email already exists
-                phoneExists:
+                phoneOrRegNoExists:
                   value:
                     status: fail
-                    message: User with this phone number already exists
-                regNoExists:
-                  value:
-                    status: fail
-                    message: User with this registration number already exists
+                    message: User with this phone number or registration number already exists
         "500":
           description: Internal Server Error
           content:
