@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"sync"
 
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
@@ -18,6 +19,11 @@ var (
 )
 
 func InitMailer() {
+	if len(Config.SmtpCreds) == 0 {
+		logger.Errorf("No smtp creds found")
+		return
+	}
+
 	mailers = make(chan mails, len(Config.SmtpCreds))
 
 	for _, creds := range Config.SmtpCreds {
@@ -66,7 +72,7 @@ func SendEmail(to, subject, body string, attachments ...string) error {
 	default:
 		logger.Errorf("No mailer available, reinitializing mailers")
 		reinitMailers()
-		mail = <-mailers
+		return fmt.Errorf("No SMTP connection available. Please try again later")
 	}
 
 	m := gomail.NewMessage()
