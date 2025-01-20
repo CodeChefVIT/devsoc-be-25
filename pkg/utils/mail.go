@@ -14,8 +14,8 @@ type mails struct {
 }
 
 var (
-	mailers chan mails
-	mu      sync.Mutex
+	mailers    chan mails
+	reinitOnce sync.Once
 )
 
 func InitMailer() {
@@ -52,16 +52,15 @@ func createConnection(dialer *gomail.Dialer) (mails, error) {
 }
 
 func reinitMailers() {
-	mu.Lock()
-	defer mu.Unlock()
+	reinitOnce.Do(func() {
+		for len(mailers) > 0 {
+			mail := <-mailers
+			mail.Conn.Close()
+		}
 
-	for len(mailers) > 0 {
-		mail := <-mailers
-		mail.Conn.Close()
-	}
-
-	logger.Infof("Reinitializing mailers")
-	InitMailer()
+		logger.Infof("Reinitializing mailers")
+		InitMailer()
+	})
 }
 
 func SendEmail(to, subject, body string) error {
