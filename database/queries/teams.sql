@@ -100,7 +100,7 @@ From users
 where team_id = $1;
 
 -- name: BanTeam :exec
-UPDATE teams
+UPDATE users
 SET is_banned = TRUE
 WHERE id = $1;
 
