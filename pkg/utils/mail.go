@@ -58,7 +58,7 @@ func reinitMailers() {
 	InitMailer()
 }
 
-func SendEmail(to, subject, body string) error {
+func SendEmail(to, subject, body string, attachments ...string) error {
 	var mail mails
 
 	select {
@@ -74,6 +74,12 @@ func SendEmail(to, subject, body string) error {
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", body)
+
+	for _, attachment := range attachments {
+		if attachment != "" {
+			m.Attach(attachment)
+		}
+	}
 
 	if err := gomail.Send(mail.Conn, m); err != nil {
 		logger.Errorf("Unable to send mail: %v", err)

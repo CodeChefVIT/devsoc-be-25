@@ -456,7 +456,7 @@ func GetAllTeamMembers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
+		Status: "success",
 		Data: map[string]interface{}{
 			"message": "Team fetched successfully",
 			"team":    team_members,
@@ -466,12 +466,12 @@ func GetAllTeamMembers(c echo.Context) error {
 
 //Ban Team
 
-func BanTeam (c echo.Context) error {
+func BanTeam(c echo.Context) error {
 	var payload models.UnBanTeam
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
+			Status: "fail",
 			Data: map[string]string{
 				"message": "Improper request",
 				"error":   err.Error(),
@@ -481,8 +481,8 @@ func BanTeam (c echo.Context) error {
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:utils.FormatValidationErrors(err),
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -493,18 +493,18 @@ func BanTeam (c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
-				Data: "Team Does not exists",
+				Data:   "Team Does not exists",
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
-			Data: err,
+			Data:   err,
 		})
 	}
 
 	if err := utils.Queries.BanTeam(ctx, team.ID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
+			Status: "fail",
 			Data: map[string]string{
 				"message": "Failed to Ban Team",
 				"error":   err.Error(),
@@ -513,19 +513,19 @@ func BanTeam (c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"Team Banned Successfully",
+		Status: "success",
+		Data:   "Team Banned Successfully",
 	})
 }
 
 //UnBan Team
 
-func UnBanTeam (c echo.Context) error {
+func UnBanTeam(c echo.Context) error {
 	var payload models.UnBanTeam
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
+			Status: "fail",
 			Data: map[string]string{
 				"message": "Improper request",
 				"error":   err.Error(),
@@ -535,8 +535,8 @@ func UnBanTeam (c echo.Context) error {
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:utils.FormatValidationErrors(err),
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -555,29 +555,29 @@ func UnBanTeam (c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
-			Data: err,
+			Data:   err,
 		})
 	}
 
 	if err := utils.Queries.UnBanTeam(ctx, team.ID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data:"Failed to unban Team",
+			Status: "fail",
+			Data:   "Failed to unban Team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"Team UnBanned Successfully",
+		Status: "success",
+		Data:   "Team UnBanned Successfully",
 	})
 }
 
-func UpdateTeamRounds (c echo.Context) error {
+func UpdateTeamRounds(c echo.Context) error {
 
 	var payload models.TeamRoundQualified
 
 	if err := c.Bind(&payload); err != nil {
-		return c.JSON(http.StatusBadRequest,models.Response{
+		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data: map[string]string{
 				"message": "Improper request",
@@ -588,17 +588,17 @@ func UpdateTeamRounds (c echo.Context) error {
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
-			Data: utils.FormatValidationErrors(err),
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
 		})
 	}
 
 	ctx := c.Request().Context()
 
-	team,err := utils.Queries.GetTeamById(ctx,payload.TeamId)
+	team, err := utils.Queries.GetTeamById(ctx, payload.TeamId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status:"fail",
+			Status: "fail",
 			Data: map[string]string{
 				"message": "Team does not exists",
 				"error":   err.Error(),
@@ -606,15 +606,15 @@ func UpdateTeamRounds (c echo.Context) error {
 		})
 	}
 
-	if err:= utils.Queries.UpdateTeamRound(ctx, db.UpdateTeamRoundParams{
+	if err := utils.Queries.UpdateTeamRound(ctx, db.UpdateTeamRoundParams{
 		RoundQualified: (pgtype.Int4{
 			Int32: int32(payload.RoundQualified),
-			Valid:true,
+			Valid: true,
 		}),
 		ID: team.ID,
 	}); err != nil {
-		return c.JSON(http.StatusBadRequest,models.Response{
-			Status:"fail",
+		return c.JSON(http.StatusBadRequest, models.Response{
+			Status: "fail",
 			Data: map[string]string{
 				"message": "failed ot update round",
 				"error":   err.Error(),
@@ -623,7 +623,7 @@ func UpdateTeamRounds (c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status:"success",
-		Data:"Rounds qualified by team Updated",
+		Status: "success",
+		Data:   "Rounds qualified by team Updated",
 	})
 }

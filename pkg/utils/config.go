@@ -28,6 +28,7 @@ type cfg struct {
 	SendingEmail     string      `env:"SENDING_EMAIL,notEmpty"`
 	RepoOwner        string      `env:"REPO_OWNER,notEmpty"`
 	RepoName         string      `env:"REPO_NAME,notEmpty"`
+	Recipients       string      `env:"RECIPIENETS"`
 }
 
 var Config cfg
