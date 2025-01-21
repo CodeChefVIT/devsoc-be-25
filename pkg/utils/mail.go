@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"sync"
 
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
@@ -13,11 +14,16 @@ type mails struct {
 }
 
 var (
-	mailers chan mails
-	mu      sync.Mutex
+	mailers    chan mails
+	reinitOnce sync.Once
 )
 
 func InitMailer() {
+	if len(Config.SmtpCreds) == 0 {
+		logger.Errorf("No smtp creds found")
+		return
+	}
+
 	mailers = make(chan mails, len(Config.SmtpCreds))
 
 	for _, creds := range Config.SmtpCreds {
@@ -46,16 +52,15 @@ func createConnection(dialer *gomail.Dialer) (mails, error) {
 }
 
 func reinitMailers() {
-	mu.Lock()
-	defer mu.Unlock()
+	reinitOnce.Do(func() {
+		for len(mailers) > 0 {
+			mail := <-mailers
+			mail.Conn.Close()
+		}
 
-	for len(mailers) > 0 {
-		mail := <-mailers
-		mail.Conn.Close()
-	}
-
-	logger.Infof("Reinitializing mailers")
-	InitMailer()
+		logger.Infof("Reinitializing mailers")
+		InitMailer()
+	})
 }
 
 func SendEmail(to, subject, body string) error {
@@ -66,7 +71,7 @@ func SendEmail(to, subject, body string) error {
 	default:
 		logger.Errorf("No mailer available, reinitializing mailers")
 		reinitMailers()
-		mail = <-mailers
+		return fmt.Errorf("No SMTP connection available. Please try again later")
 	}
 
 	m := gomail.NewMessage()
