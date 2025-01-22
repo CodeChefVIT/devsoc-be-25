@@ -67,7 +67,7 @@ func Cron() {
 	subject := fmt.Sprintf("Users Details")
 	body := fmt.Sprintf("This mail contails details of all the users")
 
-	recipients  := Config.Recipients
+	recipients := Config.Recipients
 
 	if recipients == "" {
 		logger.Errorf("error in getenv")
