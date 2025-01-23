@@ -14,7 +14,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func SignUp(c echo.Context) error {
@@ -566,8 +565,23 @@ func UpdatePassword(c echo.Context) error {
 }
 
 func RefreshToken(c echo.Context) error {
-	refToken := c.Get("user").(*jwt.Token)
-	claims := refToken.Claims.(*utils.JWTClaims)
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "fail",
+			Message: "Refresh token not found",
+		})
+	}
+
+	claims, err := utils.ValidateRefreshToken(refreshToken.Value)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "fail",
+			Message: "Invalid refresh token",
+		})
+	}
 
 	token, err := utils.GenerateToken(&claims.UserID, false)
 	if err != nil {

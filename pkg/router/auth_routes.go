@@ -14,8 +14,5 @@ func AuthRoutes(incomingRoutes *echo.Echo) {
 	auth.POST("/verify-otp", controller.VerifyOTP)
 	auth.POST("/login", controller.Login)
 	auth.POST("/update-password", controller.UpdatePassword)
-	auth.POST("/refresh", controller.RefreshToken, middleware.CheckRefresh())
-
-	// auth.Use(middleware.JWTMiddleware())
-	// auth.GET("/ping", controller.Ping)
+	auth.POST("/refresh", controller.RefreshToken)
 }
