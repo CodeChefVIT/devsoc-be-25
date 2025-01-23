@@ -13,5 +13,5 @@ func IdeaRoutes(incomingRoutes *echo.Echo) {
 
 	idea.POST("/create", controller.CreateIdea)
 	idea.PUT("/update/:id", controller.UpdateIdea)
-	idea.GET("", controller.GetIdea)
+	idea.GET("/", controller.GetIdea)
 }

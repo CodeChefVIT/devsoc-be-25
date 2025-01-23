@@ -565,25 +565,10 @@ func UpdatePassword(c echo.Context) error {
 }
 
 func RefreshToken(c echo.Context) error {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusUnauthorized, &models.Response{
-			Status:  "fail",
-			Message: "Refresh token not found",
-		})
-	}
+	refToken = c.Get("user").(*jwt.Token)
+	claims := refToken.Claims.(*utils.JWTClaims)
 
-	refreshClaims, err := utils.ValidateRefreshToken(refreshToken.Value)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusUnauthorized, &models.Response{
-			Status:  "fail",
-			Message: "Invalid refresh token",
-		})
-	}
-
-	token, err := utils.GenerateToken(&refreshClaims.UserID, false)
+	token, err := utils.GenerateToken(&claims.UserID, false)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
