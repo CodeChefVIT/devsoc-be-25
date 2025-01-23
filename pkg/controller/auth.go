@@ -197,6 +197,7 @@ func CompleteProfile(c echo.Context) error {
 
 	existingUser, err := utils.Queries.GetUserByPhoneNo(ctx, pgtype.Text{
 		String: req.PhoneNo,
+		Valid:  true,
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
@@ -205,7 +206,8 @@ func CompleteProfile(c echo.Context) error {
 			Message: "Database error",
 		})
 	}
-	if existingUser.ID != uuid.Nil || *existingUser.RegNo == req.RegNo {
+
+	if existingUser.ID != uuid.Nil && existingUser.RegNo != nil && *existingUser.RegNo == req.RegNo {
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
 			Message: "User with this phone number or registration number already exists",
@@ -249,6 +251,7 @@ func CompleteProfile(c echo.Context) error {
 		LastName:  req.LastName,
 		PhoneNo: pgtype.Text{
 			String: req.PhoneNo,
+			Valid:  true,
 		},
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
