@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
@@ -17,13 +16,13 @@ import (
 
 func Protected() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
-		SigningKey: []byte(os.Getenv("JWT_SECRET")),
+		SigningKey: []byte(utils.Config.JwtSecret),
 	})
 }
 
 func JWTMiddleware() echo.MiddlewareFunc {
 	config := echojwt.Config{
-		SigningKey:  []byte(os.Getenv("JWT_SECRET")),
+		SigningKey:  []byte(utils.Config.JwtSecret),
 		TokenLookup: "cookie:jwt",
 		SuccessHandler: func(c echo.Context) {
 			token := c.Get("user").(*jwt.Token)

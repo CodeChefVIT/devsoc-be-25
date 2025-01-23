@@ -61,7 +61,7 @@ func JoinTeam(c echo.Context) error {
 	}
 
 	user := c.Get("user").(db.User)
-	// fmt.Println(user)  -- For testing
+	fmt.Println(user)  
 
 	member, err := utils.Queries.GetUser(ctx, user.ID)
 	fmt.Println(member.TeamID)
@@ -73,6 +73,7 @@ func JoinTeam(c echo.Context) error {
 	}
 
 	team, err := utils.Queries.FindTeam(ctx, payload.Code)
+	fmt.Println(team)
 
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
@@ -346,7 +347,7 @@ func LeaveTeam(c echo.Context) error {
 		})
 	}
 
-	member, err := utils.Queries.GetUser(ctx, user.ID)
+	member, err := utils.Queries.GetUserByEmail(ctx, user.Email)
 
 	if member.TeamID.UUID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
@@ -436,7 +437,7 @@ func LeaveTeam(c echo.Context) error {
 		})
 	}
 
-	if err := utils.Queries.LeaveTeam(ctx, payload.UserID); err != nil {
+	if err := utils.Queries.LeaveTeam(ctx, user.ID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   err,
