@@ -30,6 +30,7 @@ type cfg struct {
 	RepoName         string      `env:"REPO_NAME,notEmpty"`
 	Recipients       string      `env:"RECIPIENETS"`
 	CookieSecure     bool        `env:"SECURE" envDefault:"false"`
+	GithubPAT        string      `env:"GITHUB_PAT"`
 }
 
 var Config cfg

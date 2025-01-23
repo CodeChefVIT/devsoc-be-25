@@ -1491,6 +1491,68 @@ paths:
                   value:
                     status: fail
                     message: Failed to generate refresh token
+  /auth/star:
+    get:
+      tags:
+        - Authentication
+      summary: Check if a GitHub user has starred a specific repository
+      description: Verifies whether a given GitHub user has starred a specific repository
+      responses:
+        200:
+          description: User has starred the repository
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: string
+                    example: "user has starred the repo"
+
+        417:
+          description: User has not starred the repository
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "fail"
+                  data:
+                    type: string
+                    example: "user has not starred. Please star the repository"
+
+        400:
+          description: Invalid GitHub link
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "fail"
+                  data:
+                    type: string
+                    example: "error invalid github link"
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "fail"
+                  data:
+                    type: string
+                    example: "error creating request"
   /info/me:
     get:
       tags:
