@@ -1,7 +1,7 @@
 package utils
 
 import (
-	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
+	"fmt"
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
@@ -34,14 +34,13 @@ type cfg struct {
 
 var Config cfg
 
-func LoadConfig() {
+func init() {
 	if err := godotenv.Load(); err != nil {
-		logger.Errorf("No .env file found")
+		fmt.Printf("No .env file found")
 	}
 
 	if err := env.Parse(&Config); err != nil {
-		logger.Errorf("%+v", err)
+		fmt.Printf("%+v", err)
+		panic(err);
 	}
-
-	logger.Infof("Configuration successfully loaded")
 }

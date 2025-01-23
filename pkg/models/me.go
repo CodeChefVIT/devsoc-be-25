@@ -32,7 +32,6 @@ type TeamData struct {
 }
 
 type ResponseData struct {
-	Message string   `json:"message"`
 	User    UserData `json:"user"`
 	Team    TeamData `json:"team"`
 }
