@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -38,7 +38,7 @@ func SignUp(c echo.Context) error {
 	}
 
 	existingUserByEmail, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
