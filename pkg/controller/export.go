@@ -17,16 +17,16 @@ func ExportUsers(c echo.Context) error {
 	users, err := utils.Queries.ExportAllUsers(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to fetch users"},
+			Status:  "fail",
+			Message: "Failed to fetch users",
 		})
 	}
 
 	file, err := os.Create("users.csv")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to create CSV file"},
+			Status:  "fail",
+			Message: "Failed to create CSV file",
 		})
 	}
 	defer file.Close()
@@ -36,8 +36,8 @@ func ExportUsers(c echo.Context) error {
 	headers := []string{"ID", "FirstName", "LastName", "Email", "PhoneNo", "Gender", "RegNo", "TeamID", "VitEmail", "Hostel", "RoomNo", "GitHub", "Role", "IsLeader", "IsVerified", "IsBanned", "IsProfComplete"}
 	if err := csvWriter.Write(headers); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to write CSV headers"},
+			Status:  "fail",
+			Message: "Failed to write CSV headers",
 		})
 	}
 
@@ -61,8 +61,8 @@ func ExportUsers(c echo.Context) error {
 
 		if err := csvWriter.Write(record); err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status: "fail",
-				Data:   map[string]string{"error": "Failed to write CSV record"},
+				Status:  "fail",
+				Message: "Failed to write CSV record",
 			})
 		}
 	}
@@ -71,8 +71,8 @@ func ExportUsers(c echo.Context) error {
 
 	if err := csvWriter.Error(); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to flush CSV writer"},
+			Status:  "fail",
+			Message: "Failed to flush CSV writer",
 		})
 	}
 
@@ -85,16 +85,16 @@ func ExportTeams(c echo.Context) error {
 	teams, err := utils.Queries.ExportAllTeams(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to fetch teams"},
+			Status:  "fail",
+			Message: "Failed to fetch teams",
 		})
 	}
 
 	file, err := os.Create("teams.csv")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to create CSV file"},
+			Status:  "fail",
+			Message: "Failed to create CSV file",
 		})
 	}
 	defer file.Close()
@@ -107,8 +107,8 @@ func ExportTeams(c echo.Context) error {
 		"ScoreId", "DesignScore", "ImplementationScore", "PresentationScore", "ScoreRound"}
 	if err := csvWriter.Write(headers); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to write CSV headers"},
+			Status:  "fail",
+			Message: "Failed to write CSV headers",
 		})
 	}
 
@@ -145,8 +145,8 @@ func ExportTeams(c echo.Context) error {
 
 				if err := csvWriter.Write(record); err != nil {
 					return c.JSON(http.StatusInternalServerError, &models.Response{
-						Status: "fail",
-						Data:   map[string]string{"error": "Failed to write CSV record"},
+						Status:  "fail",
+						Message: "Failed to write CSV record",
 					})
 				}
 			}
@@ -177,8 +177,8 @@ func ExportTeams(c echo.Context) error {
 
 			if err := csvWriter.Write(record); err != nil {
 				return c.JSON(http.StatusInternalServerError, &models.Response{
-					Status: "fail",
-					Data:   map[string]string{"error": "Failed to write CSV record"},
+					Status:  "fail",
+					Message: "Failed to write CSV record",
 				})
 			}
 		}
@@ -188,8 +188,8 @@ func ExportTeams(c echo.Context) error {
 
 	if err := csvWriter.Error(); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   map[string]string{"error": "Failed to flush CSV writer"},
+			Status:  "fail",
+			Message: "Failed to flush CSV writer",
 		})
 	}
 
