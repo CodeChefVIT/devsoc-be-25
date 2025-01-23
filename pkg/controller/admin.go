@@ -180,6 +180,7 @@ func UnbanUser(c echo.Context) error {
 func GetTeams(c echo.Context) error {
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
+	name := c.QueryParam("name")
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
@@ -203,8 +204,9 @@ func GetTeams(c echo.Context) error {
 		}
 	}
 	teams, err := utils.Queries.GetTeams(c.Request().Context(), db.GetTeamsParams{
-		Limit: int32(limit),
-		ID:    cursorUUID,
+		Limit:   int32(limit),
+		ID:      cursorUUID,
+		Column1: &name,
 	})
 
 	if err != nil {
