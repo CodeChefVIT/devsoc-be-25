@@ -12,7 +12,6 @@ func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin.Use(middleware.CheckAdmin)
 
 	admin.GET("/users", controller.GetAllUsers)
-	admin.GET("/vitians", controller.GetAllVitians)
 	admin.GET("/user/:email", controller.GetUsersByEmail)
 	admin.POST("/ban", controller.BanUser)
 	admin.POST("/unban", controller.UnbanUser)
@@ -24,10 +23,10 @@ func AdminRoutes(incomingRoutes *echo.Echo) {
 	admin.POST("/createpanel", controller.CreatePanel)
 
 	admin.GET("/members/:id", controller.GetAllTeamMembers)
-	admin.POST("/ban/team",controller.BanTeam)
-	admin.POST("/unban/team",controller.UnBanTeam)
+	admin.POST("/ban/team", controller.BanTeam)
+	admin.POST("/unban/team", controller.UnBanTeam)
 
 	admin.GET("/usercsv", controller.ExportUsers)
 	admin.GET("/teamcsv", controller.ExportTeams)
-	admin.PUT("/team/rounds",controller.UpdateTeamRounds)
+	admin.PUT("/team/rounds", controller.UpdateTeamRounds)
 }

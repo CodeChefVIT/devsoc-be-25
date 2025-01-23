@@ -48,11 +48,11 @@ func GenerateRandomString(length int) string {
 	return string(result)
 }
 
-func SendTeamEmail(ctx context.Context, emails[] string) error {
+func SendTeamEmail(ctx context.Context, emails []string) error {
 	html_body := "Your Leader has deleted the team.You are requested to join other team or create a new team to continue"
 
-	for i:= 0 ; i<len(emails); i++ {
-		err := SendEmail(emails[i], "Team Deleted", fmt.Sprintf(html_body))
+	for i := 0; i < len(emails); i++ {
+		err := SendEmail(emails[i], "Team Deleted", fmt.Sprint(html_body))
 		if err != nil {
 			return nil
 		}
