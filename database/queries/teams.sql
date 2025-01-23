@@ -2,10 +2,13 @@
 SELECT id FROM teams WHERE code = $1;
 
 -- name: GetTeams :many
-SELECT * FROM teams
-WHERE id > $1
-ORDER BY id ASC
-LIMIT $2;
+SELECT *
+FROM teams
+WHERE name ILIKE '%' || $1 || '%'
+  AND id > $2
+ORDER BY id
+LIMIT $3;
+
 
 -- name: GetTeamById :one
 SELECT * FROM teams WHERE id = $1;

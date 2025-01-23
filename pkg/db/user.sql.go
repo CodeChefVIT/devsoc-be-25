@@ -139,19 +139,24 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users
-WHERE id > $1
-ORDER BY id ASC
-LIMIT $2
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete
+FROM users
+WHERE (first_name LIKE '%' || $1 || '%'
+       OR reg_no LIKE '%' || $1 || '%'
+       OR email LIKE '%' || $1 || '%')
+  AND id > $2
+ORDER BY id
+LIMIT $3
 `
 
 type GetAllUsersParams struct {
-	ID    uuid.UUID
-	Limit int32
+	Column1 *string
+	ID      uuid.UUID
+	Limit   int32
 }
 
 func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getAllUsers, arg.ID, arg.Limit)
+	rows, err := q.db.Query(ctx, getAllUsers, arg.Column1, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

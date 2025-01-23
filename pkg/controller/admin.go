@@ -21,6 +21,7 @@ func GetAllUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
+	name := c.QueryParam("name")
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
@@ -45,31 +46,11 @@ func GetAllUsers(c echo.Context) error {
 	}
 
 	users, err := utils.Queries.GetAllUsers(ctx, db.GetAllUsersParams{
-		Limit: int32(limit),
-		ID:    cursorUUID,
+		Limit:   int32(limit),
+		ID:      cursorUUID,
+		Column1: &name,
 	})
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to fetch users",
-				"error":   err.Error(),
-			},
-		})
-	}
-
-	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: map[string]interface{}{
-			"message": "Users fetched successfully",
-			"users":   users,
-		},
-	})
-}
-
-func GetAllVitians(c echo.Context) error {
-	users, err := utils.Queries.GetAllVitians(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
@@ -140,27 +121,7 @@ func BanUser(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, &models.Response{
-				Status: "fail",
-				Data: map[string]string{
-					"message": "User does not exist",
-					"error":   err.Error(),
-				},
-			})
-		}
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
-		})
-	}
-
-	if err := utils.Queries.BanUser(context.Background(), user.Email); err != nil {
+	if err := utils.Queries.BanUser(c.Request().Context(), payload.Email); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
@@ -198,27 +159,7 @@ func UnbanUser(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, &models.Response{
-				Status: "fail",
-				Data: map[string]string{
-					"message": "User does not exist",
-					"error":   err.Error(),
-				},
-			})
-		}
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
-		})
-	}
-
-	if err := utils.Queries.UnbanUser(context.Background(), user.Email); err != nil {
+	if err := utils.Queries.UnbanUser(context.Background(), payload.Email); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status: "fail",
 			Data: map[string]string{
@@ -239,6 +180,7 @@ func UnbanUser(c echo.Context) error {
 func GetTeams(c echo.Context) error {
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
+	name := c.QueryParam("name")
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
@@ -262,8 +204,9 @@ func GetTeams(c echo.Context) error {
 		}
 	}
 	teams, err := utils.Queries.GetTeams(c.Request().Context(), db.GetTeamsParams{
-		Limit: int32(limit),
-		ID:    cursorUUID,
+		Limit:   int32(limit),
+		ID:      cursorUUID,
+		Column1: &name,
 	})
 
 	if err != nil {

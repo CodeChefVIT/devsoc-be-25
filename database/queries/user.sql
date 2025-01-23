@@ -1,8 +1,12 @@
 -- name: GetAllUsers :many
-SELECT * FROM users
-WHERE id > $1
-ORDER BY id ASC
-LIMIT $2;
+SELECT *
+FROM users
+WHERE (first_name LIKE '%' || $1 || '%'
+       OR reg_no LIKE '%' || $1 || '%'
+       OR email LIKE '%' || $1 || '%')
+  AND id > $2
+ORDER BY id
+LIMIT $3;
 
 -- name: GetUsers :many
 SELECT * FROM users;

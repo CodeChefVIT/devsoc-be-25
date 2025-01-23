@@ -22,6 +22,21 @@ paths:
       tags:
         - Admin
       summary: List all users
+      parameters:
+        - name: limit
+          in: query
+          description: The number of users to fetch. Required for the first request.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: cursor
+          in: query
+          description: The Base64-encoded cursor representing the last user ID from the previous page.
+          required: false
+          schema:
+            type: string
+            example: "550e8400-e29b-41d4-a716-446655440000"
       responses:
         "200":
           description: A list of users
@@ -31,57 +46,129 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
-    post:
-      tags:
-        - Admin
-      summary: Create a new user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
-      responses:
-        "201":
-          description: User created
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: Invalid UUID for cursor
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Failed to fetch users
+                      error:
+                        type: string
+                        example: Database query failed
+
   /admin/users/{email}:
     get:
-      tags:
-        - Admin
-      summary: Get a user by email
+      summary: Get user by email
+      description: Fetch user details by their email address.
       parameters:
         - name: email
           in: path
+          description: The email address of the user to fetch.
           required: true
           schema:
             type: string
+            format: email
+            example: user@example.com
       responses:
         "200":
-          description: A single user
+          description: Successfully fetched the user
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: User fetched successfully
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: "550e8400-e29b-41d4-a716-446655440000"
+                          email:
+                            type: string
+                            format: email
+                            example: user@example.com
+                          name:
+                            type: string
+                            example: John Doe
+                          created_at:
+                            type: string
+                            format: date-time
+                            example: "2025-01-01T12:00:00Z"
         "404":
           description: User not found
-  /admin/vitians:
-    get:
-      tags:
-        - Admin
-      summary: List all vitians
-      responses:
-        "200":
-          description: A list of vitians
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: User not found
+                      error:
+                        type: string
+                        example: sql no rows in result set
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Some error occurred
+                      error:
+                        type: string
+                        example: Database query failed
+
   /admin/ban:
     post:
       tags:

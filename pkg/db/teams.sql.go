@@ -29,7 +29,7 @@ func (q *Queries) AddUserToTeam(ctx context.Context, arg AddUserToTeamParams) er
 }
 
 const banTeam = `-- name: BanTeam :exec
-UPDATE teams
+UPDATE users
 SET is_banned = TRUE
 WHERE id = $1
 `
@@ -265,19 +265,22 @@ func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) 
 }
 
 const getTeams = `-- name: GetTeams :many
-SELECT id, name, number_of_people, round_qualified, code, is_banned FROM teams
-WHERE id > $1
-ORDER BY id ASC
-LIMIT $2
+SELECT id, name, number_of_people, round_qualified, code, is_banned
+FROM teams
+WHERE name ILIKE '%' || $1 || '%'
+  AND id > $2
+ORDER BY id
+LIMIT $3
 `
 
 type GetTeamsParams struct {
-	ID    uuid.UUID
-	Limit int32
+	Column1 *string
+	ID      uuid.UUID
+	Limit   int32
 }
 
 func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, error) {
-	rows, err := q.db.Query(ctx, getTeams, arg.ID, arg.Limit)
+	rows, err := q.db.Query(ctx, getTeams, arg.Column1, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
