@@ -71,8 +71,6 @@ func SignUp(c echo.Context) error {
 		})
 	}
 
-	empty_string := ""
-
 	err = utils.Queries.CreateUser(ctx, db.CreateUserParams{
 		ID:                userId,
 		TeamID:            uuid.NullUUID{Valid: false},
@@ -83,9 +81,6 @@ func SignUp(c echo.Context) error {
 		IsVerified:        false,
 		IsBanned:          false,
 		IsProfileComplete: false,
-		PhoneNo:           pgtype.Text{String: "", Valid: true},
-		RegNo:             &empty_string,
-		VitEmail:          &empty_string,
 	})
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
