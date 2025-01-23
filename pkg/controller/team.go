@@ -68,7 +68,9 @@ func JoinTeam(c echo.Context) error {
 	if member.TeamID.UUID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "user already in a team",
+			Data: map[string]string{
+				"message": "user already in a team",
+			},
 		})
 	}
 
@@ -84,7 +86,10 @@ func JoinTeam(c echo.Context) error {
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "failed to join team",
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -97,14 +102,19 @@ func JoinTeam(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "failed to get team member count",
+			Data: map[string]string{
+				"message": "Failed to get team members count",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if count >= 5 {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Cannot join Team. Team is already full",
+			Data: map[string]string{
+				"message": "Cannot join team already full",
+			},
 		})
 	}
 
@@ -114,20 +124,28 @@ func JoinTeam(c echo.Context) error {
 	}); err != nil {
 		return c.JSON(http.StatusBadGateway, models.Response{
 			Status: "fail",
-			Data:   "Cannot join Team",
+			Data: map[string]string{
+				"message": "Cannot join team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if err := utils.Queries.IncreaseCountTeam(ctx, nullableTeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Failed to add member to team",
+			Data: map[string]string{
+				"message": "Failed to leave team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
-		Data:   "Team joined successfully",
+		Data: map[string]string{
+			"message": "Team joined successfully",
+		},
 	})
 }
 
@@ -167,7 +185,9 @@ func KickMemeber(c echo.Context) error {
 	if leader.IsLeader != true {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Only leader can kick Members",
+			Data: map[string]string{
+				"message": "Only leaders can kick members",
+			},
 		})
 	}
 
@@ -175,7 +195,10 @@ func KickMemeber(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "User not found",
+			Data: map[string]string{
+				"message": "User not found",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -193,14 +216,19 @@ func KickMemeber(c echo.Context) error {
 	if count <= 0 || err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Cannot leave team. Team is already empty",
+			Data: map[string]string{
+				"message": "Cannot leave team, already empty",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if user.TeamID.UUID != member.TeamID.UUID {
 		return c.JSON(http.StatusBadGateway, models.Response{
 			Status: "fail",
-			Data:   "User is not a member of your team",
+			Data: map[string]string{
+				"message": "User not a memebr of your team",
+			},
 		})
 	}
 
@@ -210,20 +238,28 @@ func KickMemeber(c echo.Context) error {
 	}); err != nil {
 		return c.JSON(http.StatusBadGateway, models.Response{
 			Status: "fail",
-			Data:   "Failed to kick user",
+			Data: map[string]string{
+				"message": "Failed to leave team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if err := utils.Queries.DecreaseUserCountTeam(ctx, nullableTeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadGateway, models.Response{
 			Status: "fail",
-			Data:   "Failed to leave Team",
+			Data: map[string]string{
+				"message": "Failed to leave team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
-		Data:   "User kicked successfully",
+		Data: map[string]string{
+			"message": "User kicked successfully",
+		},
 	})
 }
 
@@ -262,7 +298,10 @@ func CreateTeam(c echo.Context) error {
 	if member.TeamID.UUID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "user already in a team",
+			Data: map[string]string{
+				"message": "User already in a team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -281,7 +320,10 @@ func CreateTeam(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "Failed to create Team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -300,13 +342,19 @@ func CreateTeam(c echo.Context) error {
 			if pgerr.Code == "23505" {
 				return c.JSON(http.StatusBadRequest, models.Response{
 					Status: "fail",
-					Data:   "Team name already exists",
+					Data: map[string]string{
+						"message": "Team already exists",
+						"error":   err.Error(),
+					},		
 				})
 			}
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -327,7 +375,10 @@ func LeaveTeam(c echo.Context) error {
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -343,7 +394,9 @@ func LeaveTeam(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "unauthorized",
+			Data: map[string]string{
+				"message": "unauthorized",
+			},
 		})
 	}
 
@@ -352,7 +405,10 @@ func LeaveTeam(c echo.Context) error {
 	if member.TeamID.UUID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "user not in a team",
+			Data: map[string]string{
+				"message": "User not in a team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -365,7 +421,10 @@ func LeaveTeam(c echo.Context) error {
 	if count <= 0 || err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Cannot leave Team. Team is already empty",
+			Data: map[string]string{
+				"message": "Cannot leave team, already empty",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -379,21 +438,30 @@ func LeaveTeam(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
 				Status: "fail",
-				Data:   "Failed to get email id's",
+				Data: map[string]string{
+					"message": "Failed to get Team id's",
+					"error":   err.Error(),
+				},	
 			})
 		}
 
 		if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
 				Status: "fail",
-				Data:   err,
+				Data: map[string]string{
+					"message": "some error occured",
+					"error":   err.Error(),
+				},	
 			})
 		}
 
 		if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
 				Status: "fail",
-				Data:   err,
+				Data: map[string]string{
+					"message": "Failed to delete team",
+					"error":   err.Error(),
+				},	
 			})
 		}
 
@@ -403,7 +471,10 @@ func LeaveTeam(c echo.Context) error {
 		}); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
 				Status: "fail",
-				Data:   err,
+				Data: map[string]string{
+					"message": "Failed to update leader",
+					"error":   err.Error(),
+				},	
 			})
 		}
 		user.TeamID = uuid.NullUUID{}
@@ -418,13 +489,19 @@ func LeaveTeam(c echo.Context) error {
 		if err := utils.SendTeamEmail(ctx, emailStrings); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
 				Status: "fail",
-				Data:   "Failed send emails",
+				Data: map[string]string{
+					"message": "Failed sending the email",
+					"error":   err.Error(),
+				},
 			})
 		}
 
-		return c.JSON(http.StatusBadRequest, models.Response{
+		return c.JSON(http.StatusOK, models.Response{
 			Status: "success",
-			Data:   "Team Left and Deleted successfully",
+			Data: map[string]string{
+				"message": "Team Left Successfully",
+			},
+
 		})
 	}
 
@@ -433,26 +510,37 @@ func LeaveTeam(c echo.Context) error {
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "Failed ot remove user",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if err := utils.Queries.LeaveTeam(ctx, user.ID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if err := utils.Queries.DecreaseUserCountTeam(ctx, nullableTeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Failed to leave team",
+			Data: map[string]string{
+				"message": "Failed to leave team",
+				"error":   err.Error(),
+			},
 		})
 	}
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
-		Data:   "Team Left Successfully",
+		Data: map[string]string{
+			"message": "Team left successfully",
+		},
 	})
 }
 
@@ -472,7 +560,9 @@ func DeleteTeam(c echo.Context) error {
 	if !user.IsLeader {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Only leader can delete the team",
+			Data: map[string]string{
+				"message": "Only leaders can delete team",
+			},
 		})
 	}
 
@@ -485,21 +575,30 @@ func DeleteTeam(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Failed to get email id's",
+			Data: map[string]string{
+				"message": "Failed to get email id's",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if err := utils.Queries.RemoveTeamIDFromUsers(ctx, nullableTeamID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "Cannot remove user form team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	if err := utils.Queries.DeleteTeam(ctx, user.TeamID.UUID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "Failed to delete team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
@@ -509,7 +608,10 @@ func DeleteTeam(c echo.Context) error {
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
 		})
 	}
 	user.TeamID = uuid.NullUUID{}
@@ -524,13 +626,18 @@ func DeleteTeam(c echo.Context) error {
 	if err := utils.SendTeamEmail(ctx, emailStrings); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Failed send emails",
+			Data: map[string]string{
+				"message": "Failed to send emails",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
-		Data:   "Team Deleted",
+		Data: map[string]string{
+			"message": "Team deleted successfully",
+		},
 	})
 }
 
@@ -558,14 +665,19 @@ func UpdateTeamName(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "unauthorized",
+			Data: map[string]string{
+				"message": "unauthorized",
+			},
+
 		})
 	}
 
 	if !user.IsLeader {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Only Leader can update me",
+			Data: map[string]string{
+				"message": "Only leaders can update team",
+			},
 		})
 	}
 
@@ -575,13 +687,18 @@ func UpdateTeamName(c echo.Context) error {
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   err,
+			Data: map[string]string{
+				"message": "some error occured",
+				"error":   err.Error(),
+			},
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
-		Data:   "Team name updated successfully",
+		Data: map[string]string{
+			"message": "Team updated successfully",
+		},
 	})
 }
 
@@ -604,7 +721,10 @@ func GetAllTeamUsers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
-			Data:   "Cannot get Members of the team",
+			Data: map[string]string{
+				"message": "Cannot get members of the team",
+				"error":   err.Error(),
+			},
 		})
 	}
 
