@@ -48,7 +48,6 @@ func SignUp(c echo.Context) error {
 	}
 
 	if existingUserByEmail.ID != uuid.Nil {
-		fmt.Println(err.Error());
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
