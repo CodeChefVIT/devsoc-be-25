@@ -24,7 +24,7 @@ func CheckAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusForbidden, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
-					"error": "Access denied. Not panel",
+					"error": "Access denied. Not admin",
 				},
 			})
 		}
@@ -49,7 +49,7 @@ func CheckPanel(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusForbidden, &models.Response{
 				Status: "fail",
 				Data: map[string]string{
-					"message": "Access denied",
+					"message": "Access denied. Not panel",
 				},
 			})
 		}

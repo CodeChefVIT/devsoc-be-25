@@ -13,6 +13,7 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.3.0
 	github.com/labstack/echo/v4 v4.13.2
 	github.com/redis/go-redis/v9 v9.7.0
+	github.com/robfig/cron v1.2.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.31.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df

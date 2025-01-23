@@ -528,6 +528,49 @@ func (q *Queries) GetUserByVitEmail(ctx context.Context, vitEmail *string) (User
 	return i, err
 }
 
+const getUsers = `-- name: GetUsers :many
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users
+`
+
+func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.TeamID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.PhoneNo,
+			&i.Gender,
+			&i.RegNo,
+			&i.VitEmail,
+			&i.HostelBlock,
+			&i.RoomNo,
+			&i.GithubProfile,
+			&i.Password,
+			&i.Role,
+			&i.IsLeader,
+			&i.IsVerified,
+			&i.IsBanned,
+			&i.IsProfileComplete,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const unbanUser = `-- name: UnbanUser :exec
 UPDATE users
 SET is_banned = FALSE

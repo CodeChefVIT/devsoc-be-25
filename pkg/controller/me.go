@@ -12,89 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type UserData struct {
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	Email         string `json:"email"`
-	RegNo         string `json:"reg_no"`
-	PhoneNo       string `json:"phone_no"`
-	Gender        string `json:"gender"`
-	VitEmail      string `json:"vit_email"`
-	HostelBlock   string `json:"hostel_block"`
-	RoomNo        int    `json:"room_no"`
-	GithubProfile string `json:"github_profile"`
-	IsLeader      bool   `json:"is_leader"`
-}
-
-type TeamMember struct {
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	Email         string `json:"email"`
-	PhoneNo       string `json:"phone_no"`
-	GithubProfile string `json:"github_profile"`
-	IsLeader      bool   `json:"is_leader"`
-}
-
-type TeamData struct {
-	Name           string       `json:"team_name"`
-	NumberOfPeople int          `json:"number_of_people"`
-	RoundQualified int          `json:"round_qualified"`
-	Code           string       `json:"code"`
-	Members        []TeamMember `json:"members"`
-}
-
-type ResponseData struct {
-	Message string   `json:"message"`
-	User    UserData `json:"user"`
-	Team    TeamData `json:"team"`
-}
-
-func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) ResponseData {
-	var response ResponseData
-
-	for _, entry := range data {
-		if entry.ID == userID {
-			response.User = UserData{
-				FirstName:     entry.FirstName,
-				LastName:      entry.LastName,
-				Email:         entry.Email,
-				RegNo:         *entry.RegNo,
-				PhoneNo:       entry.PhoneNo.String,
-				Gender:        entry.Gender,
-				VitEmail:      *entry.VitEmail,
-				HostelBlock:   entry.HostelBlock,
-				RoomNo:        int(entry.RoomNo),
-				GithubProfile: entry.GithubProfile,
-				IsLeader:      entry.IsLeader,
-			}
-
-			response.Team = TeamData{
-				Name:           entry.Name,
-				NumberOfPeople: int(entry.NumberOfPeople),
-				RoundQualified: int(entry.RoundQualified.Int32),
-				Code:           entry.Code,
-				Members:        []TeamMember{},
-			}
-			break
-		}
-	}
-
-	for _, entry := range data {
-		if entry.ID != userID {
-			member := TeamMember{
-				FirstName:     entry.FirstName,
-				LastName:      entry.LastName,
-				Email:         entry.Email,
-				PhoneNo:       entry.PhoneNo.String,
-				GithubProfile: entry.GithubProfile,
-			}
-			response.Team.Members = append(response.Team.Members, member)
-		}
-	}
-
-	return response
-}
-
 func GetDetails(c echo.Context) error {
 	ctx := c.Request().Context()
 	user, ok := c.Get("user").(db.User)
@@ -105,14 +22,31 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	if user.TeamID.Valid == false {
-		return c.JSON(http.StatusForbidden, &models.Response{
-			Status:  "fail",
-			Message: "User is not part of any team",
+	if !user.TeamID.Valid {
+		userData := models.ResponseData{
+			User: models.UserData{
+				FirstName:     user.FirstName,
+				LastName:      user.LastName,
+				Email:         user.Email,
+				RegNo:         getSafeString(user.RegNo),
+				PhoneNo:       user.PhoneNo.String,
+				Gender:        user.Gender,
+				VitEmail:      getSafeString(user.VitEmail),
+				HostelBlock:   user.HostelBlock,
+				RoomNo:        int(user.RoomNo),
+				GithubProfile: user.GithubProfile,
+				IsLeader:      user.IsLeader,
+			},
+			Team: models.TeamData{},
+		}
+		return c.JSON(http.StatusOK, &models.Response{
+			Status:  "success",
+			Message: "User details fetched successfully",
+			Data:    userData,
 		})
 	}
 
-	userData, err := utils.Queries.GetUserAndTeamDetails(ctx, user.TeamID.UUID)
+	teamData, err := utils.Queries.GetUserAndTeamDetails(ctx, user.TeamID.UUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -120,7 +54,7 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	marshallData := Marshall(userData, user.ID)
+	marshallData := Marshall(teamData, user.ID)
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "User details fetched successfully",
@@ -128,23 +62,65 @@ func GetDetails(c echo.Context) error {
 	})
 }
 
-type UpdateUserRequest struct {
-	FirstName     string `json:"first_name" validate:"required"`
-	LastName      string `json:"last_name" validate:"required"`
-	Email         string `json:"email" validate:"required,email"`
-	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
-	Gender        string `json:"gender" validate:"required,len=1"`
-	RegNo         string `json:"reg_no" validate:"required"`
-	VitEmail      string `json:"vit_email" validate:"required,email,endswith=@vitstudent.ac.in"`
-	HostelBlock   string `json:"hostel_block" validate:"required"`
-	RoomNumber    int    `json:"room_no" validate:"required"`
-	GithubProfile string `json:"github_profile" validate:"required,url"`
+func getSafeString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) models.ResponseData {
+	var response models.ResponseData
+
+	if len(data) == 0 {
+		return response
+	}
+
+	entry := data[0]
+	response.User = models.UserData{
+		FirstName:     entry.FirstName,
+		LastName:      entry.LastName,
+		Email:         entry.Email,
+		RegNo:         getSafeString(entry.RegNo),
+		PhoneNo:       entry.PhoneNo.String,
+		Gender:        entry.Gender,
+		VitEmail:      getSafeString(entry.VitEmail),
+		HostelBlock:   entry.HostelBlock,
+		RoomNo:        int(entry.RoomNo),
+		GithubProfile: entry.GithubProfile,
+		IsLeader:      entry.IsLeader,
+	}
+
+	if entry.Name != "" {
+		response.Team = models.TeamData{
+			Name:           entry.Name,
+			NumberOfPeople: int(entry.NumberOfPeople),
+			RoundQualified: int(entry.RoundQualified.Int32),
+			Code:           entry.Code,
+			Members:        []models.TeamMember{},
+		}
+
+		for _, member := range data {
+			if member.ID != userID {
+				response.Team.Members = append(response.Team.Members, models.TeamMember{
+					FirstName:     member.FirstName,
+					LastName:      member.LastName,
+					Email:         member.Email,
+					PhoneNo:       member.PhoneNo.String,
+					GithubProfile: member.GithubProfile,
+					IsLeader:      member.IsLeader,
+				})
+			}
+		}
+	}
+
+	return response
 }
 
 func UpdateUser(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	var req UpdateUserRequest
+	var req models.UpdateUserRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",

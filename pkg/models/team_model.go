@@ -35,7 +35,7 @@ type GetTeams struct {
 }
 
 type LeaveTeam struct {
-	UserID uuid.UUID `json:"id" validate:"required"`
+	Email string `json:"email" validate:"required"`
 }
 
 type DeleteTeam struct {

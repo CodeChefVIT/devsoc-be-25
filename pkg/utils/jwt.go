@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,7 +13,7 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-var secretKey = []byte(os.Getenv("JWT_SECRET"))
+var secretKey = []byte(Config.JwtSecret)
 
 func GenerateToken(userId *uuid.UUID, isRefresh bool) (string, error) {
 	if isRefresh {
