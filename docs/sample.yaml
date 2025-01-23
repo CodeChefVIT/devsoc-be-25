@@ -4,7 +4,7 @@ info:
   description: The API for the DevSoc 25 hackathon backend
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:8080
+  - url: https://salad.codechefvit.com
 
 tags:
   - name: Admin
