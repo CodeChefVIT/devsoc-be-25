@@ -29,7 +29,7 @@ func (q *Queries) AddUserToTeam(ctx context.Context, arg AddUserToTeamParams) er
 }
 
 const banTeam = `-- name: BanTeam :exec
-UPDATE teams
+UPDATE users
 SET is_banned = TRUE
 WHERE id = $1
 `

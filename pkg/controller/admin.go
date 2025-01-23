@@ -21,6 +21,7 @@ func GetAllUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
+	name := c.QueryParam("name")
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
@@ -45,8 +46,9 @@ func GetAllUsers(c echo.Context) error {
 	}
 
 	users, err := utils.Queries.GetAllUsers(ctx, db.GetAllUsersParams{
-		Limit: int32(limit),
-		ID:    cursorUUID,
+		Limit:   int32(limit),
+		ID:      cursorUUID,
+		Column1: &name,
 	})
 
 	if err != nil {
