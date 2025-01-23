@@ -4,6 +4,9 @@ WHERE id > $1
 ORDER BY id ASC
 LIMIT $2;
 
+-- name: GetUsers :many
+SELECT * FROM users;
+
 -- name: GetAllVitians :many
 SELECT * FROM users WHERE is_vitian = TRUE;
 

@@ -28,7 +28,8 @@ type cfg struct {
 	SendingEmail     string      `env:"SENDING_EMAIL,notEmpty"`
 	RepoOwner        string      `env:"REPO_OWNER,notEmpty"`
 	RepoName         string      `env:"REPO_NAME,notEmpty"`
-	CookieSecure 	 bool		 `env:"SECURE" envDefault:"false"`
+	Recipients       string      `env:"RECIPIENETS"`
+	CookieSecure     bool        `env:"SECURE" envDefault:"false"`
 }
 
 var Config cfg
