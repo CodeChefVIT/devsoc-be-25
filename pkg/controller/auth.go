@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 	"strings"
@@ -10,7 +9,6 @@ import (
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -572,8 +570,23 @@ func UpdatePassword(c echo.Context) error {
 }
 
 func RefreshToken(c echo.Context) error {
-	refToken := c.Get("user").(*jwt.Token)
-	claims := refToken.Claims.(*utils.JWTClaims)
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "fail",
+			Message: "Refresh token not found",
+		})
+	}
+
+	claims, err := utils.ValidateRefreshToken(refreshToken.Value)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "fail",
+			Message: "Invalid refresh token",
+		})
+	}
 
 	token, err := utils.GenerateToken(&claims.UserID, false)
 	if err != nil {

@@ -15,7 +15,7 @@ func AuthRoutes(incomingRoutes *echo.Echo) {
 	auth.POST("/login", controller.Login)
 	auth.POST("/update-password", controller.UpdatePassword)
 	auth.POST("/refresh", controller.RefreshToken)
-	auth.POST("/star", controller.CheckStarred, middleware.JWTMiddleware())
+	auth.GET("/star", controller.CheckStarred, middleware.JWTMiddleware())
 
 	// auth.Use(middleware.JWTMiddleware())
 	// auth.GET("/ping", controller.Ping)
