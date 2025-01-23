@@ -37,28 +37,22 @@ func CheckTeamBan(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok:= c.Get("user").(db.User)
 		if !ok {
-			return c.JSON(http.StatusBadRequest, &models.Response{
+			return c.JSON(http.StatusUnauthorized, &models.Response{
 				Status:"fail",
-				Data: map[string]string{
-					"message":"unauthorized",
-				},
+				Message:"unauthorized",
 			})
 		}
 		team, err := utils.Queries.GetTeamById(c.Request().Context(), user.TeamID.UUID)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.Response{
+			return c.JSON(http.StatusNotFound, models.Response{
 				Status:"fail",
-				Data: map[string]string{
-					"message":"team not found",
-				},
+				Message:"team not found",
 			})
 		}
 		if team.IsBanned {
-			return c.JSON(http.StatusUnauthorized, models.Response{
+			return c.JSON(http.StatusForbidden, models.Response{
 				Status:"fail",
-				Data: map[string]string{
-					"message":"Team is banned",
-				},
+				Message:"Team is banned",
 			})
 		}
 		return next(c)

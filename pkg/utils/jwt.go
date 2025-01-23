@@ -13,8 +13,6 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-var secretKey = []byte(Config.JwtSecret)
-
 func GenerateToken(userId *uuid.UUID, isRefresh bool) (string, error) {
 	if isRefresh {
 		claims := JWTClaims{
@@ -25,7 +23,7 @@ func GenerateToken(userId *uuid.UUID, isRefresh bool) (string, error) {
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		return token.SignedString(secretKey)
+		return token.SignedString([]byte(Config.JwtSecret))
 	}
 
 	claims := JWTClaims{
@@ -36,27 +34,7 @@ func GenerateToken(userId *uuid.UUID, isRefresh bool) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretKey)
-}
-
-func ValidateToken(tokenString string) (*JWTClaims, error) {
-	fmt.Println(tokenString)
-	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return secretKey, nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
-		return claims, nil
-	}
-
-	return nil, fmt.Errorf("invalid token")
+	return token.SignedString([]byte(Config.JwtSecret))
 }
 
 func ValidateRefreshToken(tokenString string) (*JWTClaims, error) {
@@ -64,7 +42,7 @@ func ValidateRefreshToken(tokenString string) (*JWTClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
-		return secretKey, nil
+		return []byte(Config.JwtSecret), nil
 	})
 
 	if err != nil {

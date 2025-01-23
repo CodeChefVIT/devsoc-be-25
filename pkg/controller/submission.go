@@ -20,7 +20,7 @@ func GetUserSubmission(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid user"},
+			Message: "Invalid user",
 		})
 	}
 
@@ -28,7 +28,7 @@ func GetUserSubmission(c echo.Context) error {
 	if !user.TeamID.Valid {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
+			Message: "Invalid team ID format",
 		})
 	}
 
@@ -37,13 +37,13 @@ func GetUserSubmission(c echo.Context) error {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status: "fail",
-				Data:   map[string]string{"error": "Submission not found"},
+				Message: "Submission not found",
 			})
 		}
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": err.Error()},
+			Message: err.Error(),
 		})
 	}
 
@@ -67,17 +67,14 @@ func CreateSubmission(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid user"},
+			Message: "Invalid user",
 		})
 	}
 
 	if !ok || !user.TeamID.Valid || !user.IsLeader {
 		return c.JSON(http.StatusForbidden, &models.Response{
 			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User does not belong to any team or is not team leader",
-			},
+			Message:   "User does not belong to any team or is not team leader",
 		})
 	}
 
@@ -85,7 +82,7 @@ func CreateSubmission(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
+			Message: "Invalid request body",
 		})
 	}
 
@@ -114,7 +111,7 @@ func CreateSubmission(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": err.Error()},
+			Message: "failed to create submission",
 		})
 	}
 
@@ -139,17 +136,14 @@ func UpdateSubmission(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid user"},
+			Message: "Invalid user",
 		})
 	}
 
 	if !user.TeamID.Valid || !user.IsLeader {
 		return c.JSON(http.StatusForbidden, &models.Response{
 			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User does not belong to any team or is not team leader",
-			},
+			Message: "User does not belong to any team or is not team leader",
 		})
 	}
 
@@ -157,7 +151,7 @@ func UpdateSubmission(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid request body"},
+			Message: "Invalid request body",
 		})
 	}
 
@@ -172,7 +166,7 @@ func UpdateSubmission(c echo.Context) error {
 	if !user.TeamID.Valid {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
+			Message:"Invalid team ID format",
 		})
 	}
 
@@ -190,7 +184,7 @@ func UpdateSubmission(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": err.Error()},
+			Message: "failed to update submission",
 		})
 	}
 
@@ -215,17 +209,14 @@ func DeleteSubmission(c echo.Context) error {
 	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid user"},
+			Message:   "Invalid user",
 		})
 	}
 
 	if !user.IsLeader {
 		return c.JSON(http.StatusForbidden, &models.Response{
 			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User is not team leader",
-			},
+			Message: "User is not team leader",
 		})
 	}
 
@@ -233,7 +224,7 @@ func DeleteSubmission(c echo.Context) error {
 	if !user.TeamID.Valid {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": "Invalid team ID format"},
+			Message: "Invalid team ID format",
 		})
 	}
 
@@ -242,12 +233,12 @@ func DeleteSubmission(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status: "fail",
-			Data:   map[string]string{"error": err.Error()},
+			Message: "failed to delete submission",
 		})
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
-		Data:   map[string]string{"message": "Submission deleted successfully"},
+		Message: "Submission deleted successfully",
 	})
 }

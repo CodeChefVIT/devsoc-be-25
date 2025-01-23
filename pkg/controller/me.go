@@ -37,8 +37,8 @@ func GetDetails(c echo.Context) error {
 				GithubProfile: user.GithubProfile,
 				IsLeader:      user.IsLeader,
 			},
-			Team: models.TeamData{},
 		}
+
 		return c.JSON(http.StatusOK, &models.Response{
 			Status:  "success",
 			Message: "User details fetched successfully",

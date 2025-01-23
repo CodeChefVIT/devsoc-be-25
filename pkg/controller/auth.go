@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -38,7 +38,7 @@ func SignUp(c echo.Context) error {
 	}
 
 	existingUserByEmail, err := utils.Queries.GetUserByEmail(ctx, req.Email)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -565,8 +565,23 @@ func UpdatePassword(c echo.Context) error {
 }
 
 func RefreshToken(c echo.Context) error {
-	refToken = c.Get("user").(*jwt.Token)
-	claims := refToken.Claims.(*utils.JWTClaims)
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "fail",
+			Message: "Refresh token not found",
+		})
+	}
+
+	claims, err := utils.ValidateRefreshToken(refreshToken.Value)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "fail",
+			Message: "Invalid refresh token",
+		})
+	}
 
 	token, err := utils.GenerateToken(&claims.UserID, false)
 	if err != nil {
@@ -577,7 +592,7 @@ func RefreshToken(c echo.Context) error {
 		})
 	}
 
-	newRefreshToken, err := utils.GenerateToken(&refreshClaims.UserID, true)
+	newRefreshToken, err := utils.GenerateToken(&claims.UserID, true)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{

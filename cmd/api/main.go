@@ -8,14 +8,16 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func main() {
-	logger.InitLogger()
-	utils.LoadConfig()
+func init() {
+    logger.InitLogger()
+	// utils.LoadConfig()
 	utils.InitCache()
 	utils.InitDB()
 	utils.InitValidator()
 	utils.InitMailer()
+}
 
+func main() {
 	e := echo.New()
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI:        true,
