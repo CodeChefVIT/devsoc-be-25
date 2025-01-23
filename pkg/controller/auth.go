@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"errors"
 	"net/http"
 	"strings"
@@ -45,8 +46,9 @@ func SignUp(c echo.Context) error {
 			Message: "Database error",
 		})
 	}
-	fmt.Println(existingUserByemail);
+
 	if existingUserByEmail.ID != uuid.Nil {
+		fmt.Println(err.Error());
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
