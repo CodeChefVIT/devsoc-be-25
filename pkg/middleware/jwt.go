@@ -59,3 +59,30 @@ func JWTMiddleware() echo.MiddlewareFunc {
 
 	return echojwt.WithConfig(config)
 }
+
+func CheckRefresh() echo.MiddlewareFunc {
+	config := echojwt.Config{
+		SigningKey:  []byte(utils.Config.JwtSecret),
+		TokenLookup: "cookie:refresh_token",
+		ErrorHandler: func(c echo.Context, err error) error {
+			fmt.Println(err)
+			if err == echojwt.ErrJWTMissing {
+				return c.JSON(http.StatusUnauthorized, &models.Response{
+					Status: "fail",
+					Data: map[string]string{
+						"error": "Missing or malformed JWT",
+					},
+				})
+			}
+
+			return c.JSON(http.StatusUnauthorized, &models.Response{
+				Status: "fail",
+				Data: map[string]string{
+					"error": "Invalid or expired token",
+				},
+			})
+		},
+	}
+
+	return echojwt.WithConfig(config)
+}
