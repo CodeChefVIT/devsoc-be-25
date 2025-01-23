@@ -46,6 +46,7 @@ func SignUp(c echo.Context) error {
 		})
 	}
 	if existingUserByEmail.ID != uuid.Nil {
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
 			Message: "User with this email already exists",
@@ -120,7 +121,7 @@ func SignUp(c echo.Context) error {
 		Value:    token,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -130,7 +131,7 @@ func SignUp(c echo.Context) error {
 		Value:    refreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -157,7 +158,8 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Invalid request body",
+			Message: "Validation errors",
+			Data:    utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -193,7 +195,7 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	existingUserByPhoneNo, err := utils.Queries.GetUserByPhoneNo(ctx, pgtype.Text{
+	existingUser, err := utils.Queries.GetUserByPhoneNo(ctx, pgtype.Text{
 		String: req.PhoneNo,
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -203,25 +205,10 @@ func CompleteProfile(c echo.Context) error {
 			Message: "Database error",
 		})
 	}
-	if existingUserByPhoneNo.ID != uuid.Nil {
+	if existingUser.ID != uuid.Nil || *existingUser.RegNo == req.RegNo {
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
-			Message: "User with this phone number already exists",
-		})
-	}
-
-	existingUserByRegNo, err := utils.Queries.GetUserByRegNo(ctx, &req.RegNo)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status:  "fail",
-			Message: "Database error",
-		})
-	}
-	if existingUserByRegNo.ID != uuid.Nil {
-		return c.JSON(http.StatusConflict, &models.Response{
-			Status:  "fail",
-			Message: "User with this registration number already exists",
+			Message: "User with this phone number or registration number already exists",
 		})
 	}
 
@@ -460,7 +447,7 @@ func Login(c echo.Context) error {
 		Value:    token,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -470,7 +457,7 @@ func Login(c echo.Context) error {
 		Value:    refreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -616,7 +603,7 @@ func RefreshToken(c echo.Context) error {
 		Value:    token,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -626,7 +613,7 @@ func RefreshToken(c echo.Context) error {
 		Value:    newRefreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
