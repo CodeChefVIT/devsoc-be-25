@@ -47,8 +47,8 @@ func SignUp(c echo.Context) error {
 			Message: "Database error",
 		})
 	}
+
 	if existingUserByEmail.ID != uuid.Nil {
-		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusConflict, &models.Response{
 			Status:  "fail",
 			Message: "User with this email already exists",
@@ -188,7 +188,7 @@ func CompleteProfile(c echo.Context) error {
 	}
 
 	existingUserByVitEmail, err := utils.Queries.GetUserByVitEmail(ctx, &req.VitEmail)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -206,7 +206,7 @@ func CompleteProfile(c echo.Context) error {
 		String: req.PhoneNo,
 		Valid:  true,
 	})
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -304,7 +304,7 @@ func VerifyOTP(c echo.Context) error {
 
 	user, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status:  "fail",
@@ -388,7 +388,7 @@ func Login(c echo.Context) error {
 
 	user, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status:  "fail",
@@ -504,7 +504,7 @@ func UpdatePassword(c echo.Context) error {
 
 	_, err := utils.Queries.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			logger.Errorf(logger.InternalError, err.Error())
 			return c.JSON(http.StatusNotFound, &models.Response{
 				Status:  "fail",
