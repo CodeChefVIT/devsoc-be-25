@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-    logger.InitLogger()
+	logger.InitLogger()
 	utils.InitCache()
 	utils.InitDB()
 	utils.InitValidator()
