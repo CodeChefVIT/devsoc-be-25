@@ -1,11 +1,13 @@
 package models
 
+import "github.com/jackc/pgx/v5/pgtype"
+
 type UserData struct {
 	FirstName     string `json:"first_name"`
 	LastName      string `json:"last_name"`
 	Email         string `json:"email"`
 	RegNo         string `json:"reg_no"`
-	PhoneNo       string `json:"phone_no"`
+	PhoneNo       pgtype.Text   `json:"phone_no"`
 	Gender        string `json:"gender"`
 	VitEmail      string `json:"vit_email"`
 	HostelBlock   string `json:"hostel_block"`
@@ -32,8 +34,8 @@ type TeamData struct {
 }
 
 type ResponseData struct {
-	User    UserData `json:"user"`
-	Team    TeamData `json:"team"`
+	User UserData `json:"user"`
+	Team TeamData `json:"team"`
 }
 
 type UpdateUserRequest struct {
