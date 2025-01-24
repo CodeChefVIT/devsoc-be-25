@@ -93,48 +93,11 @@ SET
     is_profile_complete = TRUE
 WHERE email = $1;
 
--- Goofy ahh query hai, but kaam karega if decoded
--- SELECT
---   (json_build_object(
---     'user', json_strip_nulls(json_build_object(
---       'first_name', u.first_name,
---       'last_name', u.last_name,
---       'email', u.email,
---       'phone_no', u.phone_no,
---       'gender', u.gender,
---       'reg_no', u.reg_no,
---       'vit_email', u.vit_email,
---       'hostel_block', u.hostel_block,
---       'room_no', u.room_no,
---       'github_profile', u.github_profile,
---       'role', u.role
---     )),
---     'team', json_build_object(
---       'team_name', t.name,
---       'number_of_people', t.number_of_people,
---       'round_qualified', t.round_qualified,
---       'code', t.code,
---       'members', (
---         SELECT json_agg(json_strip_nulls(json_build_object(
---           'first_name', members.first_name,
---           'last_name', members.last_name,
---           'email', members.email,
---           'phone_no', members.phone_no,
---           'github_profile', members.github_profile,
---           'role', members.role,
---           'is_leader', members.is_leader
---         )))
---         FROM users members
---         WHERE members.team_id = t.id AND members.id != u.id
---       )
---     )
---   ))::json AS result
--- FROM
---   users u
--- JOIN
---   teams t ON u.team_id = t.id
--- WHERE
---   u.id = $1;
+-- name: UpdateStarred :exec
+UPDATE users
+SET
+    is_starred = $1
+WHERE email = $2;
 
 -- name: GetUserAndTeamDetails :many
 SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code,

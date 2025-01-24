@@ -65,4 +65,5 @@ type User struct {
 	IsVerified        bool
 	IsBanned          bool
 	IsProfileComplete bool
+	IsStarred         bool
 }

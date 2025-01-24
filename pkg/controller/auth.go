@@ -452,6 +452,7 @@ func Login(c echo.Context) error {
 		Message: "User logged in successfully",
 		Data: map[string]interface{}{
 			"is_profile_complete": user.IsProfileComplete,
+			"is_starred":          user.IsStarred,
 		},
 	})
 }

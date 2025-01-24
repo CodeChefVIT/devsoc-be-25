@@ -56,15 +56,33 @@ SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, gith
 FROM users
 `
 
-func (q *Queries) ExportAllUsers(ctx context.Context) ([]User, error) {
+type ExportAllUsersRow struct {
+	ID                uuid.UUID
+	TeamID            uuid.NullUUID
+	FirstName         string
+	LastName          string
+	Email             string
+	PhoneNo           pgtype.Text
+	Gender            string
+	RegNo             *string
+	GithubProfile     string
+	Password          string
+	Role              string
+	IsLeader          bool
+	IsVerified        bool
+	IsBanned          bool
+	IsProfileComplete bool
+}
+
+func (q *Queries) ExportAllUsers(ctx context.Context) ([]ExportAllUsersRow, error) {
 	rows, err := q.db.Query(ctx, exportAllUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []ExportAllUsersRow
 	for rows.Next() {
-		var i User
+		var i ExportAllUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.TeamID,

@@ -126,6 +126,14 @@ func CheckStarred(c echo.Context) error {
 		})
 	}
 
+	err = utils.Queries.UpdateStarred(c.Request().Context(), db.UpdateStarredParams{IsStarred: true, Email: user.Email})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: "Failed to update the user",
+		})
+	}
+
 	return c.JSON(http.StatusOK, models.Response{
 		Status: "success",
 		Data:   "user has starred the repo",
