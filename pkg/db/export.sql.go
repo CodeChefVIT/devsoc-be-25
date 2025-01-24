@@ -52,7 +52,7 @@ func (q *Queries) ExportAllTeams(ctx context.Context) ([]ExportAllTeamsRow, erro
 }
 
 const exportAllUsers = `-- name: ExportAllUsers :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete
 FROM users
 `
 
@@ -74,9 +74,6 @@ func (q *Queries) ExportAllUsers(ctx context.Context) ([]User, error) {
 			&i.PhoneNo,
 			&i.Gender,
 			&i.RegNo,
-			&i.VitEmail,
-			&i.HostelBlock,
-			&i.RoomNo,
 			&i.GithubProfile,
 			&i.Password,
 			&i.Role,

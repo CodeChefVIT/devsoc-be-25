@@ -40,9 +40,6 @@ INSERT INTO users (
     phone_no,
     gender,
     reg_no,
-    vit_email,
-    hostel_block,
-    room_no,
     github_profile,
     password,
     role,
@@ -51,7 +48,7 @@ INSERT INTO users (
     is_banned,
     is_profile_complete
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
 );
 
 -- name: GetUserByRegNo :one
@@ -75,10 +72,7 @@ SET first_name = $2,
     phone_no = $5,
     gender = $6,
     reg_no = $7,
-    vit_email = $8,
-    hostel_block = $9,
-    room_no = $10,
-    github_profile = $11
+    github_profile = $8
 WHERE id = $1;
 
 -- name: GetUser :one
@@ -86,9 +80,6 @@ SELECT * FROM users WHERE id = $1;
 
 -- name: GetUserByPhoneNo :one
 SELECT * FROM users WHERE phone_no = $1;
-
--- name: GetUserByVitEmail :one
-SELECT * FROM users WHERE vit_email = $1;
 
 -- name: CompleteProfile :exec
 UPDATE users
@@ -98,10 +89,7 @@ SET
     phone_no = $4,
     gender = $5,
     reg_no = $6,
-    vit_email = $7,
-    hostel_block = $8,
-    room_no = $9,
-    github_profile = $10,
+    github_profile = $7,
     is_profile_complete = TRUE
 WHERE email = $1;
 
@@ -150,7 +138,7 @@ WHERE email = $1;
 
 -- name: GetUserAndTeamDetails :many
 SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code,
-	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile, users.is_leader
+	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.github_profile, users.is_leader
 	FROM teams
 	INNER JOIN users ON users.team_id = teams.id
 	LEFT JOIN submission ON submission.team_id = teams.id

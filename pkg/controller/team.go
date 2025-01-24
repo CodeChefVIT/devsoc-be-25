@@ -479,14 +479,7 @@ func LeaveTeam(c echo.Context) error {
 		}
 		user.TeamID = uuid.NullUUID{}
 
-		emailStrings := make([]string, 0, len(emails))
-		for _, email := range emails {
-			if email != nil {
-				emailStrings = append(emailStrings, *email)
-			}
-		}
-
-		if err := utils.SendTeamEmail(ctx, emailStrings); err != nil {
+		if err := utils.SendTeamEmail(ctx, emails); err != nil {
 			return c.JSON(http.StatusBadRequest, models.Response{
 				Status: "fail",
 				Data: map[string]string{
@@ -616,14 +609,7 @@ func DeleteTeam(c echo.Context) error {
 	}
 	user.TeamID = uuid.NullUUID{}
 
-	emailStrings := make([]string, 0, len(emails))
-	for _, email := range emails {
-		if email != nil {
-			emailStrings = append(emailStrings, *email)
-		}
-	}
-
-	if err := utils.SendTeamEmail(ctx, emailStrings); err != nil {
+	if err := utils.SendTeamEmail(ctx, emails); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data: map[string]string{

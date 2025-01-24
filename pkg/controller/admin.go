@@ -336,7 +336,6 @@ func CreatePanel(c echo.Context) error {
 		FirstName: panel.FirstName,
 		LastName:  panel.LastName,
 		Email:     panel.Email,
-		VitEmail:  &panel.VitEmail,
 		RegNo:     &panel.RegNo,
 		Password:  string(hashedPassword),
 		PhoneNo: pgtype.Text{
@@ -347,8 +346,6 @@ func CreatePanel(c echo.Context) error {
 		IsVerified:    true,
 		IsBanned:      false,
 		Gender:        panel.Gender,
-		HostelBlock:   panel.HostelBlock,
-		RoomNo:        int32(panel.RoomNumber),
 		GithubProfile: panel.GithubProfile,
 	}
 	panelDb.ID, _ = uuid.NewV7()

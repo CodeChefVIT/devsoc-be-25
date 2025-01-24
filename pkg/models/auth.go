@@ -11,9 +11,6 @@ type CompleteProfileRequest struct {
 	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
 	Gender        string `json:"gender" validate:"required,len=1"`
 	RegNo         string `json:"reg_no" validate:"required"`
-	VitEmail      string `json:"vit_email" validate:"required,email,endswith=@vitstudent.ac.in"`
-	HostelBlock   string `json:"hostel_block" validate:"required"`
-	RoomNumber    int    `json:"room_no" validate:"required"`
 	GithubProfile string `json:"github_profile" validate:"required,url"`
 }
 

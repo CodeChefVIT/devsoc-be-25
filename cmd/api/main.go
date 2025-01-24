@@ -10,7 +10,6 @@ import (
 
 func init() {
     logger.InitLogger()
-	// utils.LoadConfig()
 	utils.InitCache()
 	utils.InitDB()
 	utils.InitValidator()

@@ -31,10 +31,7 @@ SET
     phone_no = $4,
     gender = $5,
     reg_no = $6,
-    vit_email = $7,
-    hostel_block = $8,
-    room_no = $9,
-    github_profile = $10,
+    github_profile = $7,
     is_profile_complete = TRUE
 WHERE email = $1
 `
@@ -46,9 +43,6 @@ type CompleteProfileParams struct {
 	PhoneNo       pgtype.Text
 	Gender        string
 	RegNo         *string
-	VitEmail      *string
-	HostelBlock   string
-	RoomNo        int32
 	GithubProfile string
 }
 
@@ -60,9 +54,6 @@ func (q *Queries) CompleteProfile(ctx context.Context, arg CompleteProfileParams
 		arg.PhoneNo,
 		arg.Gender,
 		arg.RegNo,
-		arg.VitEmail,
-		arg.HostelBlock,
-		arg.RoomNo,
 		arg.GithubProfile,
 	)
 	return err
@@ -78,9 +69,6 @@ INSERT INTO users (
     phone_no,
     gender,
     reg_no,
-    vit_email,
-    hostel_block,
-    room_no,
     github_profile,
     password,
     role,
@@ -89,7 +77,7 @@ INSERT INTO users (
     is_banned,
     is_profile_complete
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
 )
 `
 
@@ -102,9 +90,6 @@ type CreateUserParams struct {
 	PhoneNo           pgtype.Text
 	Gender            string
 	RegNo             *string
-	VitEmail          *string
-	HostelBlock       string
-	RoomNo            int32
 	GithubProfile     string
 	Password          string
 	Role              string
@@ -124,9 +109,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.PhoneNo,
 		arg.Gender,
 		arg.RegNo,
-		arg.VitEmail,
-		arg.HostelBlock,
-		arg.RoomNo,
 		arg.GithubProfile,
 		arg.Password,
 		arg.Role,
@@ -139,7 +121,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete
 FROM users
 WHERE (first_name LIKE '%' || $1 || '%'
        OR reg_no LIKE '%' || $1 || '%'
@@ -173,9 +155,6 @@ func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]Use
 			&i.PhoneNo,
 			&i.Gender,
 			&i.RegNo,
-			&i.VitEmail,
-			&i.HostelBlock,
-			&i.RoomNo,
 			&i.GithubProfile,
 			&i.Password,
 			&i.Role,
@@ -195,7 +174,7 @@ func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]Use
 }
 
 const getAllVitians = `-- name: GetAllVitians :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE is_vitian = TRUE
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE is_vitian = TRUE
 `
 
 func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
@@ -216,9 +195,6 @@ func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
 			&i.PhoneNo,
 			&i.Gender,
 			&i.RegNo,
-			&i.VitEmail,
-			&i.HostelBlock,
-			&i.RoomNo,
 			&i.GithubProfile,
 			&i.Password,
 			&i.Role,
@@ -238,7 +214,7 @@ func (q *Queries) GetAllVitians(ctx context.Context) ([]User, error) {
 }
 
 const getTeamLeader = `-- name: GetTeamLeader :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE team_id = $1 AND is_leader = TRUE
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE team_id = $1 AND is_leader = TRUE
 `
 
 func (q *Queries) GetTeamLeader(ctx context.Context, teamID uuid.NullUUID) (User, error) {
@@ -253,9 +229,6 @@ func (q *Queries) GetTeamLeader(ctx context.Context, teamID uuid.NullUUID) (User
 		&i.PhoneNo,
 		&i.Gender,
 		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
 		&i.GithubProfile,
 		&i.Password,
 		&i.Role,
@@ -268,7 +241,7 @@ func (q *Queries) GetTeamLeader(ctx context.Context, teamID uuid.NullUUID) (User
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE id = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -283,9 +256,6 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.PhoneNo,
 		&i.Gender,
 		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
 		&i.GithubProfile,
 		&i.Password,
 		&i.Role,
@@ -300,7 +270,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 const getUserAndTeamDetails = `-- name: GetUserAndTeamDetails :many
 
 SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code,
-	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.vit_email, users.hostel_block, users.room_no, users.github_profile, users.is_leader
+	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.github_profile, users.is_leader
 	FROM teams
 	INNER JOIN users ON users.team_id = teams.id
 	LEFT JOIN submission ON submission.team_id = teams.id
@@ -320,9 +290,6 @@ type GetUserAndTeamDetailsRow struct {
 	RegNo          *string
 	PhoneNo        pgtype.Text
 	Gender         string
-	VitEmail       *string
-	HostelBlock    string
-	RoomNo         int32
 	GithubProfile  string
 	IsLeader       bool
 }
@@ -397,9 +364,6 @@ func (q *Queries) GetUserAndTeamDetails(ctx context.Context, id uuid.UUID) ([]Ge
 			&i.RegNo,
 			&i.PhoneNo,
 			&i.Gender,
-			&i.VitEmail,
-			&i.HostelBlock,
-			&i.RoomNo,
 			&i.GithubProfile,
 			&i.IsLeader,
 		); err != nil {
@@ -414,7 +378,7 @@ func (q *Queries) GetUserAndTeamDetails(ctx context.Context, id uuid.UUID) ([]Ge
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE email = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -429,9 +393,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.PhoneNo,
 		&i.Gender,
 		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
 		&i.GithubProfile,
 		&i.Password,
 		&i.Role,
@@ -444,7 +405,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByPhoneNo = `-- name: GetUserByPhoneNo :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE phone_no = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE phone_no = $1
 `
 
 func (q *Queries) GetUserByPhoneNo(ctx context.Context, phoneNo pgtype.Text) (User, error) {
@@ -459,9 +420,6 @@ func (q *Queries) GetUserByPhoneNo(ctx context.Context, phoneNo pgtype.Text) (Us
 		&i.PhoneNo,
 		&i.Gender,
 		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
 		&i.GithubProfile,
 		&i.Password,
 		&i.Role,
@@ -474,7 +432,7 @@ func (q *Queries) GetUserByPhoneNo(ctx context.Context, phoneNo pgtype.Text) (Us
 }
 
 const getUserByRegNo = `-- name: GetUserByRegNo :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE reg_no = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE reg_no = $1
 `
 
 func (q *Queries) GetUserByRegNo(ctx context.Context, regNo *string) (User, error) {
@@ -489,39 +447,6 @@ func (q *Queries) GetUserByRegNo(ctx context.Context, regNo *string) (User, erro
 		&i.PhoneNo,
 		&i.Gender,
 		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
-		&i.GithubProfile,
-		&i.Password,
-		&i.Role,
-		&i.IsLeader,
-		&i.IsVerified,
-		&i.IsBanned,
-		&i.IsProfileComplete,
-	)
-	return i, err
-}
-
-const getUserByVitEmail = `-- name: GetUserByVitEmail :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE vit_email = $1
-`
-
-func (q *Queries) GetUserByVitEmail(ctx context.Context, vitEmail *string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByVitEmail, vitEmail)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.TeamID,
-		&i.FirstName,
-		&i.LastName,
-		&i.Email,
-		&i.PhoneNo,
-		&i.Gender,
-		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
 		&i.GithubProfile,
 		&i.Password,
 		&i.Role,
@@ -534,7 +459,7 @@ func (q *Queries) GetUserByVitEmail(ctx context.Context, vitEmail *string) (User
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
@@ -555,9 +480,6 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 			&i.PhoneNo,
 			&i.Gender,
 			&i.RegNo,
-			&i.VitEmail,
-			&i.HostelBlock,
-			&i.RoomNo,
 			&i.GithubProfile,
 			&i.Password,
 			&i.Role,
@@ -611,10 +533,7 @@ SET first_name = $2,
     phone_no = $5,
     gender = $6,
     reg_no = $7,
-    vit_email = $8,
-    hostel_block = $9,
-    room_no = $10,
-    github_profile = $11
+    github_profile = $8
 WHERE id = $1
 `
 
@@ -626,9 +545,6 @@ type UpdateUserParams struct {
 	PhoneNo       pgtype.Text
 	Gender        string
 	RegNo         *string
-	VitEmail      *string
-	HostelBlock   string
-	RoomNo        int32
 	GithubProfile string
 }
 
@@ -641,9 +557,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.PhoneNo,
 		arg.Gender,
 		arg.RegNo,
-		arg.VitEmail,
-		arg.HostelBlock,
-		arg.RoomNo,
 		arg.GithubProfile,
 	)
 	return err

@@ -31,9 +31,6 @@ func GetDetails(c echo.Context) error {
 				RegNo:         getSafeString(user.RegNo),
 				PhoneNo:       user.PhoneNo,
 				Gender:        user.Gender,
-				VitEmail:      getSafeString(user.VitEmail),
-				HostelBlock:   user.HostelBlock,
-				RoomNo:        int(user.RoomNo),
 				GithubProfile: user.GithubProfile,
 				IsLeader:      user.IsLeader,
 			},
@@ -84,9 +81,6 @@ func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) models.Respo
 		RegNo:         getSafeString(entry.RegNo),
 		PhoneNo:       entry.PhoneNo,
 		Gender:        entry.Gender,
-		VitEmail:      getSafeString(entry.VitEmail),
-		HostelBlock:   entry.HostelBlock,
-		RoomNo:        int(entry.RoomNo),
 		GithubProfile: entry.GithubProfile,
 		IsLeader:      entry.IsLeader,
 	}
@@ -171,9 +165,6 @@ func UpdateUser(c echo.Context) error {
 		},
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
-		VitEmail:      &req.VitEmail,
-		HostelBlock:   req.HostelBlock,
-		RoomNo:        int32(req.RoomNumber),
 		GithubProfile: req.GithubProfile,
 	})
 	if err != nil {
@@ -190,9 +181,6 @@ func UpdateUser(c echo.Context) error {
 		"phone_no":       req.PhoneNo,
 		"gender":         req.Gender,
 		"reg_no":         req.RegNo,
-		"vit_email":      req.VitEmail,
-		"hostel_block":   req.HostelBlock,
-		"room_no":        int32(req.RoomNumber),
 		"github_profile": req.GithubProfile,
 	}
 

@@ -58,9 +58,6 @@ type User struct {
 	PhoneNo           pgtype.Text
 	Gender            string
 	RegNo             *string
-	VitEmail          *string
-	HostelBlock       string
-	RoomNo            int32
 	GithubProfile     string
 	Password          string
 	Role              string

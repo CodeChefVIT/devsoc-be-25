@@ -166,7 +166,7 @@ func (q *Queries) GetTeamIDByCode(ctx context.Context, code string) (uuid.UUID, 
 }
 
 const getTeamMembers = `-- name: GetTeamMembers :many
-SELECT first_name , last_name , github_profile, vit_email, reg_no, phone_no
+SELECT first_name , last_name , github_profile, reg_no, phone_no
 FROM users
 Where team_id = $1
 `
@@ -175,7 +175,6 @@ type GetTeamMembersRow struct {
 	FirstName     string
 	LastName      string
 	GithubProfile string
-	VitEmail      *string
 	RegNo         *string
 	PhoneNo       pgtype.Text
 }
@@ -193,7 +192,6 @@ func (q *Queries) GetTeamMembers(ctx context.Context, teamID uuid.NullUUID) ([]G
 			&i.FirstName,
 			&i.LastName,
 			&i.GithubProfile,
-			&i.VitEmail,
 			&i.RegNo,
 			&i.PhoneNo,
 		); err != nil {
@@ -239,24 +237,24 @@ func (q *Queries) GetTeamUsers(ctx context.Context, teamID uuid.NullUUID) ([]Get
 }
 
 const getTeamUsersEmails = `-- name: GetTeamUsersEmails :many
-SELECT vit_email
-From users
-where team_id = $1
+SELECT email
+FROM users
+WHERE team_id = $1
 `
 
-func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) ([]*string, error) {
+func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) ([]string, error) {
 	rows, err := q.db.Query(ctx, getTeamUsersEmails, teamID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*string
+	var items []string
 	for rows.Next() {
-		var vit_email *string
-		if err := rows.Scan(&vit_email); err != nil {
+		var email string
+		if err := rows.Scan(&email); err != nil {
 			return nil, err
 		}
-		items = append(items, vit_email)
+		items = append(items, email)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -307,7 +305,7 @@ func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, vit_email, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE id = $1
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -322,9 +320,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.PhoneNo,
 		&i.Gender,
 		&i.RegNo,
-		&i.VitEmail,
-		&i.HostelBlock,
-		&i.RoomNo,
 		&i.GithubProfile,
 		&i.Password,
 		&i.Role,

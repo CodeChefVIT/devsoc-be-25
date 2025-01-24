@@ -41,7 +41,7 @@ func Cron() {
 		defer file.Close()
 
 		csvWriter := csv.NewWriter(file)
-		headers := []string{"ID", "FirstName", "LastName", "Email", "PhoneNo", "Gender", "RegNo", "TeamID", "VitEmail", "Hostel", "RoomNo", "GitHub", "Role", "IsLeader", "IsVerified", "IsBanned", "IsProfComplete"}
+		headers := []string{"ID", "FirstName", "LastName", "Email", "PhoneNo", "Gender", "RegNo", "TeamID", "GitHub", "Role", "IsLeader", "IsVerified", "IsBanned", "IsProfComplete"}
 
 		if err := csvWriter.Write(headers); err != nil {
 			logger.Errorf("failed to write headers", err)
@@ -58,9 +58,6 @@ func Cron() {
 				user.Gender,
 				*user.RegNo,
 				user.TeamID.UUID.String(),
-				*user.VitEmail,
-				user.HostelBlock,
-				strconv.Itoa(int(user.RoomNo)),
 				user.GithubProfile,
 				user.Role,
 				strconv.FormatBool(user.IsLeader),

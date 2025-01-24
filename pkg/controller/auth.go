@@ -180,21 +180,6 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	existingUserByVitEmail, err := utils.Queries.GetUserByVitEmail(ctx, &req.VitEmail)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status:  "fail",
-			Message: "Database error",
-		})
-	}
-	if existingUserByVitEmail.ID != uuid.Nil {
-		return c.JSON(http.StatusConflict, &models.Response{
-			Status:  "fail",
-			Message: "User with this VIT email already exists",
-		})
-	}
-
 	existingUser, err := utils.Queries.GetUserByPhoneNo(ctx, pgtype.Text{
 		String: req.PhoneNo,
 		Valid:  true,
@@ -255,9 +240,6 @@ func CompleteProfile(c echo.Context) error {
 		},
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
-		VitEmail:      &req.VitEmail,
-		HostelBlock:   req.HostelBlock,
-		RoomNo:        int32(req.RoomNumber),
 		GithubProfile: req.GithubProfile,
 	})
 	if err != nil {

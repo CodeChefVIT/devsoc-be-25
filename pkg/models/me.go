@@ -9,9 +9,6 @@ type UserData struct {
 	RegNo         string `json:"reg_no"`
 	PhoneNo       pgtype.Text   `json:"phone_no"`
 	Gender        string `json:"gender"`
-	VitEmail      string `json:"vit_email"`
-	HostelBlock   string `json:"hostel_block"`
-	RoomNo        int    `json:"room_no"`
 	GithubProfile string `json:"github_profile"`
 	IsLeader      bool   `json:"is_leader"`
 }
