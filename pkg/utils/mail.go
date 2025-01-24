@@ -26,6 +26,9 @@ func InitMailer() {
 func SendEmail(to, subject, body string, attachments ...string) error {
 
 	dialer := <-mailers
+	defer func() {
+		mailers <- dialer
+	}()
 	m := gomail.NewMessage()
 	m.SetHeader("From", Config.SendingEmail)
 	m.SetHeader("To", to)
