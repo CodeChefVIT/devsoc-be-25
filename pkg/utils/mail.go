@@ -45,6 +45,6 @@ func SendEmail(to, subject, body string, attachments ...string) error {
 		logger.Errorf("Unable to send mail: %v", err)
 		return err
 	}
-	logger.Infof("Sent mail using: " + dialer.Host)
+	logger.Infof("Sent mail using: " + dialer.Username)
 	return nil
 }
