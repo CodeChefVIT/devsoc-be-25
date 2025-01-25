@@ -158,9 +158,9 @@ func UpdateUser(c echo.Context) error {
 		ID:        user.ID,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		Email:     req.Email,
 		PhoneNo: pgtype.Text{
 			String: req.PhoneNo,
+			Valid:  true,
 		},
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
@@ -178,7 +178,6 @@ func UpdateUser(c echo.Context) error {
 	updatedUser := map[string]interface{}{
 		"first_name":     req.FirstName,
 		"last_name":      req.LastName,
-		"email":          req.Email,
 		"phone_no":       req.PhoneNo,
 		"gender":         req.Gender,
 		"reg_no":         req.RegNo,

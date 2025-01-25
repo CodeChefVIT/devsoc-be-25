@@ -466,13 +466,12 @@ const updateUser = `-- name: UpdateUser :exec
 UPDATE users
 SET first_name = $2,
     last_name = $3,
-    email = $4,
-    phone_no = $5,
-    gender = $6,
-    reg_no = $7,
-    github_profile = $8,
-    hostel_block = $9,
-    room_no = $10
+    phone_no = $4,
+    gender = $5,
+    reg_no = $6,
+    github_profile = $7,
+    hostel_block = $8,
+    room_no = $9
 WHERE id = $1
 `
 
@@ -480,7 +479,6 @@ type UpdateUserParams struct {
 	ID            uuid.UUID
 	FirstName     string
 	LastName      string
-	Email         string
 	PhoneNo       pgtype.Text
 	Gender        string
 	RegNo         *string
@@ -494,7 +492,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
-		arg.Email,
 		arg.PhoneNo,
 		arg.Gender,
 		arg.RegNo,

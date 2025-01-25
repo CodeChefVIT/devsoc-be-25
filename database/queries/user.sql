@@ -68,13 +68,12 @@ WHERE email = $1;
 UPDATE users
 SET first_name = $2,
     last_name = $3,
-    email = $4,
-    phone_no = $5,
-    gender = $6,
-    reg_no = $7,
-    github_profile = $8,
-    hostel_block = $9,
-    room_no = $10
+    phone_no = $4,
+    gender = $5,
+    reg_no = $6,
+    github_profile = $7,
+    hostel_block = $8,
+    room_no = $9
 WHERE id = $1;
 
 -- name: GetUser :one
