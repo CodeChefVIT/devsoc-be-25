@@ -78,6 +78,19 @@ func CheckUserVerifiation(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusExpectationFailed, &models.Response{
 				Status:  "success",
 				Message: "user not verified",
+				Data: map[string]any{
+					"is_verified": false,
+				},
+			})
+		}
+
+		if !user.IsProfileComplete {
+			return c.JSON(http.StatusExpectationFailed, &models.Response{
+				Status:  "success",
+				Message: "user is profile not complete",
+				Data: map[string]any{
+					"is_profile_complete": false,
+				},
 			})
 		}
 

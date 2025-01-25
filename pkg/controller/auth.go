@@ -394,7 +394,7 @@ func Login(c echo.Context) error {
 		err := utils.GenerateOTP(ctx, req.Email)
 		if err != nil {
 			logger.Errorf(logger.InternalError, err.Error())
-			
+
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
 				Message: "Failed to generate OTP",
