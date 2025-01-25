@@ -122,6 +122,7 @@ func SignUp(c echo.Context) error {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
+		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -132,6 +133,7 @@ func SignUp(c echo.Context) error {
 		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
+		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -433,6 +435,7 @@ func Login(c echo.Context) error {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
+		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -443,6 +446,7 @@ func Login(c echo.Context) error {
 		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
+		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -590,6 +594,7 @@ func RefreshToken(c echo.Context) error {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
+		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -600,6 +605,7 @@ func RefreshToken(c echo.Context) error {
 		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
+		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -607,5 +613,58 @@ func RefreshToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "Token refreshed successfully",
+	})
+}
+
+func Logout(c echo.Context) error {
+	access, err := c.Cookie("jwt")
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			access = &http.Cookie{
+				Name:     "jwt",
+				MaxAge:   -1,
+				Value:    "",
+				Path:     "/",
+				SameSite: http.SameSiteNoneMode,
+				Secure:   true,
+				HttpOnly: true,
+			}
+		}
+	}
+
+	refresh, err := c.Cookie("refresh_token")
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			refresh = &http.Cookie{
+				Name:     "refresh_token",
+				MaxAge:   -1,
+				Value:    "",
+				Path:     "/",
+				SameSite: http.SameSiteNoneMode,
+				Secure:   true,
+				HttpOnly: true,
+			}
+		}
+	}
+
+	access.MaxAge = -1
+	access.Value = ""
+	access.Path = "/"
+	access.SameSite = http.SameSiteNoneMode
+	access.Secure = true
+	access.HttpOnly = true
+	c.SetCookie(access)
+
+	refresh.MaxAge = -1
+	refresh.Value = ""
+	refresh.Path = "/"
+	refresh.SameSite = http.SameSiteNoneMode
+	refresh.Secure = true
+	refresh.HttpOnly = true
+	c.SetCookie(refresh)
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "Logged out successfully",
 	})
 }
