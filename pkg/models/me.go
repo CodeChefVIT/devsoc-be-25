@@ -11,6 +11,8 @@ type UserData struct {
 	Gender        string      `json:"gender"`
 	GithubProfile string      `json:"github_profile"`
 	IsLeader      bool        `json:"is_leader"`
+	HostelBlock   string      `json:"hostel_block"`
+	RoomNo        string      `json:"room_no"`
 }
 
 type TeamMember struct {
@@ -34,14 +36,13 @@ type ResponseData struct {
 }
 
 type UpdateUserRequest struct {
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
-	Email     string `json:"email" validate:"required,email"`
-	PhoneNo   string `json:"phone_no" validate:"required,len=10"`
-	Gender    string `json:"gender" validate:"required,len=1"`
-	RegNo     string `json:"reg_no" validate:"required"`
-	//VitEmail      string `json:"vit_email" validate:"required,email,endswith=@vitstudent.ac.in"`
-	//HostelBlock   string `json:"hostel_block" validate:"required"`
-	//RoomNumber    int    `json:"room_no" validate:"required"`
+	FirstName     string `json:"first_name" validate:"required"`
+	LastName      string `json:"last_name" validate:"required"`
+	Email         string `json:"email" validate:"required,email"`
+	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
+	Gender        string `json:"gender" validate:"required,len=1"`
+	RegNo         string `json:"reg_no" validate:"required"`
+	HostelBlock   string `json:"hostel_block" validate:"required"`
+	RoomNumber    string `json:"room_no" validate:"required"`
 	GithubProfile string `json:"github_profile" validate:"required,url"`
 }

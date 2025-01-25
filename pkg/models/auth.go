@@ -12,6 +12,8 @@ type CompleteProfileRequest struct {
 	Gender        string `json:"gender" validate:"required,len=1"`
 	RegNo         string `json:"reg_no" validate:"required"`
 	GithubProfile string `json:"github_profile" validate:"required,url"`
+	HostelBlock   string `json:"hostel_block" validate:"required"`
+	RoomNo        string `json:"room_no" validate:"required"`
 }
 
 type VerifyOTPRequest struct {

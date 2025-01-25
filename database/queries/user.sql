@@ -72,7 +72,9 @@ SET first_name = $2,
     phone_no = $5,
     gender = $6,
     reg_no = $7,
-    github_profile = $8
+    github_profile = $8,
+    hostel_block = $9,
+    room_no = $10
 WHERE id = $1;
 
 -- name: GetUser :one
@@ -90,6 +92,8 @@ SET
     gender = $5,
     reg_no = $6,
     github_profile = $7,
+    hostel_block = $8,
+    room_no = $9,
     is_profile_complete = TRUE
 WHERE email = $1;
 
@@ -98,12 +102,3 @@ UPDATE users
 SET
     is_starred = $1
 WHERE email = $2;
-
--- name: GetUserAndTeamDetails :many
-SELECT teams.name, teams.number_of_people, teams.round_qualified, teams.code,
-	users.id, users.first_name, users.last_name, users.email, users.reg_no, users.phone_no, users.gender, users.github_profile, users.is_leader
-	FROM teams
-	INNER JOIN users ON users.team_id = teams.id
-	LEFT JOIN submission ON submission.team_id = teams.id
-	LEFT JOIN ideas ON ideas.team_id = teams.id
-WHERE teams.id = $1;

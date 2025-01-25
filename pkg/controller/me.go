@@ -21,6 +21,17 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
+	hostelBlock := ""
+	roomNo := ""
+
+	if user.HostelBlock != nil {
+		hostelBlock = *user.HostelBlock
+	}
+
+	if user.RoomNo != nil {
+		roomNo = *user.RoomNo
+	}
+
 	res := models.ResponseData{
 		User: models.UserData{
 			FirstName:     user.FirstName,
@@ -31,6 +42,8 @@ func GetDetails(c echo.Context) error {
 			Gender:        user.Gender,
 			GithubProfile: user.GithubProfile,
 			IsLeader:      user.IsLeader,
+			HostelBlock:   hostelBlock,
+			RoomNo:        roomNo,
 		},
 	}
 
@@ -150,6 +163,8 @@ func UpdateUser(c echo.Context) error {
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
 		GithubProfile: req.GithubProfile,
+		HostelBlock:   &req.HostelBlock,
+		RoomNo:        &req.RoomNumber,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{

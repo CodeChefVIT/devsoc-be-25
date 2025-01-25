@@ -33,7 +33,7 @@ func ExportUsers(c echo.Context) error {
 
 	csvWriter := csv.NewWriter(file)
 
-	headers := []string{"ID", "FirstName", "LastName", "Email", "PhoneNo", "Gender", "RegNo", "TeamID", "VitEmail", "Hostel", "RoomNo", "GitHub", "Role", "IsLeader", "IsVerified", "IsBanned", "IsProfComplete"}
+	headers := []string{"ID", "FirstName", "LastName", "Email", "PhoneNo", "Gender", "RegNo", "TeamID", "Hostel", "RoomNo", "GitHub", "Role", "IsLeader", "IsVerified", "IsBanned", "IsProfComplete"}
 	if err := csvWriter.Write(headers); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -42,6 +42,15 @@ func ExportUsers(c echo.Context) error {
 	}
 
 	for _, user := range users {
+		var hostelBlock string
+		if user.HostelBlock != nil {
+			hostelBlock = *user.HostelBlock
+		}
+
+		var roomNo string
+		if user.RoomNo != nil {
+			roomNo = *user.RoomNo
+		}
 		record := []string{
 			user.ID.String(),
 			user.FirstName,
@@ -51,6 +60,8 @@ func ExportUsers(c echo.Context) error {
 			user.Gender,
 			*user.RegNo,
 			user.TeamID.UUID.String(),
+			hostelBlock,
+			roomNo,
 			user.GithubProfile,
 			user.Role,
 			strconv.FormatBool(user.IsLeader),

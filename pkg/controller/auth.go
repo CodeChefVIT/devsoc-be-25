@@ -243,7 +243,10 @@ func CompleteProfile(c echo.Context) error {
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
 		GithubProfile: req.GithubProfile,
+		HostelBlock:   &req.HostelBlock,
+		RoomNo:        &req.RoomNo,
 	})
+	
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{

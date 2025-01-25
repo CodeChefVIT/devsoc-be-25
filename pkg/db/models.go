@@ -66,4 +66,6 @@ type User struct {
 	IsBanned          bool
 	IsProfileComplete bool
 	IsStarred         bool
+	RoomNo            *string
+	HostelBlock       *string
 }

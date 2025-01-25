@@ -32,7 +32,6 @@ func main() {
 	router.AuthRoutes(e)
 	router.PanelRoutes(e)
 	router.InfoRoutes(e)
-	utils.Cron()
 
 	e.Start(":" + utils.Config.Port)
 }
