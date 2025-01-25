@@ -1,6 +1,7 @@
 package controller
 
 import (
+	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"net/http"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 
 func GetDetails(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqID := c.Get("req_id").(string)
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusForbidden, &models.Response{
@@ -22,6 +24,7 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
+	logger.Infof("Fetching user for request id %v, User id is %v", reqID, user.ID)
 	if !user.TeamID.Valid {
 		userData := models.ResponseData{
 			User: models.UserData{

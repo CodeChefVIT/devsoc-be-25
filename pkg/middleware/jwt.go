@@ -25,11 +25,14 @@ func JWTMiddleware() echo.MiddlewareFunc {
 		SigningKey:  []byte(utils.Config.JwtSecret),
 		TokenLookup: "cookie:jwt",
 		SuccessHandler: func(c echo.Context) {
+			reqID := uuid.New().String()
 			token := c.Get("user").(*jwt.Token)
 			claims := token.Claims.(jwt.MapClaims)
 
 			userId, _ := uuid.Parse(claims["user_id"].(string))
+			logger.Infof("handling request with request id %s, uesr id is %s", reqID, userId)
 
+			c.Set("req_id", reqID)
 			user, err := utils.Queries.GetUserByID(c.Request().Context(), userId)
 			if err != nil {
 				logger.Errorf(logger.InternalError, err.Error())

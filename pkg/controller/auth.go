@@ -346,6 +346,9 @@ func Login(c echo.Context) error {
 	ctx := c.Request().Context()
 	var req models.LoginRequest
 
+	reqID := uuid.New()
+	logger.Infof("Handling request with id: %v", reqID)
+
 	if err := c.Bind(&req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -410,6 +413,8 @@ func Login(c echo.Context) error {
 			Message: "Invalid password",
 		})
 	}
+
+	logger.Infof("Fetching user for request id %v, User id is %v", reqID, user.ID)
 
 	token, err := utils.GenerateToken(&user.ID, false)
 	if err != nil {
