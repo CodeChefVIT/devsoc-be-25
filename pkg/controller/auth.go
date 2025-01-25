@@ -246,7 +246,7 @@ func CompleteProfile(c echo.Context) error {
 		HostelBlock:   &req.HostelBlock,
 		RoomNo:        &req.RoomNo,
 	})
-	
+
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{

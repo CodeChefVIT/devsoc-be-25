@@ -1,6 +1,7 @@
 package controller
 
 import (
+	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"net/http"
 	"strings"
 
@@ -113,6 +114,7 @@ func UpdateUser(c echo.Context) error {
 
 	var req models.UpdateUserRequest
 	if err := c.Bind(&req); err != nil {
+		logger.Warnf(err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
 			Message: "Invalid request body",
