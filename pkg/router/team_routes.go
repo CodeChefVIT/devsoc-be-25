@@ -12,12 +12,13 @@ func TeamRoutes(incomingRoutes *echo.Echo) {
 
 	team.Use(middleware.JWTMiddleware())
 	team.Use(middleware.CheckUserBan)
+	team.Use(middleware.CheckUserVerifiation)
 
 	team.POST("/join", controller.JoinTeam)
-	team.POST("/create",controller.CreateTeam)
-	team.POST("/leave",controller.LeaveTeam)
-	team.POST("/kick",controller.KickMemeber)
-	team.POST("/delete",controller.DeleteTeam)
-	team.PUT("/update",controller.UpdateTeamName)
-	team.GET("/users",controller.GetAllTeamUsers)
+	team.POST("/create", controller.CreateTeam)
+	team.POST("/leave", controller.LeaveTeam)
+	team.POST("/kick", controller.KickMemeber)
+	team.POST("/delete", controller.DeleteTeam)
+	team.PUT("/update", controller.UpdateTeamName)
+	team.GET("/users", controller.GetAllTeamUsers)
 }

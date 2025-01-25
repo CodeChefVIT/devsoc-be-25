@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	"net/http"
 
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
@@ -61,4 +62,25 @@ func JWTMiddleware() echo.MiddlewareFunc {
 	}
 
 	return echojwt.WithConfig(config)
+}
+
+func CheckUserVerifiation(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user, ok := c.Get("user").(db.User)
+		if !ok {
+			return c.JSON(http.StatusUnauthorized, &models.Response{
+				Status:  "success",
+				Message: "unauthorized",
+			})
+		}
+
+		if !user.IsVerified {
+			return c.JSON(http.StatusExpectationFailed, &models.Response{
+				Status:  "success",
+				Message: "user not verified",
+			})
+		}
+
+		return next(c)
+	}
 }

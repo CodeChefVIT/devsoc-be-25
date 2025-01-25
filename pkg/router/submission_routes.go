@@ -10,6 +10,7 @@ func SubmissionRoutes(incomingRoutes *echo.Echo) {
 	submission := incomingRoutes.Group("/submission")
 	submission.Use(middleware.JWTMiddleware())
 	submission.Use(middleware.CheckTeamBan)
+	submission.Use(middleware.CheckUserVerifiation)
 
 	submission.POST("/create", controller.CreateSubmission)
 	submission.GET("/get", controller.GetUserSubmission)
