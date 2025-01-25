@@ -88,7 +88,7 @@ SET name = $1
 WHERE id = $2;
 
 -- name: GetTeamMembers :many
-SELECT first_name , last_name , github_profile, reg_no, phone_no
+SELECT first_name , last_name, email, is_leader, github_profile, reg_no, phone_no
 FROM users
 Where team_id = $1;
 

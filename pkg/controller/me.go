@@ -1,7 +1,6 @@
 package controller
 
 import (
-	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"net/http"
 	"strings"
 
@@ -15,7 +14,6 @@ import (
 
 func GetDetails(c echo.Context) error {
 	ctx := c.Request().Context()
-	reqID := c.Get("req_id").(string)
 	user, ok := c.Get("user").(db.User)
 	if !ok {
 		return c.JSON(http.StatusForbidden, &models.Response{
@@ -24,29 +22,28 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	logger.Infof("Fetching user for request id %v, User id is %v", reqID, user.ID)
-	if !user.TeamID.Valid {
-		userData := models.ResponseData{
-			User: models.UserData{
-				FirstName:     user.FirstName,
-				LastName:      user.LastName,
-				Email:         user.Email,
-				RegNo:         getSafeString(user.RegNo),
-				PhoneNo:       user.PhoneNo,
-				Gender:        user.Gender,
-				GithubProfile: user.GithubProfile,
-				IsLeader:      user.IsLeader,
-			},
-		}
+	res := models.ResponseData{
+		User: models.UserData{
+			FirstName:     user.FirstName,
+			LastName:      user.LastName,
+			Email:         user.Email,
+			RegNo:         getSafeString(user.RegNo),
+			PhoneNo:       user.PhoneNo,
+			Gender:        user.Gender,
+			GithubProfile: user.GithubProfile,
+			IsLeader:      user.IsLeader,
+		},
+	}
 
+	if !user.TeamID.Valid {
 		return c.JSON(http.StatusOK, &models.Response{
 			Status:  "success",
 			Message: "User details fetched successfully",
-			Data:    userData,
+			Data:    res,
 		})
 	}
 
-	teamData, err := utils.Queries.GetUserAndTeamDetails(ctx, user.TeamID.UUID)
+	teamData, err := utils.Queries.GetTeamById(ctx, user.TeamID.UUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -54,11 +51,46 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	marshallData := Marshall(teamData, user.ID)
+	res.Team = models.TeamData{
+		Name:           teamData.Name,
+		NumberOfPeople: int(teamData.NumberOfPeople),
+		RoundQualified: 0,
+		Code:           teamData.Code,
+		Members:        nil,
+	}
+
+	if teamData.RoundQualified.Valid {
+		res.Team.RoundQualified = int(teamData.RoundQualified.Int32)
+	}
+
+	members, err := utils.Queries.GetTeamMembers(ctx, user.TeamID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: "Failed to fetch member details",
+		})
+	}
+
+	res.Team.Members = make([]models.TeamMember, len(members))
+
+	for i, member := range members {
+		res.Team.Members[i] = models.TeamMember{
+			FirstName:     member.FirstName,
+			LastName:      member.LastName,
+			Email:         member.Email,
+			GithubProfile: member.GithubProfile,
+			IsLeader:      member.IsLeader,
+		}
+
+		if member.PhoneNo.Valid {
+			res.Team.Members[i].PhoneNo = member.PhoneNo.String
+		}
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "User details fetched successfully",
-		Data:    marshallData,
+		Data:    res,
 	})
 }
 
@@ -67,51 +99,6 @@ func getSafeString(s *string) string {
 		return ""
 	}
 	return *s
-}
-
-func Marshall(data []db.GetUserAndTeamDetailsRow, userID uuid.UUID) models.ResponseData {
-	var response models.ResponseData
-
-	if len(data) == 0 {
-		return response
-	}
-
-	entry := data[0]
-	response.User = models.UserData{
-		FirstName:     entry.FirstName,
-		LastName:      entry.LastName,
-		Email:         entry.Email,
-		RegNo:         getSafeString(entry.RegNo),
-		PhoneNo:       entry.PhoneNo,
-		Gender:        entry.Gender,
-		GithubProfile: entry.GithubProfile,
-		IsLeader:      entry.IsLeader,
-	}
-
-	if entry.Name != "" {
-		response.Team = models.TeamData{
-			Name:           entry.Name,
-			NumberOfPeople: int(entry.NumberOfPeople),
-			RoundQualified: int(entry.RoundQualified.Int32),
-			Code:           entry.Code,
-			Members:        []models.TeamMember{},
-		}
-
-		for _, member := range data {
-			if member.ID != userID {
-				response.Team.Members = append(response.Team.Members, models.TeamMember{
-					FirstName:     member.FirstName,
-					LastName:      member.LastName,
-					Email:         member.Email,
-					PhoneNo:       member.PhoneNo.String,
-					GithubProfile: member.GithubProfile,
-					IsLeader:      member.IsLeader,
-				})
-			}
-		}
-	}
-
-	return response
 }
 
 func UpdateUser(c echo.Context) error {
