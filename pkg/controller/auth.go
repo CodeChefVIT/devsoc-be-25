@@ -563,6 +563,13 @@ func UpdatePassword(c echo.Context) error {
 func RefreshToken(c echo.Context) error {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			return c.JSON(http.StatusForbidden, &models.Response{
+				Status:  "success",
+				Message: "please login again",
+			})
+		}
+		
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusUnauthorized, &models.Response{
 			Status:  "fail",
