@@ -20,32 +20,24 @@ func GetScore(c echo.Context) error {
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid team ID format",
-				"error":   err.Error()},
-		})
+			Status:  "fail",
+			Message: err.Error()},
+		)
 	}
 
 	teamScore, err := utils.Queries.GetTeamScores(ctx, teamUuid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
-				Status: "fail",
-				Data: map[string]string{
-					"message": "No scores found for the team",
-					"error":   err.Error(),
-				},
-			})
+				Status:  "fail",
+				Message: err.Error()},
+			)
 		}
 
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to fetch team scores",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 

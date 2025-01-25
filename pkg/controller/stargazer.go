@@ -47,8 +47,8 @@ func CheckStarred(c echo.Context) error {
 
 	if len(github_user) != 2 {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   "error invalid github link",
+			Status:  "fail",
+			Message: "error invalid github link",
 		})
 	}
 
@@ -58,8 +58,8 @@ func CheckStarred(c echo.Context) error {
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   "error creating request",
+			Status:  "fail",
+			Message: "error creating request",
 		})
 	}
 
@@ -70,24 +70,24 @@ func CheckStarred(c echo.Context) error {
 	resp, err := Client.Do(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   "error",
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return c.JSON(http.StatusNotFound, models.Response{
-			Status: "fail",
-			Data:   "repo not found",
+			Status:  "fail",
+			Message: "repo not found",
 		})
 	}
 
 	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != http.StatusOK {
 		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   "error from github",
+			Status:  "fail",
+			Message: "error from github",
 		})
 	}
 
@@ -103,8 +103,8 @@ func CheckStarred(c echo.Context) error {
 	err = json.Unmarshal(bytes, &repos)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.Response{
-			Status: "fail",
-			Data:   "parsing error",
+			Status:  "fail",
+			Message: "parsing error",
 		})
 	}
 
@@ -121,8 +121,8 @@ func CheckStarred(c echo.Context) error {
 
 	if !hasStarred {
 		return c.JSON(http.StatusExpectationFailed, models.Response{
-			Status: "fail",
-			Data:   "user has not starred. Please star the repository",
+			Status:  "fail",
+			Message: "user has not starred. Please star the repository",
 		})
 	}
 

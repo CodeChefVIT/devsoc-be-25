@@ -26,10 +26,8 @@ func GetAllUsers(c echo.Context) error {
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"error": "failed to convert to integer",
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -53,11 +51,8 @@ func GetAllUsers(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to fetch users",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -76,20 +71,14 @@ func GetUsersByEmail(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
-				Status: "fail",
-				Data: map[string]string{
-					"message": "User not found",
-					"error":   err.Error(),
-				},
+				Status:  "fail",
+				Message: err.Error(),
 			})
 
 		}
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, &models.Response{
@@ -106,11 +95,8 @@ func BanUser(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Improper request",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -123,11 +109,8 @@ func BanUser(c echo.Context) error {
 
 	if err := utils.Queries.BanUser(c.Request().Context(), payload.Email); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -144,11 +127,8 @@ func UnbanUser(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Improper request",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -161,11 +141,8 @@ func UnbanUser(c echo.Context) error {
 
 	if err := utils.Queries.UnbanUser(context.Background(), payload.Email); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -185,10 +162,8 @@ func GetTeams(c echo.Context) error {
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"error": "failed to convert to integer",
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -211,11 +186,8 @@ func GetTeams(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to fetch teams",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -233,22 +205,16 @@ func GetTeamById(c echo.Context) error {
 	teamId, err := uuid.Parse(teamIdParam)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
 	team, err := utils.Queries.GetTeamById(c.Request().Context(), teamId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -266,11 +232,8 @@ func GetTeamLeader(c echo.Context) error {
 	teamId, err := uuid.Parse(teamIdParam)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -282,11 +245,8 @@ func GetTeamLeader(c echo.Context) error {
 	user, err := utils.Queries.GetTeamLeader(c.Request().Context(), nullUUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "some error occured",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -305,11 +265,8 @@ func CreatePanel(c echo.Context) error {
 	if err := c.Bind(panel); err != nil {
 		logger.Errorf(logger.ParsingError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid request body",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -324,11 +281,8 @@ func CreatePanel(c echo.Context) error {
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to hash password",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -357,11 +311,8 @@ func CreatePanel(c echo.Context) error {
 	if err != nil {
 		logger.Errorf(logger.DatabaseError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to create user",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -375,7 +326,7 @@ func CreatePanel(c echo.Context) error {
 
 func GetAllTeamMembers(c echo.Context) error {
 	teamIdParam := c.Param("id")
-	teamId, err := uuid.Parse(teamIdParam)
+	teamId, _ := uuid.Parse(teamIdParam)
 	ctx := c.Request().Context()
 
 	nullUUID := uuid.NullUUID{
@@ -387,11 +338,8 @@ func GetAllTeamMembers(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Cannot get Team Memebrs",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -411,11 +359,8 @@ func BanTeam(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Improper request",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -444,11 +389,8 @@ func BanTeam(c echo.Context) error {
 
 	if err := utils.Queries.BanTeam(ctx, team.ID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to Ban Team",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -465,11 +407,8 @@ func UnBanTeam(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Improper request",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -486,16 +425,13 @@ func UnBanTeam(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
-				Status: "fail",
-				Data: map[string]string{
-					"message": "Failed to Find team",
-					"error":   err.Error(),
-				},
+				Status:  "fail",
+				Message: err.Error(),
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data:   err,
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -518,11 +454,8 @@ func UpdateTeamRounds(c echo.Context) error {
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Improper request",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -538,11 +471,8 @@ func UpdateTeamRounds(c echo.Context) error {
 	team, err := utils.Queries.GetTeamById(ctx, payload.TeamId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Team does not exists",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -554,11 +484,8 @@ func UpdateTeamRounds(c echo.Context) error {
 		ID: team.ID,
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "failed ot update round",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
