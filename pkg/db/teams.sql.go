@@ -166,7 +166,7 @@ func (q *Queries) GetTeamIDByCode(ctx context.Context, code string) (uuid.UUID, 
 }
 
 const getTeamMembers = `-- name: GetTeamMembers :many
-SELECT first_name , last_name, email, is_leader, github_profile, reg_no, phone_no
+SELECT first_name , last_name, is_leader, github_profile, reg_no, phone_no
 FROM users
 Where team_id = $1
 `
@@ -174,7 +174,6 @@ Where team_id = $1
 type GetTeamMembersRow struct {
 	FirstName     string
 	LastName      string
-	Email         string
 	IsLeader      bool
 	GithubProfile string
 	RegNo         *string
@@ -193,7 +192,6 @@ func (q *Queries) GetTeamMembers(ctx context.Context, teamID uuid.NullUUID) ([]G
 		if err := rows.Scan(
 			&i.FirstName,
 			&i.LastName,
-			&i.Email,
 			&i.IsLeader,
 			&i.GithubProfile,
 			&i.RegNo,

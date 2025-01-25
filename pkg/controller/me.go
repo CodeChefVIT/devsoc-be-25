@@ -76,13 +76,8 @@ func GetDetails(c echo.Context) error {
 		res.Team.Members[i] = models.TeamMember{
 			FirstName:     member.FirstName,
 			LastName:      member.LastName,
-			Email:         member.Email,
 			GithubProfile: member.GithubProfile,
 			IsLeader:      member.IsLeader,
-		}
-
-		if member.PhoneNo.Valid {
-			res.Team.Members[i].PhoneNo = member.PhoneNo.String
 		}
 	}
 

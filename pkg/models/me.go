@@ -16,8 +16,6 @@ type UserData struct {
 type TeamMember struct {
 	FirstName     string `json:"first_name"`
 	LastName      string `json:"last_name"`
-	Email         string `json:"email"`
-	PhoneNo       string `json:"phone_no"`
 	GithubProfile string `json:"github_profile"`
 	IsLeader      bool   `json:"is_leader"`
 }
