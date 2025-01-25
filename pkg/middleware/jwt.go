@@ -94,6 +94,16 @@ func CheckUserVerifiation(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
+		if !user.IsStarred {
+			return c.JSON(http.StatusExpectationFailed, &models.Response{
+				Status:  "success",
+				Message: "user has not starred the github repo yet",
+				Data: map[string]any{
+					"is_starred": false,
+				},
+			})
+		}
+
 		return next(c)
 	}
 }
