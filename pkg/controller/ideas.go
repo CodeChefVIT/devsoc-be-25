@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
+	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
@@ -19,14 +19,14 @@ func CreateIdea(c echo.Context) error {
 	user, ok := c.Get("user").(db.User)
 	if !ok || !user.TeamID.Valid {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "User does not belong to any team",
 		})
 	}
 
 	if !user.IsLeader {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "Only team leaders can create ideas",
 		})
 	}
@@ -34,7 +34,7 @@ func CreateIdea(c echo.Context) error {
 	var input db.CreateIdeaParams
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "invalid request body",
 		})
 	}
@@ -45,7 +45,7 @@ func CreateIdea(c echo.Context) error {
 	_, err := utils.Queries.GetIdeaByTeamID(context.Background(), input.TeamID)
 	if err == nil {
 		return c.JSON(http.StatusConflict, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "An idea already exists for this team",
 		})
 	}
@@ -54,20 +54,20 @@ func CreateIdea(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, &models.Response{
-				Status: "fail",
+				Status:  "fail",
 				Message: "Idea not found",
 			})
 		}
 
-		logger.Errorf(logger.InternalError, err.Error());
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "Failed to create idea",
 		})
 	}
 
 	return c.JSON(http.StatusCreated, &models.Response{
-		Status: "success",
+		Status:  "success",
 		Message: "Idea created successfully",
 	})
 }
@@ -77,15 +77,15 @@ func UpdateIdea(c echo.Context) error {
 	user, ok := c.Get("user").(db.User)
 	if !ok || !user.TeamID.Valid {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "User does not belong to any team",
 		})
 	}
 
 	if !user.IsLeader {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
-			Message:  "Only team leaders can update ideas",
+			Status:  "fail",
+			Message: "Only team leaders can update ideas",
 		})
 	}
 
@@ -93,18 +93,18 @@ func UpdateIdea(c echo.Context) error {
 	id, err := uuid.Parse(ideaID)
 
 	if err != nil {
-		logger.Infof("error: %v", err.Error());
+		logger.Infof("error: %v", err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "Invalid ID format",
 		})
 	}
 
 	existingIdea, err := utils.Queries.GetIdea(context.Background(), id)
 	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error());
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusNotFound, &models.Response{
-			Status: "fail",
+			Status:  "fail",
 			Message: "Idea not found",
 		})
 	}
@@ -112,22 +112,16 @@ func UpdateIdea(c echo.Context) error {
 	fmt.Println(existingIdea.TeamID)
 	if existingIdea.TeamID != user.TeamID.UUID {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User's team does not match the idea's team",
-			},
+			Status:  "fail",
+			Message: "User's team does not match the idea's team",
 		})
 	}
 
 	var input db.UpdateIdeaParams
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Invalid request",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -135,11 +129,8 @@ func UpdateIdea(c echo.Context) error {
 	err = utils.Queries.UpdateIdea(context.Background(), input)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to update idea",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
@@ -155,22 +146,16 @@ func GetIdea(c echo.Context) error {
 	user, ok := c.Get("user").(db.User)
 	if !ok || !user.TeamID.Valid {
 		return c.JSON(http.StatusForbidden, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Forbidden",
-				"error":   "User does not belong to any team",
-			},
+			Status:  "fail",
+			Message: "User does not belong to any team",
 		})
 	}
 
 	ideas, err := utils.Queries.GetIdeaByTeamID(context.Background(), user.TeamID.UUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"message": "Failed to fetch ideas",
-				"error":   err.Error(),
-			},
+			Status:  "fail",
+			Message: err.Error(),
 		})
 	}
 
