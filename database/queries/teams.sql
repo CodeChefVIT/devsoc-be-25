@@ -116,3 +116,6 @@ WHERE id = $1;
 UPDATE teams
 SET round_qualified = $1
 WHERE id = $2;
+
+-- name: InfoQuery :many
+SELECT * FROM teams INNER JOIN users ON users.team_id = teams.id WHERE teams.id = $1;

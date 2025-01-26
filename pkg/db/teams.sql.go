@@ -347,6 +347,82 @@ func (q *Queries) IncreaseCountTeam(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const infoQuery = `-- name: InfoQuery :many
+SELECT teams.id, name, number_of_people, round_qualified, code, teams.is_banned, users.id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, users.is_banned, is_profile_complete, is_starred, room_no, hostel_block FROM teams INNER JOIN users ON users.team_id = teams.id WHERE teams.id = $1
+`
+
+type InfoQueryRow struct {
+	ID                uuid.UUID
+	Name              string
+	NumberOfPeople    int32
+	RoundQualified    pgtype.Int4
+	Code              string
+	IsBanned          bool
+	ID_2              uuid.UUID
+	TeamID            uuid.NullUUID
+	FirstName         string
+	LastName          string
+	Email             string
+	PhoneNo           pgtype.Text
+	Gender            string
+	RegNo             *string
+	GithubProfile     string
+	Password          string
+	Role              string
+	IsLeader          bool
+	IsVerified        bool
+	IsBanned_2        bool
+	IsProfileComplete bool
+	IsStarred         bool
+	RoomNo            *string
+	HostelBlock       *string
+}
+
+func (q *Queries) InfoQuery(ctx context.Context, id uuid.UUID) ([]InfoQueryRow, error) {
+	rows, err := q.db.Query(ctx, infoQuery, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []InfoQueryRow
+	for rows.Next() {
+		var i InfoQueryRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.NumberOfPeople,
+			&i.RoundQualified,
+			&i.Code,
+			&i.IsBanned,
+			&i.ID_2,
+			&i.TeamID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.PhoneNo,
+			&i.Gender,
+			&i.RegNo,
+			&i.GithubProfile,
+			&i.Password,
+			&i.Role,
+			&i.IsLeader,
+			&i.IsVerified,
+			&i.IsBanned_2,
+			&i.IsProfileComplete,
+			&i.IsStarred,
+			&i.RoomNo,
+			&i.HostelBlock,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const kickMemeber = `-- name: KickMemeber :exec
 UPDATE users
 SET team_id = NULL

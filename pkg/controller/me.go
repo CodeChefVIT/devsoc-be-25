@@ -1,9 +1,10 @@
 package controller
 
 import (
-	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"net/http"
 	"strings"
+
+	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
@@ -56,43 +57,27 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	teamData, err := utils.Queries.GetTeamById(ctx, user.TeamID.UUID)
+	teamData, err := utils.Queries.InfoQuery(ctx, user.TeamID.UUID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Message: "Failed to fetch user details",
+			Message: "Failed to fetch details",
 		})
 	}
 
 	res.Team = models.TeamData{
-		Name:           teamData.Name,
-		NumberOfPeople: int(teamData.NumberOfPeople),
-		RoundQualified: 0,
-		Code:           teamData.Code,
-		Members:        nil,
+		Name:           teamData[0].Name,
+		NumberOfPeople: len(teamData),
+		RoundQualified: int(teamData[0].RoundQualified.Int32),
+		Code:           teamData[0].Code,
 	}
-
-	if teamData.RoundQualified.Valid {
-		res.Team.RoundQualified = int(teamData.RoundQualified.Int32)
-	}
-
-	members, err := utils.Queries.GetTeamMembers(ctx, user.TeamID)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status:  "fail",
-			Message: "Failed to fetch member details",
+	for _, v := range teamData {
+		res.Team.Members = append(res.Team.Members, models.TeamMember{
+			FirstName:     v.FirstName,
+			LastName:      v.LastName,
+			GithubProfile: v.GithubProfile,
+			IsLeader:      v.IsLeader,
 		})
-	}
-
-	res.Team.Members = make([]models.TeamMember, len(members))
-
-	for i, member := range members {
-		res.Team.Members[i] = models.TeamMember{
-			FirstName:     member.FirstName,
-			LastName:      member.LastName,
-			GithubProfile: member.GithubProfile,
-			IsLeader:      member.IsLeader,
-		}
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
