@@ -8,7 +8,7 @@ import (
 
 func IdeaRoutes(incomingRoutes *echo.Echo) {
 	idea := incomingRoutes.Group("/idea")
-	idea.Use(middleware.Protected())
+	idea.Use(middleware.JWTMiddleware())
 	idea.Use(middleware.CheckTeamBan)
 	idea.Use(middleware.CheckUserVerifiation)
 
