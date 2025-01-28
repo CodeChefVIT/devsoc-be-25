@@ -30,7 +30,7 @@ type cfg struct {
 	RepoName         string      `env:"REPO_NAME,notEmpty"`
 	Recipients       string      `env:"RECIPIENETS"`
 	CookieSecure     bool        `env:"SECURE" envDefault:"false"`
-	Domain 			 string		 `env:"DOMAIN" envDefault:".codechefvit.com"`
+	Domain           string      `env:"DOMAIN" envDefault:".codechefvit.com"`
 	GithubPAT        string      `env:"GITHUB_PAT"`
 }
 
@@ -43,6 +43,6 @@ func init() {
 
 	if err := env.Parse(&Config); err != nil {
 		fmt.Printf("%+v", err)
-		panic(err);
+		panic(err)
 	}
 }

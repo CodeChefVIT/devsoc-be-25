@@ -147,23 +147,31 @@ func GetIdea(c echo.Context) error {
 	if !ok || !user.TeamID.Valid {
 		return c.JSON(http.StatusForbidden, &models.Response{
 			Status:  "fail",
-			Message: "User does not belong to any team",
+			Message: "Please join a team or create one",
 		})
 	}
 
 	ideas, err := utils.Queries.GetIdeaByTeamID(context.Background(), user.TeamID.UUID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, &models.Response{
+				Status:  "success",
+				Message: "Idea not found",
+			})
+		}
+
+		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Message: err.Error(),
+			Message: "some error occurred",
 		})
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "ideas fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Ideas fetched successfully",
-			"ideas":   ideas,
+			"ideas": ideas,
 		},
 	})
 }
