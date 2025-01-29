@@ -8,8 +8,6 @@ DROP NOT NULL;
 ALTER TABLE teams ADD CONSTRAINT unique_team_name UNIQUE (name);
 
 -- +goose Down
-ALTER TABLE users
-DROP CONSTRAINT unique_github_profile;
+ALTER TABLE users DROP CONSTRAINT unique_github_profile;
 
-ALTER TABLE teams
-DROP CONSTRAINT unique_team_name;
+ALTER TABLE teams DROP CONSTRAINT unique_team_name;
