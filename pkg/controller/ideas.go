@@ -130,7 +130,6 @@ func UpdateIdea(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
 		Data: dto.Idea{
-			TeamID:      teamUuid.String(),
 			Title:       req.Title,
 			Description: req.Description,
 			Track:       req.Track,
@@ -166,11 +165,8 @@ func GetIdea(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "ideas fetched successfully",
-		Data: dto.Idea{
-			Title:       ideas.Title,
-			Description: ideas.Description,
-			Track:       ideas.Track,
-
+		Data: map[string]interface{}{
+			"ideas": ideas,
 		},
 	})
 }
