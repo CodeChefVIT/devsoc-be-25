@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
@@ -128,7 +129,8 @@ func UpdateIdea(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "Idea updated successfully",
 		Data: dto.Idea{
 			Title:       req.Title,
 			Description: req.Description,

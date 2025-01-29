@@ -13,6 +13,6 @@ func IdeaRoutes(incomingRoutes *echo.Echo) {
 	idea.Use(middleware.CheckUserVerifiation)
 
 	idea.POST("/create", controller.CreateIdea)
-	idea.PUT("/update/:id", controller.UpdateIdea)
+	idea.PUT("/update", controller.UpdateIdea)
 	idea.GET("/", controller.GetIdea)
 }
