@@ -7,7 +7,7 @@ type SignupRequest struct {
 
 type CompleteProfileRequest struct {
 	FirstName     string `json:"first_name" validate:"required,alphanum"`
-	LastName      string `json:"last_name" validate:"required,aplhanum"`
+	LastName      string `json:"last_name" validate:"required,alphanum"`
 	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
 	Gender        string `json:"gender" validate:"required,len=1"`
 	RegNo         string `json:"reg_no" validate:"required"`
