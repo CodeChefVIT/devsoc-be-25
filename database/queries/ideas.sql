@@ -19,9 +19,8 @@ UPDATE ideas
 SET title = $2,
     description = $3,
     track = $4,
-    is_selected = $5,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = $1;
+WHERE team_id = $1;
 
 
 -- name: DeleteIdea :exec
