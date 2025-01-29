@@ -15,10 +15,10 @@ func TeamRoutes(incomingRoutes *echo.Echo) {
 	team.Use(middleware.CheckUserVerifiation)
 
 	team.POST("/join", controller.JoinTeam)
-	team.POST("/create", controller.CreateTeam,middleware.RejectSpecialMiddleware)
+	team.POST("/create", controller.CreateTeam)
 	team.POST("/leave", controller.LeaveTeam)
 	team.POST("/kick", controller.KickMemeber)
 	team.POST("/delete", controller.DeleteTeam)
-	team.PUT("/update", controller.UpdateTeamName,middleware.RejectSpecialMiddleware)
+	team.PUT("/update", controller.UpdateTeamName)
 	team.GET("/users", controller.GetAllTeamUsers)
 }
