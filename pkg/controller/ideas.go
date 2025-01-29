@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/dto"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
@@ -170,8 +171,11 @@ func GetIdea(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "ideas fetched successfully",
-		Data: map[string]interface{}{
-			"ideas": ideas,
+		Data: dto.Idea{
+			Title:       ideas.Title,
+			Description: ideas.Description,
+			Track:       ideas.Track,
+
 		},
 	})
 }
