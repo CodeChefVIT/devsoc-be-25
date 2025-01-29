@@ -3,10 +3,11 @@ package controller
 import (
 	"context"
 	"errors"
-	"fmt"
+
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/dto"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
@@ -73,71 +74,67 @@ func CreateIdea(c echo.Context) error {
 }
 
 func UpdateIdea(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	user, ok := c.Get("user").(db.User)
-	if !ok || !user.TeamID.Valid {
-		return c.JSON(http.StatusForbidden, &models.Response{
-			Status:  "fail",
-			Message: "User does not belong to any team",
-		})
-	}
-
-	if !user.IsLeader {
-		return c.JSON(http.StatusForbidden, &models.Response{
-			Status:  "fail",
-			Message: "Only team leaders can update ideas",
-		})
-	}
-
-	ideaID := c.Param("id")
-	id, err := uuid.Parse(ideaID)
-
-	if err != nil {
-		logger.Infof("error: %v", err.Error())
+	if !ok {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Invalid ID format",
+			Message: "Invalid user",
 		})
 	}
 
-	existingIdea, err := utils.Queries.GetIdea(context.Background(), id)
-	if err != nil {
-		logger.Errorf(logger.InternalError, err.Error())
-		return c.JSON(http.StatusNotFound, &models.Response{
-			Status:  "fail",
-			Message: "Idea not found",
-		})
-	}
-
-	fmt.Println(existingIdea.TeamID)
-	if existingIdea.TeamID != user.TeamID.UUID {
+	if !user.TeamID.Valid || !user.IsLeader {
 		return c.JSON(http.StatusForbidden, &models.Response{
 			Status:  "fail",
-			Message: "User's team does not match the idea's team",
+			Message: "User does not belong to any team or is not team leader",
 		})
 	}
 
-	var input db.UpdateIdeaParams
-	if err := c.Bind(&input); err != nil {
+	var req models.UpdateIdeaRequest
+	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: err.Error(),
+			Message: "Invalid request body",
 		})
 	}
 
-	input.ID = id
-	err = utils.Queries.UpdateIdea(context.Background(), input)
+	if err := utils.Validate.Struct(req); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	teamUuid := user.TeamID.UUID
+	if !user.TeamID.Valid {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "Invalid team ID format",
+		})
+	}
+
+	err := utils.Queries.UpdateIdea(ctx, db.UpdateIdeaParams{
+		TeamID:      teamUuid,
+		Title:       req.Title,
+		Description: req.Description,
+		Track:       req.Track,
+	})
 	if err != nil {
+		logger.Errorf("Failed to update idea: %v", err)
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Message: err.Error(),
+			Message: "Failed to update idea",
 		})
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: map[string]interface{}{
-			"message": "Idea updated successfully",
+		Status:  "success",
+		Message: "Idea updated successfully",
+		Data: dto.Idea{
+			Title:       req.Title,
+			Description: req.Description,
+			Track:       req.Track,
 		},
 	})
 }
@@ -170,8 +167,11 @@ func GetIdea(c echo.Context) error {
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "ideas fetched successfully",
-		Data: map[string]interface{}{
-			"ideas": ideas,
+		Data: dto.Idea{
+			Title:       ideas.Title,
+			Description: ideas.Description,
+			Track:       ideas.Track,
+
 		},
 	})
 }

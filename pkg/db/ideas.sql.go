@@ -148,26 +148,23 @@ UPDATE ideas
 SET title = $2,
     description = $3,
     track = $4,
-    is_selected = $5,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = $1
+WHERE team_id = $1
 `
 
 type UpdateIdeaParams struct {
-	ID          uuid.UUID
+	TeamID      uuid.UUID
 	Title       string
 	Description string
 	Track       string
-	IsSelected  bool
 }
 
 func (q *Queries) UpdateIdea(ctx context.Context, arg UpdateIdeaParams) error {
 	_, err := q.db.Exec(ctx, updateIdea,
-		arg.ID,
+		arg.TeamID,
 		arg.Title,
 		arg.Description,
 		arg.Track,
-		arg.IsSelected,
 	)
 	return err
 }

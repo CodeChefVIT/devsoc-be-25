@@ -61,7 +61,7 @@ func JoinTeam(c echo.Context) error {
 	}
 
 	user := c.Get("user").(db.User)
-	fmt.Println(user)  
+	fmt.Println(user)
 
 	member, err := utils.Queries.GetUser(ctx, user.ID)
 	fmt.Println(member.TeamID)
@@ -85,10 +85,10 @@ func JoinTeam(c echo.Context) error {
 			})
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
+			Status:  "fail",
+			Message: "Team doesn't exist",
 			Data: map[string]string{
-				"message": "Team does not exist",
-				"error":   err.Error(),
+				"error": err.Error(),
 			},
 		})
 	}
@@ -142,10 +142,9 @@ func JoinTeam(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "Team joined successfully",
-		},
+		Status:  "success",
+		Message: "User joined team successfully",
+		Data:    map[string]string{},
 	})
 }
 
@@ -313,7 +312,7 @@ func CreateTeam(c echo.Context) error {
 		Code:           utils.GenerateRandomString(6),
 		NumberOfPeople: 1,
 		RoundQualified: pgtype.Int4{Int32: 0, Valid: true},
-		IsBanned:	false,
+		IsBanned:       false,
 	}
 
 	team, err := utils.Queries.CreateTeam(ctx, params)
@@ -345,7 +344,7 @@ func CreateTeam(c echo.Context) error {
 					Data: map[string]string{
 						"message": "Team already exists",
 						"error":   err.Error(),
-					},		
+					},
 				})
 			}
 		}
@@ -441,7 +440,7 @@ func LeaveTeam(c echo.Context) error {
 				Data: map[string]string{
 					"message": "Failed to get Team id's",
 					"error":   err.Error(),
-				},	
+				},
 			})
 		}
 
@@ -451,7 +450,7 @@ func LeaveTeam(c echo.Context) error {
 				Data: map[string]string{
 					"message": "some error occured",
 					"error":   err.Error(),
-				},	
+				},
 			})
 		}
 
@@ -461,7 +460,7 @@ func LeaveTeam(c echo.Context) error {
 				Data: map[string]string{
 					"message": "Failed to delete team",
 					"error":   err.Error(),
-				},	
+				},
 			})
 		}
 
@@ -474,7 +473,7 @@ func LeaveTeam(c echo.Context) error {
 				Data: map[string]string{
 					"message": "Failed to update leader",
 					"error":   err.Error(),
-				},	
+				},
 			})
 		}
 		user.TeamID = uuid.NullUUID{}
@@ -494,7 +493,6 @@ func LeaveTeam(c echo.Context) error {
 			Data: map[string]string{
 				"message": "Team Left Successfully",
 			},
-
 		})
 	}
 
@@ -654,7 +652,6 @@ func UpdateTeamName(c echo.Context) error {
 			Data: map[string]string{
 				"message": "unauthorized",
 			},
-
 		})
 	}
 
