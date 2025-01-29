@@ -48,7 +48,6 @@ func GetAllUsers(c echo.Context) error {
 		ID:      cursorUUID,
 		Column1: &name,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -74,7 +73,6 @@ func GetUsersByEmail(c echo.Context) error {
 				Status:  "fail",
 				Message: err.Error(),
 			})
-
 		}
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -183,7 +181,6 @@ func GetTeams(c echo.Context) error {
 		ID:      cursorUUID,
 		Column1: &name,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -295,12 +292,11 @@ func CreatePanel(c echo.Context) error {
 		PhoneNo: pgtype.Text{
 			String: panel.PhoneNo,
 		},
-		Role:          "panel",
-		IsLeader:      true,
-		IsVerified:    true,
-		IsBanned:      false,
-		Gender:        panel.Gender,
-		GithubProfile: panel.GithubProfile,
+		Role:       "panel",
+		IsLeader:   true,
+		IsVerified: true,
+		IsBanned:   false,
+		Gender:     panel.Gender,
 	}
 	panelDb.ID, _ = uuid.NewV7()
 	panelDb.TeamID = uuid.NullUUID{
@@ -335,7 +331,6 @@ func GetAllTeamMembers(c echo.Context) error {
 	}
 
 	team_members, err := utils.Queries.GetTeamMembers(ctx, nullUUID)
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status:  "fail",
@@ -352,8 +347,7 @@ func GetAllTeamMembers(c echo.Context) error {
 	})
 }
 
-//Ban Team
-
+// Ban Team
 func BanTeam(c echo.Context) error {
 	var payload models.UnBanTeam
 
@@ -400,8 +394,7 @@ func BanTeam(c echo.Context) error {
 	})
 }
 
-//UnBan Team
-
+// UnBan Team
 func UnBanTeam(c echo.Context) error {
 	var payload models.UnBanTeam
 
@@ -449,7 +442,6 @@ func UnBanTeam(c echo.Context) error {
 }
 
 func UpdateTeamRounds(c echo.Context) error {
-
 	var payload models.TeamRoundQualified
 
 	if err := c.Bind(&payload); err != nil {

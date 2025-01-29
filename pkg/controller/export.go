@@ -33,7 +33,24 @@ func ExportUsers(c echo.Context) error {
 
 	csvWriter := csv.NewWriter(file)
 
-	headers := []string{"ID", "FirstName", "LastName", "Email", "PhoneNo", "Gender", "RegNo", "TeamID", "Hostel", "RoomNo", "GitHub", "Role", "IsLeader", "IsVerified", "IsBanned", "IsProfComplete"}
+	headers := []string{
+		"ID",
+		"FirstName",
+		"LastName",
+		"Email",
+		"PhoneNo",
+		"Gender",
+		"RegNo",
+		"TeamID",
+		"Hostel",
+		"RoomNo",
+		"GitHub",
+		"Role",
+		"IsLeader",
+		"IsVerified",
+		"IsBanned",
+		"IsProfComplete",
+	}
 	if err := csvWriter.Write(headers); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -51,6 +68,12 @@ func ExportUsers(c echo.Context) error {
 		if user.RoomNo != nil {
 			roomNo = *user.RoomNo
 		}
+
+		var githubProfile string
+		if user.GithubProfile != nil {
+			githubProfile = *user.GithubProfile
+		}
+
 		record := []string{
 			user.ID.String(),
 			user.FirstName,
@@ -62,7 +85,7 @@ func ExportUsers(c echo.Context) error {
 			user.TeamID.UUID.String(),
 			hostelBlock,
 			roomNo,
-			user.GithubProfile,
+			githubProfile,
 			user.Role,
 			strconv.FormatBool(user.IsLeader),
 			strconv.FormatBool(user.IsVerified),
@@ -112,10 +135,12 @@ func ExportTeams(c echo.Context) error {
 
 	csvWriter := csv.NewWriter(file)
 
-	headers := []string{"ID", "TeamName", "TeamCode", "NumberOfPeople", "RoundQualified",
+	headers := []string{
+		"ID", "TeamName", "TeamCode", "NumberOfPeople", "RoundQualified",
 		"IdeaId", "IdeaTitle", "IdeaDescription", "IdeaTrack",
 		"SubmissionId", "SubmissionTitle", "SubmissionDescription", "SubmissionTrack", "GitHubLink", "FigmaLink", "OtherLink",
-		"ScoreId", "DesignScore", "ImplementationScore", "PresentationScore", "ScoreRound"}
+		"ScoreId", "DesignScore", "ImplementationScore", "PresentationScore", "ScoreRound",
+	}
 	if err := csvWriter.Write(headers); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",

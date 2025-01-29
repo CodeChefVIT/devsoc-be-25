@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	"net/http"
+
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"

@@ -36,6 +36,16 @@ func CheckStarred(c echo.Context) error {
 			Message: "User not found",
 		})
 	}
+
+	if !user.IsProfileComplete {
+		return c.JSON(http.StatusForbidden, &models.Response{
+			Status:  "success",
+			Message: "user profile not complete",
+			Data: map[string]any{
+				"is_profile_complete": false,
+			},
+		})
+	}
 	github_link := user.GithubProfile
 
 	hasStarred := false
@@ -43,7 +53,7 @@ func CheckStarred(c echo.Context) error {
 	owner := utils.Config.RepoOwner
 	name := utils.Config.RepoName
 
-	github_user := strings.Split(github_link, "github.com/")
+	github_user := strings.Split(*github_link, "github.com/")
 
 	if len(github_user) != 2 {
 		return c.JSON(http.StatusBadRequest, models.Response{
@@ -126,7 +136,10 @@ func CheckStarred(c echo.Context) error {
 		})
 	}
 
-	err = utils.Queries.UpdateStarred(c.Request().Context(), db.UpdateStarredParams{IsStarred: true, Email: user.Email})
+	err = utils.Queries.UpdateStarred(
+		c.Request().Context(),
+		db.UpdateStarredParams{IsStarred: true, Email: user.Email},
+	)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",

@@ -23,17 +23,6 @@ func GetDetails(c echo.Context) error {
 		})
 	}
 
-	hostelBlock := ""
-	roomNo := ""
-
-	if user.HostelBlock != nil {
-		hostelBlock = *user.HostelBlock
-	}
-
-	if user.RoomNo != nil {
-		roomNo = *user.RoomNo
-	}
-
 	res := models.ResponseData{
 		User: models.UserData{
 			FirstName:     user.FirstName,
@@ -42,10 +31,10 @@ func GetDetails(c echo.Context) error {
 			RegNo:         getSafeString(user.RegNo),
 			PhoneNo:       user.PhoneNo,
 			Gender:        user.Gender,
-			GithubProfile: user.GithubProfile,
+			GithubProfile: *user.GithubProfile,
 			IsLeader:      user.IsLeader,
-			HostelBlock:   hostelBlock,
-			RoomNo:        roomNo,
+			HostelBlock:   *user.HostelBlock,
+			RoomNo:        *user.RoomNo,
 		},
 	}
 
@@ -75,7 +64,7 @@ func GetDetails(c echo.Context) error {
 		res.Team.Members = append(res.Team.Members, models.TeamMember{
 			FirstName:     v.FirstName,
 			LastName:      v.LastName,
-			GithubProfile: v.GithubProfile,
+			GithubProfile: *v.GithubProfile,
 			IsLeader:      v.IsLeader,
 		})
 	}
@@ -149,7 +138,7 @@ func UpdateUser(c echo.Context) error {
 		},
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
-		GithubProfile: req.GithubProfile,
+		GithubProfile: &req.GithubProfile,
 		HostelBlock:   &req.HostelBlock,
 		RoomNo:        &req.RoomNumber,
 	})

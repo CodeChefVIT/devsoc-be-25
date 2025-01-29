@@ -243,7 +243,7 @@ func CompleteProfile(c echo.Context) error {
 		},
 		Gender:        req.Gender,
 		RegNo:         &req.RegNo,
-		GithubProfile: req.GithubProfile,
+		GithubProfile: &req.GithubProfile,
 		HostelBlock:   &req.HostelBlock,
 		RoomNo:        &req.RoomNo,
 	})
