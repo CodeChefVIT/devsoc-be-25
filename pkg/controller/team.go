@@ -87,7 +87,7 @@ func JoinTeam(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data: map[string]string{
-				"message": "some error occured",
+				"message": "Team does not exist",
 				"error":   err.Error(),
 			},
 		})
