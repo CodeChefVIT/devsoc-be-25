@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func TeamRoutes(incomingRoutes *echo.Echo) {
+func TeamRoutes(incomingRoutes *echo.Group) {
 	team := incomingRoutes.Group("/team")
 
 	team.Use(middleware.JWTMiddleware())

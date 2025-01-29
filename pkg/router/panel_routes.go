@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PanelRoutes(incomingRoutes *echo.Echo) {
+func PanelRoutes(incomingRoutes *echo.Group) {
 	panel := incomingRoutes.Group("/panel")
 	panel.Use(middleware.JWTMiddleware())
 	panel.Use(middleware.CheckPanel)
@@ -16,5 +16,4 @@ func PanelRoutes(incomingRoutes *echo.Echo) {
 	panel.GET("/getscore/:teamid", controller.GetScore)
 	panel.PUT("/updatescore/:id", controller.UpdateScore)
 	panel.GET("/getsubmission/:teamId", controller.GetSubmission)
-
 }

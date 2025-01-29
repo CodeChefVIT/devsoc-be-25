@@ -38,8 +38,7 @@ func GetTeamId(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-//JOIN TEAM
-
+// JOIN TEAM
 func JoinTeam(c echo.Context) error {
 	var payload models.JoinTeam
 
@@ -148,10 +147,8 @@ func JoinTeam(c echo.Context) error {
 	})
 }
 
-//KICK MEMBER
-
+// KICK MEMBER
 func KickMemeber(c echo.Context) error {
-
 	var payload models.KickMember
 
 	ctx := c.Request().Context()
@@ -265,7 +262,6 @@ func KickMemeber(c echo.Context) error {
 // CREATE TEAM
 
 func CreateTeam(c echo.Context) error {
-
 	var payload models.CreateTeam
 
 	ctx := context.Background()
@@ -293,7 +289,7 @@ func CreateTeam(c echo.Context) error {
 	// fmt.Println(user)  -- For testing
 
 	member, err := utils.Queries.GetUser(ctx, user.ID)
-	//fmt.Println(member.TeamID) -- For testing
+	// fmt.Println(member.TeamID) -- For testing
 	if member.TeamID.UUID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
@@ -304,7 +300,7 @@ func CreateTeam(c echo.Context) error {
 		})
 	}
 
-	//fmt.Println(user.TeamID.UUID.String()) -- testing
+	// fmt.Println(user.TeamID.UUID.String()) -- testing
 
 	params := db.CreateTeamParams{
 		ID:             uuid.New(),
@@ -334,7 +330,6 @@ func CreateTeam(c echo.Context) error {
 		IsLeader: true,
 		ID:       user.ID,
 	})
-
 	if err != nil {
 		var pgerr *pgconn.PgError
 		if errors.As(err, &pgerr) {
@@ -363,10 +358,8 @@ func CreateTeam(c echo.Context) error {
 	})
 }
 
-//LEAVE TEAM
-
+// LEAVE TEAM
 func LeaveTeam(c echo.Context) error {
-
 	var payload models.LeaveTeam
 
 	ctx := c.Request().Context()
@@ -535,8 +528,7 @@ func LeaveTeam(c echo.Context) error {
 	})
 }
 
-//DELETE TEAM
-
+// DELETE TEAM
 func DeleteTeam(c echo.Context) error {
 	ctx := c.Request().Context()
 
@@ -625,10 +617,8 @@ func DeleteTeam(c echo.Context) error {
 	})
 }
 
-//update team name
-
+// update team name
 func UpdateTeamName(c echo.Context) error {
-
 	var payload models.UpdateTeamName
 
 	ctx := c.Request().Context()
@@ -687,7 +677,6 @@ func UpdateTeamName(c echo.Context) error {
 
 // Get All users in a team
 func GetAllTeamUsers(c echo.Context) error {
-
 	ctx := c.Request().Context()
 
 	user, ok := c.Get("user").(db.User)
@@ -700,7 +689,6 @@ func GetAllTeamUsers(c echo.Context) error {
 	}
 
 	team_members, err := utils.Queries.GetTeamUsers(ctx, user.TeamID)
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",

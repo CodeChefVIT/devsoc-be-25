@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func AuthRoutes(incomingRoutes *echo.Echo) {
+func AuthRoutes(incomingRoutes *echo.Group) {
 	auth := incomingRoutes.Group("/auth")
 
 	auth.POST("/signup", controller.SignUp)

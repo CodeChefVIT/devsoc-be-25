@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InfoRoutes(incomingRoutes *echo.Echo) {
+func InfoRoutes(incomingRoutes *echo.Group) {
 	info := incomingRoutes.Group("/info")
 	info.Use(middleware.JWTMiddleware())
 	info.Use(middleware.CheckUserBan)

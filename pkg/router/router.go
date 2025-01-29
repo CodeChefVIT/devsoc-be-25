@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterRoutes(e *echo.Echo) {
+func RegisterRoutes(e *echo.Group) {
 	admin := e.Group("/users")
 	admin.Use(echojwt.JWT(utils.Config.JwtSecret))
 	admin.GET("/ping", controller.Ping)

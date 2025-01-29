@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func AdminRoutes(incomingRoutes *echo.Echo) {
+func AdminRoutes(incomingRoutes *echo.Group) {
 	admin := incomingRoutes.Group("/admin")
 	admin.Use(middleware.JWTMiddleware())
 	admin.Use(middleware.CheckAdmin)

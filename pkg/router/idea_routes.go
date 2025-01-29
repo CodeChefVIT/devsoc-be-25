@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func IdeaRoutes(incomingRoutes *echo.Echo) {
+func IdeaRoutes(incomingRoutes *echo.Group) {
 	idea := incomingRoutes.Group("/idea")
 	idea.Use(middleware.JWTMiddleware())
 	idea.Use(middleware.CheckTeamBan)

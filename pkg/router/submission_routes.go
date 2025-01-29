@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func SubmissionRoutes(incomingRoutes *echo.Echo) {
+func SubmissionRoutes(incomingRoutes *echo.Group) {
 	submission := incomingRoutes.Group("/submission")
 	submission.Use(middleware.JWTMiddleware())
 	submission.Use(middleware.CheckTeamBan)

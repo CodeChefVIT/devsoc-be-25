@@ -24,14 +24,17 @@ func main() {
 		LogError:      true,
 		LogValuesFunc: logger.RouteLogger,
 	}))
-	router.TeamRoutes(e)
-	router.RegisterRoutes(e)
-	router.IdeaRoutes(e)
-	router.AdminRoutes(e)
-	router.SubmissionRoutes(e)
-	router.AuthRoutes(e)
-	router.PanelRoutes(e)
-	router.InfoRoutes(e)
+
+	apiGroup := e.Group("/api")
+
+	router.TeamRoutes(apiGroup)
+	router.RegisterRoutes(apiGroup)
+	router.IdeaRoutes(apiGroup)
+	router.AdminRoutes(apiGroup)
+	router.SubmissionRoutes(apiGroup)
+	router.AuthRoutes(apiGroup)
+	router.PanelRoutes(apiGroup)
+	router.InfoRoutes(apiGroup)
 
 	e.Start(":" + utils.Config.Port)
 }
