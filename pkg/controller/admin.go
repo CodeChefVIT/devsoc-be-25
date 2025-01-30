@@ -292,20 +292,11 @@ func CreatePanel(c echo.Context) error {
 		PhoneNo: pgtype.Text{
 			String: panel.PhoneNo,
 		},
-<<<<<<< HEAD
 		Role:       "panel",
 		IsLeader:   true,
 		IsVerified: true,
 		IsBanned:   false,
 		Gender:     panel.Gender,
-=======
-		Role:          "panel",
-		IsLeader:      true,
-		IsVerified:    true,
-		IsBanned:      false,
-		Gender:        panel.Gender,
-		GithubProfile: &panel.GithubProfile,
->>>>>>> 11fcf2e2295a69d11c2a99ea76ae68f7fc17df97
 	}
 	panelDb.ID, _ = uuid.NewV7()
 	panelDb.TeamID = uuid.NullUUID{
