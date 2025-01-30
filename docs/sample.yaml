@@ -1640,6 +1640,83 @@ paths:
                   data:
                     type: string
                     example: "error creating request"
+  /auth/github:
+    post:
+      summary: Update GitHub Profile
+      description: Updates the GitHub profile URL of the authenticated user.
+      operationId: updateGithubProfile
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                github:
+                  type: string
+                  format: uri
+                  description: The GitHub profile URL to update
+              required:
+                - github
+            examples:
+              validRequest:
+                value:
+                  github: "https://github.com/example-user"
+      responses:
+        "202":
+          description: GitHub profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User github updated successfully
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Invalid request body
+        "401":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: DB error [failed to update the github_link]
   /info/me:
     get:
       tags:

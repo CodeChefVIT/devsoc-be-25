@@ -100,3 +100,9 @@ UPDATE users
 SET
     is_starred = $1
 WHERE email = $2;
+
+-- name: UpdateGitHub :exec
+UPDATE users
+SET
+    github_profile = $1
+WHERE email = $2;

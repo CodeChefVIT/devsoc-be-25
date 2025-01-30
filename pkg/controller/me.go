@@ -13,6 +13,51 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func UpdateGithubProfile(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	user, ok := c.Get("user").(db.User)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, &models.Response{
+			Status:  "success",
+			Message: "unauthorized",
+		})
+	}
+
+	var req models.UpdateGithub
+	if err := c.Bind(&req); err != nil {
+		logger.Warnf(err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "Invalid request body",
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "fail",
+			Data:   utils.FormatValidationErrors(err),
+		})
+	}
+
+	err := utils.Queries.UpdateGitHub(ctx, db.UpdateGitHubParams{
+		GithubProfile: &req.Github,
+		Email:         user.Email,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: "DB error [failed to update the github_link]",
+		})
+	}
+
+	return c.JSON(http.StatusAccepted, &models.Response{
+		Status:  "success",
+		Message: "User github updated successfully",
+	})
+}
+
 func GetDetails(c echo.Context) error {
 	ctx := c.Request().Context()
 	user, ok := c.Get("user").(db.User)
