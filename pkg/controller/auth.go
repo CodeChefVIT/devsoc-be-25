@@ -347,7 +347,25 @@ func VerifyOTP(c echo.Context) error {
 
 func ResendOTP(c echo.Context) error {
 	ctx := c.Request().Context()
+
 	var req models.ResendOTP
+	if err := c.Bind(&req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "Invalid request body",
+		})
+	}
+
+	if err := utils.Validate.Struct(req); err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "Validation errors",
+			Data:    utils.FormatValidationErrors(err),
+		})
+	}
+
 	err := utils.GenerateOTP(ctx, req.Email)
 	if err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
