@@ -27,6 +27,10 @@ type Score struct {
 	Implementation int32
 	Presentation   int32
 	Round          int32
+	Points1        int32
+	Points2        int32
+	Points3        int32
+	Comment        *string
 }
 
 type Submission struct {
