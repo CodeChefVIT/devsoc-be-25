@@ -345,6 +345,25 @@ func VerifyOTP(c echo.Context) error {
 	})
 }
 
+func ResendOTP(c echo.Context) error {
+	ctx := c.Request().Context()
+	var req models.ResendOTP
+	err := utils.GenerateOTP(ctx, req.Email)
+	if err != nil {
+		logger.Errorf(logger.InternalError, err.Error())
+
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: "Failed to generate OTP",
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "OTP has been sent to email",
+	})
+}
+
 func Login(c echo.Context) error {
 	ctx := c.Request().Context()
 	var req models.LoginRequest

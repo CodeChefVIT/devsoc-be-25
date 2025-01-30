@@ -18,6 +18,7 @@ func AuthRoutes(incomingRoutes *echo.Group) {
 	auth.GET("/star", controller.CheckStarred, middleware.JWTMiddleware())
 	auth.POST("/github", controller.UpdateGithubProfile, middleware.JWTMiddleware())
 	auth.POST("/logout", controller.Logout)
+	auth.POST("/resend-otp", controller.ResendOTP)
 
 	// auth.Use(middleware.JWTMiddleware())
 	// auth.GET("/ping", controller.Ping)

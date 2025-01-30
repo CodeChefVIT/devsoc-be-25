@@ -31,3 +31,7 @@ type UpdatePasswordRequest struct {
 	NewPassword string `json:"new_password" validate:"required"`
 	OTP         string `json:"otp" validate:"required"`
 }
+
+type ResendOTP struct {
+	Email string `json:"email"`
+}
