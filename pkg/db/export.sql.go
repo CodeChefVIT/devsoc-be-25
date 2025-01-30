@@ -67,7 +67,7 @@ type ExportAllUsersRow struct {
 	RegNo             *string
 	HostelBlock       *string
 	RoomNo            *string
-	GithubProfile     string
+	GithubProfile     *string
 	Password          string
 	Role              string
 	IsLeader          bool

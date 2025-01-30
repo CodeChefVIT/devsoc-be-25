@@ -43,7 +43,7 @@ func CheckStarred(c echo.Context) error {
 	owner := utils.Config.RepoOwner
 	name := utils.Config.RepoName
 
-	github_user := strings.Split(github_link, "github.com/")
+	github_user := strings.Split(*github_link, "github.com/")
 
 	if len(github_user) != 2 {
 		return c.JSON(http.StatusBadRequest, models.Response{

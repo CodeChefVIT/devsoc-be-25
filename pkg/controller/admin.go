@@ -300,7 +300,7 @@ func CreatePanel(c echo.Context) error {
 		IsVerified:    true,
 		IsBanned:      false,
 		Gender:        panel.Gender,
-		GithubProfile: panel.GithubProfile,
+		GithubProfile: &panel.GithubProfile,
 	}
 	panelDb.ID, _ = uuid.NewV7()
 	panelDb.TeamID = uuid.NullUUID{

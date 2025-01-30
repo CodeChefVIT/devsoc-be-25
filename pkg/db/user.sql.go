@@ -45,7 +45,7 @@ type CompleteProfileParams struct {
 	PhoneNo       pgtype.Text
 	Gender        string
 	RegNo         *string
-	GithubProfile string
+	GithubProfile *string
 	HostelBlock   *string
 	RoomNo        *string
 }
@@ -96,7 +96,7 @@ type CreateUserParams struct {
 	PhoneNo           pgtype.Text
 	Gender            string
 	RegNo             *string
-	GithubProfile     string
+	GithubProfile     *string
 	Password          string
 	Role              string
 	IsLeader          bool
@@ -482,7 +482,7 @@ type UpdateUserParams struct {
 	PhoneNo       pgtype.Text
 	Gender        string
 	RegNo         *string
-	GithubProfile string
+	GithubProfile *string
 	HostelBlock   *string
 	RoomNo        *string
 }

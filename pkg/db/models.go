@@ -58,7 +58,7 @@ type User struct {
 	PhoneNo           pgtype.Text
 	Gender            string
 	RegNo             *string
-	GithubProfile     string
+	GithubProfile     *string
 	Password          string
 	Role              string
 	IsLeader          bool

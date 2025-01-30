@@ -175,7 +175,7 @@ type GetTeamMembersRow struct {
 	FirstName     string
 	LastName      string
 	IsLeader      bool
-	GithubProfile string
+	GithubProfile *string
 	RegNo         *string
 	PhoneNo       pgtype.Text
 }
@@ -366,7 +366,7 @@ type InfoQueryRow struct {
 	PhoneNo           pgtype.Text
 	Gender            string
 	RegNo             *string
-	GithubProfile     string
+	GithubProfile     *string
 	Password          string
 	Role              string
 	IsLeader          bool
