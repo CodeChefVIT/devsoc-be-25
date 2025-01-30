@@ -85,7 +85,11 @@ func ExportUsers(c echo.Context) error {
 			user.TeamID.UUID.String(),
 			hostelBlock,
 			roomNo,
+<<<<<<< HEAD
 			githubProfile,
+=======
+			*user.GithubProfile,
+>>>>>>> 11fcf2e2295a69d11c2a99ea76ae68f7fc17df97
 			user.Role,
 			strconv.FormatBool(user.IsLeader),
 			strconv.FormatBool(user.IsVerified),
