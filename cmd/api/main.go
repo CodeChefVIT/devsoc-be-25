@@ -25,7 +25,7 @@ func main() {
 		LogValuesFunc: logger.RouteLogger,
 	}))
 
-	apiGroup := e.Group("/api")
+	apiGroup := e.Group("")
 
 	router.TeamRoutes(apiGroup)
 	router.RegisterRoutes(apiGroup)
