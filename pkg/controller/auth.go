@@ -122,7 +122,6 @@ func SignUp(c echo.Context) error {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
-		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
@@ -133,7 +132,6 @@ func SignUp(c echo.Context) error {
 		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
-		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
@@ -442,7 +440,6 @@ func Login(c echo.Context) error {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
-		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
@@ -453,7 +450,6 @@ func Login(c echo.Context) error {
 		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
-		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
@@ -608,7 +604,6 @@ func RefreshToken(c echo.Context) error {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
-		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
@@ -619,7 +614,6 @@ func RefreshToken(c echo.Context) error {
 		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   utils.Config.CookieSecure,
-		Domain:   utils.Config.Domain,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
