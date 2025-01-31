@@ -86,6 +86,9 @@ func UpdateScore(c echo.Context) error {
 		Design:         int32(points.Design),
 		Implementation: int32(points.Implementation),
 		Presentation:   int32(points.Presentation),
+		Teamwork:       int32(points.Teamwork),
+		Innovation:     int32(points.Innovation),
+		Comment:        &points.Comment,
 		Round:          int32(points.Round),
 	}
 
