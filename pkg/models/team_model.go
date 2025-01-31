@@ -13,7 +13,7 @@ type Team struct {
 }
 
 type CreateTeam struct {
-	Name string `json:"name" validate:"required,alphanum"`
+	Name string `json:"name" validate:"required"`
 }
 
 type JoinTeam struct {
