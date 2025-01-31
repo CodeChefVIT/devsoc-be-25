@@ -313,8 +313,18 @@ func CreateTeam(c echo.Context) error {
 
 	team, err := utils.Queries.CreateTeam(ctx, params)
 	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			return c.JSON(http.StatusBadRequest, models.Response{
+				Status:  "fail",
+				Message: "Team name has already been taken",
+				Data: map[string]string{
+					"message": "Failed to create Team",
+					"error":   err.Error(),
+				}})
+		}
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
+			Status:  "fail",
+			Message: "DB error",
 			Data: map[string]string{
 				"message": "Failed to create Team",
 				"error":   err.Error(),
