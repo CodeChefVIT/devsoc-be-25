@@ -213,11 +213,25 @@ func GetTeamById(c echo.Context) error {
 		})
 	}
 
+	nullUUID := uuid.NullUUID{
+		UUID:  teamId,
+		Valid: true,
+	}
+
+	users, err := utils.Queries.GetUsersByTeamId(c.Request().Context(), nullUUID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "Team fetched successfully",
 		Data: map[string]interface{}{
-			"team": team,
+			"team":         team,
+			"team_members": users,
 		},
 	})
 }

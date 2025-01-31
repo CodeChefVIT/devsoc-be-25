@@ -58,4 +58,3 @@ func CheckTeamBan(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-

@@ -415,6 +415,44 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getUsersByTeamId = `-- name: GetUsersByTeamId :many
+SELECT first_name, last_name, email, reg_no, phone_no FROM users WHERE team_id = $1
+`
+
+type GetUsersByTeamIdRow struct {
+	FirstName string
+	LastName  string
+	Email     string
+	RegNo     *string
+	PhoneNo   pgtype.Text
+}
+
+func (q *Queries) GetUsersByTeamId(ctx context.Context, teamID uuid.NullUUID) ([]GetUsersByTeamIdRow, error) {
+	rows, err := q.db.Query(ctx, getUsersByTeamId, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUsersByTeamIdRow
+	for rows.Next() {
+		var i GetUsersByTeamIdRow
+		if err := rows.Scan(
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.RegNo,
+			&i.PhoneNo,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const unbanUser = `-- name: UnbanUser :exec
 UPDATE users
 SET is_banned = FALSE

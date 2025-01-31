@@ -11,7 +11,16 @@ LIMIT $3;
 
 
 -- name: GetTeamById :one
-SELECT * FROM teams WHERE id = $1;
+SELECT teams.id, teams.name, teams.round_qualified, teams.code,teams.is_banned,
+       score.design, score.implementation, score.presentation, score.round,
+       submission.title, submission.description, submission.track, submission.github_link, submission.figma_link, submission.other_link,
+       ideas.title, ideas.description, ideas.track, ideas.is_selected
+FROM teams
+INNER JOIN score ON score.team_id = teams.id
+LEFT JOIN submission ON submission.team_id = teams.id
+LEFT JOIN ideas ON ideas.team_id = teams.id
+WHERE teams.id = $1;
+
 
 -- name: FindTeam :one
 SELECT id,name,code,round_qualified FROM teams

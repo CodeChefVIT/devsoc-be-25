@@ -137,19 +137,62 @@ func (q *Queries) FindTeam(ctx context.Context, code string) (FindTeamRow, error
 }
 
 const getTeamById = `-- name: GetTeamById :one
-SELECT id, name, number_of_people, round_qualified, code, is_banned FROM teams WHERE id = $1
+SELECT teams.id, teams.name, teams.round_qualified, teams.code,teams.is_banned,
+       score.design, score.implementation, score.presentation, score.round,
+       submission.title, submission.description, submission.track, submission.github_link, submission.figma_link, submission.other_link,
+       ideas.title, ideas.description, ideas.track, ideas.is_selected
+FROM teams
+INNER JOIN score ON score.team_id = teams.id
+LEFT JOIN submission ON submission.team_id = teams.id
+LEFT JOIN ideas ON ideas.team_id = teams.id
+WHERE teams.id = $1
 `
 
-func (q *Queries) GetTeamById(ctx context.Context, id uuid.UUID) (Team, error) {
+type GetTeamByIdRow struct {
+	ID             uuid.UUID
+	Name           string
+	RoundQualified pgtype.Int4
+	Code           string
+	IsBanned       bool
+	Design         int32
+	Implementation int32
+	Presentation   int32
+	Round          int32
+	Title          *string
+	Description    *string
+	Track          *string
+	GithubLink     *string
+	FigmaLink      *string
+	OtherLink      *string
+	Title_2        *string
+	Description_2  *string
+	Track_2        *string
+	IsSelected     pgtype.Bool
+}
+
+func (q *Queries) GetTeamById(ctx context.Context, id uuid.UUID) (GetTeamByIdRow, error) {
 	row := q.db.QueryRow(ctx, getTeamById, id)
-	var i Team
+	var i GetTeamByIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.NumberOfPeople,
 		&i.RoundQualified,
 		&i.Code,
 		&i.IsBanned,
+		&i.Design,
+		&i.Implementation,
+		&i.Presentation,
+		&i.Round,
+		&i.Title,
+		&i.Description,
+		&i.Track,
+		&i.GithubLink,
+		&i.FigmaLink,
+		&i.OtherLink,
+		&i.Title_2,
+		&i.Description_2,
+		&i.Track_2,
+		&i.IsSelected,
 	)
 	return i, err
 }
