@@ -124,7 +124,7 @@ func SignUp(c echo.Context) error {
 		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		Domain:   utils.Config.Domain,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	c.SetCookie(&http.Cookie{
@@ -135,7 +135,7 @@ func SignUp(c echo.Context) error {
 		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		Domain:   utils.Config.Domain,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	return c.JSON(http.StatusOK, &models.Response{
@@ -491,7 +491,7 @@ func Login(c echo.Context) error {
 		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		Domain:   utils.Config.Domain,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	c.SetCookie(&http.Cookie{
@@ -502,7 +502,7 @@ func Login(c echo.Context) error {
 		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		Domain:   utils.Config.Domain,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	return c.JSON(http.StatusOK, &models.Response{
@@ -657,7 +657,7 @@ func RefreshToken(c echo.Context) error {
 		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		Domain:   utils.Config.Domain,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	c.SetCookie(&http.Cookie{
@@ -668,7 +668,7 @@ func RefreshToken(c echo.Context) error {
 		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		Domain:   utils.Config.Domain,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	return c.JSON(http.StatusOK, &models.Response{
@@ -687,7 +687,7 @@ func Logout(c echo.Context) error {
 				Value:    "",
 				Path:     "/",
 				Domain:   utils.Config.Domain,
-				SameSite: http.SameSiteNoneMode,
+				SameSite: http.SameSiteStrictMode,
 				Secure:   true,
 				HttpOnly: true,
 			}
@@ -703,7 +703,7 @@ func Logout(c echo.Context) error {
 				Value:    "",
 				Path:     "/",
 				Domain:   utils.Config.Domain,
-				SameSite: http.SameSiteNoneMode,
+				SameSite: http.SameSiteStrictMode,
 				Secure:   true,
 				HttpOnly: true,
 			}
@@ -713,7 +713,7 @@ func Logout(c echo.Context) error {
 	access.MaxAge = -1
 	access.Value = ""
 	access.Path = "/"
-	access.SameSite = http.SameSiteNoneMode
+	access.SameSite = http.SameSiteStrictMode
 	access.Secure = true
 	access.HttpOnly = true
 	c.SetCookie(access)
@@ -721,7 +721,7 @@ func Logout(c echo.Context) error {
 	refresh.MaxAge = -1
 	refresh.Value = ""
 	refresh.Path = "/"
-	refresh.SameSite = http.SameSiteNoneMode
+	refresh.SameSite = http.SameSiteStrictMode
 	refresh.Secure = true
 	refresh.HttpOnly = true
 	c.SetCookie(refresh)
