@@ -42,7 +42,7 @@ func CheckTeamBan(next echo.HandlerFunc) echo.HandlerFunc {
 				Message: "unauthorized",
 			})
 		}
-		team, err := utils.Queries.GetTeamById(c.Request().Context(), user.TeamID.UUID)
+		team, err := utils.Queries.GetTeamByTeamId(c.Request().Context(), user.TeamID.UUID)
 		if err != nil {
 			return c.JSON(http.StatusNotFound, models.Response{
 				Status:  "fail",

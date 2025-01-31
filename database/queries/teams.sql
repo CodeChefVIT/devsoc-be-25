@@ -21,6 +21,8 @@ LEFT JOIN submission ON submission.team_id = teams.id
 LEFT JOIN ideas ON ideas.team_id = teams.id
 WHERE teams.id = $1;
 
+-- name: GetTeamByTeamId :one
+SELECT * FROM teams WHERE id = $1;
 
 -- name: FindTeam :one
 SELECT id,name,code,round_qualified FROM teams

@@ -197,6 +197,24 @@ func (q *Queries) GetTeamById(ctx context.Context, id uuid.UUID) (GetTeamByIdRow
 	return i, err
 }
 
+const getTeamByTeamId = `-- name: GetTeamByTeamId :one
+SELECT id, name, number_of_people, round_qualified, code, is_banned FROM teams WHERE id = $1
+`
+
+func (q *Queries) GetTeamByTeamId(ctx context.Context, id uuid.UUID) (Team, error) {
+	row := q.db.QueryRow(ctx, getTeamByTeamId, id)
+	var i Team
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.NumberOfPeople,
+		&i.RoundQualified,
+		&i.Code,
+		&i.IsBanned,
+	)
+	return i, err
+}
+
 const getTeamIDByCode = `-- name: GetTeamIDByCode :one
 SELECT id FROM teams WHERE code = $1
 `
