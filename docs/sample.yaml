@@ -258,7 +258,7 @@ paths:
       summary: Update Team Rounds
       description: Updates the round information for a specific team.
       tags:
-        - Team Management
+        - Admin
       requestBody:
         description: Object containing team ID and updated round information.
         required: true
@@ -406,22 +406,108 @@ paths:
     get:
       tags:
         - Admin
-      summary: Get a team by id
+      summary: Get Team by ID
+      description: Fetches team details along with its members.
       parameters:
         - name: id
           in: path
           required: true
+          description: UUID of the team
           schema:
-            type: uuid
+            type: string
+            format: uuid
       responses:
         "200":
-          description: A single team
+          description: Team details fetched successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Teams"
-        "404":
-          description: Team not found
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Team fetched successfully
+                  data:
+                    type: object
+                    properties:
+                      team:
+                        $ref: "#/components/schemas/Team"
+                      team_members:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  components:
+    schemas:
+      Team:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          name:
+            type: string
+          number_of_people:
+            type: integer
+          round_qualified:
+            type: integer
+          code:
+            type: string
+          is_banned:
+            type: boolean
+      User:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          first_name:
+            type: string
+          last_name:
+            type: string
+          email:
+            type: string
+            format: email
+          phone_no:
+            type: string
+          reg_no:
+            type: string
+          vit_email:
+            type: string
+          hostel_block:
+            type: string
+          room_no:
+            type: integer
+          github_profile:
+            type: string
+          role:
+            type: string
+          is_leader:
+            type: boolean
+          is_verified:
+            type: boolean
+          is_banned:
+            type: boolean
+          is_profile_complete:
+            type: boolean
+      ErrorResponse:
+        type: object
+        properties:
+          status:
+            type: string
+            example: fail
+          message:
+            type: string
+            example: Error message here
   /admin/teams/leader/{id}:
     get:
       tags:
