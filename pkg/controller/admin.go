@@ -56,10 +56,10 @@ func GetAllUsers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "Users fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Users fetched successfully",
-			"users":   users,
+			"users": users,
 		},
 	})
 }
@@ -80,10 +80,10 @@ func GetUsersByEmail(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "User fetched successfully",
 		Data: map[string]interface{}{
-			"message": "User fetched successfully",
-			"user":    user,
+			"user": user,
 		},
 	})
 }
@@ -113,10 +113,9 @@ func BanUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "user banned successfully",
-		},
+		Status:  "success",
+		Message: "user bannned successfully",
+		Data:    map[string]string{},
 	})
 }
 
@@ -145,10 +144,9 @@ func UnbanUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: map[string]string{
-			"message": "user unbanned successfully",
-		},
+		Status:  "success",
+		Message: "user unbanned successfully",
+		Data:    map[string]string{},
 	})
 }
 
@@ -189,10 +187,10 @@ func GetTeams(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "Teams fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Teams fetched successfully",
-			"teams":   teams,
+			"teams": teams,
 		},
 	})
 }
@@ -216,10 +214,10 @@ func GetTeamById(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "Team fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Team fetched successfully",
-			"team":    team,
+			"team": team,
 		},
 	})
 }
@@ -248,10 +246,10 @@ func GetTeamLeader(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "Team leader fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Team leader fetched successfully",
-			"user":    user,
+			"user": user,
 		},
 	})
 }
@@ -313,10 +311,9 @@ func CreatePanel(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
-		Status: "success",
-		Data: map[string]interface{}{
-			"message": "Panel Created SuccessFully",
-		},
+		Status:  "success",
+		Message: "Panel Created Successfully",
+		Data:    map[string]interface{}{},
 	})
 }
 
@@ -339,10 +336,10 @@ func GetAllTeamMembers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
+		Status:  "success",
+		Message: "Team fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Team fetched successfully",
-			"team":    team_members,
+			"team": team_members,
 		},
 	})
 }
@@ -389,8 +386,8 @@ func BanTeam(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data:   "Team Banned Successfully",
+		Status:  "success",
+		Message: "Team Banned Successfully",
 	})
 }
 
@@ -430,14 +427,14 @@ func UnBanTeam(c echo.Context) error {
 
 	if err := utils.Queries.UnBanTeam(ctx, team.ID); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   "Failed to unban Team",
+			Status:  "fail",
+			Message: "Failed to unban Team",
 		})
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data:   "Team UnBanned Successfully",
+		Status:  "success",
+		Message: "Team UnBanned Successfully",
 	})
 }
 
@@ -482,7 +479,7 @@ func UpdateTeamRounds(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data:   "Rounds qualified by team Updated",
+		Status:  "success",
+		Message: "Rounds qualified by team Updated",
 	})
 }
