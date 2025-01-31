@@ -166,6 +166,16 @@ func UpdateUser(c echo.Context) error {
 		})
 	}
 
+	if !utils.ValidateAlphaNum(req.LastName) {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "success",
+			Message: "Validation errors",
+			Data: map[string]any{
+				"last_name": "The name must contain only alphabetic characters and spaces. No other characters are allowed",
+			},
+		})
+	}
+
 	if req.Gender != "M" && req.Gender != "F" && req.Gender != "O" {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",

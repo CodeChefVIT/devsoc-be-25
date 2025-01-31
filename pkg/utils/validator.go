@@ -1,8 +1,8 @@
 package utils
 
 import (
-
 	"github.com/go-playground/validator"
+	"regexp"
 )
 
 var Validate *validator.Validate
@@ -27,9 +27,16 @@ func FormatValidationErrors(err error) map[string]string {
 				errorMessages[e.Field()] = "Invalid URL format"
 			case "len":
 				errorMessages[e.Field()] = "Invalid length"
+			case "alphanum":
+				errorMessages[e.Field()] = "must contain only letters or numbers"
 			}
 		}
 	}
 
 	return errorMessages
+}
+
+func ValidateAlphaNum(str string) bool {
+	regex := regexp.MustCompile(`^[a-zA-Z0-9 ]+$`)
+	return regex.MatchString(str)
 }
