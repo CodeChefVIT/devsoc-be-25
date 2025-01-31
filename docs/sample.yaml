@@ -84,6 +84,8 @@ paths:
 
   /admin/users/{email}:
     get:
+      tags:
+        - Admin
       summary: Get user by email
       description: Fetch user details by their email address.
       parameters:
