@@ -37,6 +37,6 @@ func FormatValidationErrors(err error) map[string]string {
 }
 
 func ValidateAlphaNum(str string) bool {
-	regex := regexp.MustCompile(`^[a-zA-Z0-9 ]+$`)
+	regex := regexp.MustCompile(`^[a-zA-Z0-9\s]+$`)
 	return regex.MatchString(str)
 }
