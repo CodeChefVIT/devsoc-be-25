@@ -1,8 +1,10 @@
 package utils
 
 import (
-	"github.com/go-playground/validator"
+	"fmt"
 	"regexp"
+
+	"github.com/go-playground/validator"
 )
 
 var Validate *validator.Validate
@@ -11,29 +13,28 @@ func InitValidator() {
 	Validate = validator.New()
 }
 
-func FormatValidationErrors(err error) map[string]string {
-	errorMessages := make(map[string]string)
+func FormatValidationErrors(err error) string {
 
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, e := range validationErrors {
 			switch e.Tag() {
 			case "required":
-				errorMessages[e.Field()] = "This field is required"
+				return fmt.Sprintf("%s field is required", e.Field())
 			case "email":
-				errorMessages[e.Field()] = "Invalid email format"
+				return fmt.Sprintf("%s field is invalid email format", e.Field())
 			case "endswith":
-				errorMessages[e.Field()] = "Email must end with @vitstudent.ac.in"
+				return fmt.Sprintf("%s field must end with @vitstudent.ac.in", e.Field())
 			case "url":
-				errorMessages[e.Field()] = "Invalid URL format"
+				return fmt.Sprintf("%s field is invalid URL format", e.Field())
 			case "len":
-				errorMessages[e.Field()] = "Invalid length"
+				return fmt.Sprintf("%s field is invalid length", e.Field())
 			case "alphanum":
-				errorMessages[e.Field()] = "must contain only letters or numbers"
+				return fmt.Sprintf("%s field must contain only letters or numbers", e.Field())
 			}
 		}
 	}
 
-	return errorMessages
+	return "validation issue :- contact us on discord"
 }
 
 func ValidateAlphaNum(str string) bool {
