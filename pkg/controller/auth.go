@@ -175,7 +175,17 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	if !utils.ValidateAlphaNum(req.LastName) || !utils.ValidateAlphaNum(req.FirstName) {
+	if !utils.ValidateAlphaNum(req.FirstName) {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "success",
+			Message: "Validation errors",
+			Data: map[string]any{
+				"first_name": "The name must contain only alphabetic characters and spaces. No other characters are allowed",
+			},
+		})
+	}
+
+	if !utils.ValidateAlphaNum(req.LastName) {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "success",
 			Message: "Validation errors",
