@@ -41,6 +41,13 @@ func GetScore(c echo.Context) error {
 		})
 	}
 
+	if len(teamScore) == 0 {
+		return c.JSON(http.StatusNotFound, &models.Response{
+			Status:  "fail",
+			Message: "No scores found for the given team ID"},
+		)
+	}
+
 	scores := make([]models.GetScore, len(teamScore))
 	for i := 0; i < len(teamScore); i++ {
 		scores[i] = models.GetScore{
