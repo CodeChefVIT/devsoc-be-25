@@ -48,7 +48,10 @@ func GetScore(c echo.Context) error {
 			TeamID:         teamId,
 			Design:         int(teamScore[i].Design),
 			Implementation: int(teamScore[i].Implementation),
-			Presentation:   int(teamScore[i].Implementation),
+			Presentation:   int(teamScore[i].Presentation),
+			Innovation:     int(teamScore[i].Innovation),
+			Teamwork:       int(teamScore[i].Teamwork),
+			Comment:        getSafeString(teamScore[i].Comment),
 			Round:          int(teamScore[i].Round),
 		}
 	}
