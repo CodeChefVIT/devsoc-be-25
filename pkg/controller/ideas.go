@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"errors"
-
 	"net/http"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
@@ -101,8 +100,8 @@ func UpdateIdea(c echo.Context) error {
 
 	if err := utils.Validate.Struct(req); err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status: "fail",
-			Data:   utils.FormatValidationErrors(err),
+			Status:  "fail",
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -171,7 +170,6 @@ func GetIdea(c echo.Context) error {
 			Title:       ideas.Title,
 			Description: ideas.Description,
 			Track:       ideas.Track,
-
 		},
 	})
 }

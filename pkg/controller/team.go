@@ -320,7 +320,8 @@ func CreateTeam(c echo.Context) error {
 				Data: map[string]string{
 					"message": "Failed to create Team",
 					"error":   err.Error(),
-				}})
+				},
+			})
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status:  "fail",
@@ -640,8 +641,8 @@ func UpdateTeamName(c echo.Context) error {
 	if err := utils.Validate.Struct(payload); err != nil {
 		validationErrors := utils.FormatValidationErrors(err)
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   validationErrors,
+			Status:  "fail",
+			Message: validationErrors,
 		})
 	}
 
@@ -675,7 +676,8 @@ func UpdateTeamName(c echo.Context) error {
 				Data: map[string]string{
 					"message": "Failed to create Team",
 					"error":   err.Error(),
-				}})
+				},
+			})
 		}
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status:  "fail",
