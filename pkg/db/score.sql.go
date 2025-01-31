@@ -12,8 +12,8 @@ import (
 )
 
 const createScore = `-- name: CreateScore :exec
-INSERT INTO score (id, team_id, design, implementation, presentation, round, points1, points2, points3, comment)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+INSERT INTO score (id, team_id, design, implementation, presentation, round,  innovation, teamwork, comment)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 `
 
 type CreateScoreParams struct {
@@ -23,9 +23,8 @@ type CreateScoreParams struct {
 	Implementation int32
 	Presentation   int32
 	Round          int32
-	Points1        int32
-	Points2        int32
-	Points3        int32
+	Innovation     int32
+	Teamwork       int32
 	Comment        *string
 }
 
@@ -37,9 +36,8 @@ func (q *Queries) CreateScore(ctx context.Context, arg CreateScoreParams) error 
 		arg.Implementation,
 		arg.Presentation,
 		arg.Round,
-		arg.Points1,
-		arg.Points2,
-		arg.Points3,
+		arg.Innovation,
+		arg.Teamwork,
 		arg.Comment,
 	)
 	return err
@@ -56,7 +54,7 @@ func (q *Queries) DeleteScore(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTeamScores = `-- name: GetTeamScores :many
-SELECT id, team_id, design, implementation, presentation, round, points1, points2, points3, comment
+SELECT id, team_id, design, implementation, presentation, round, innovation, teamwork, comment
 FROM score
 WHERE team_id = $1
 `
@@ -77,9 +75,8 @@ func (q *Queries) GetTeamScores(ctx context.Context, teamID uuid.UUID) ([]Score,
 			&i.Implementation,
 			&i.Presentation,
 			&i.Round,
-			&i.Points1,
-			&i.Points2,
-			&i.Points3,
+			&i.Innovation,
+			&i.Teamwork,
 			&i.Comment,
 		); err != nil {
 			return nil, err
@@ -94,8 +91,8 @@ func (q *Queries) GetTeamScores(ctx context.Context, teamID uuid.UUID) ([]Score,
 
 const updateScore = `-- name: UpdateScore :exec
 UPDATE score
-SET team_id = $1, design = $2, implementation = $3, presentation = $4, round = $5, points1 = $6, points2 = $7, points3 = $8, comment = $9
-WHERE id = $10
+SET team_id = $1, design = $2, implementation = $3, presentation = $4, round = $5, innovation = $6, teamwork = $7, comment = $8
+WHERE id = $9
 `
 
 type UpdateScoreParams struct {
@@ -104,9 +101,8 @@ type UpdateScoreParams struct {
 	Implementation int32
 	Presentation   int32
 	Round          int32
-	Points1        int32
-	Points2        int32
-	Points3        int32
+	Innovation     int32
+	Teamwork       int32
 	Comment        *string
 	ID             uuid.UUID
 }
@@ -118,9 +114,8 @@ func (q *Queries) UpdateScore(ctx context.Context, arg UpdateScoreParams) error 
 		arg.Implementation,
 		arg.Presentation,
 		arg.Round,
-		arg.Points1,
-		arg.Points2,
-		arg.Points3,
+		arg.Innovation,
+		arg.Teamwork,
 		arg.Comment,
 		arg.ID,
 	)

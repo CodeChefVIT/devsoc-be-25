@@ -166,6 +166,9 @@ func CreateScore(c echo.Context) error {
 		Round:          int32(points.Round),
 		Presentation:   int32(points.Presentation),
 		Implementation: int32(points.Implementation),
+		Teamwork:       int32(points.Teamwork),
+		Comment:        &points.Comment,
+		Innovation:     int32(points.Innovation),
 		Design:         int32(points.Design),
 	}
 	score.ID, _ = uuid.NewV7()
