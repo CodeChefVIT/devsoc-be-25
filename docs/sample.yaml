@@ -2013,7 +2013,51 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateScore"
+              type: object
+              properties:
+                design:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  example: 8
+                implementation:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  example: 7
+                presentation:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  example: 9
+                innovation:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  example: 8
+                teamwork:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  example: 9
+                comment:
+                  type: string
+                  example: "Great teamwork and innovative ideas."
+                round:
+                  type: integer
+                  example: 1
+                team_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+              required:
+                - design
+                - implementation
+                - presentation
+                - innovation
+                - teamwork
+                - round
+                - team_id
       responses:
         "200":
           description: Score created successfully
@@ -2024,7 +2068,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Score created successfully
+                    example: "Score created successfully"
         "400":
           description: Invalid request
           content:
@@ -2032,10 +2076,28 @@ paths:
               schema:
                 type: object
                 properties:
+                  status:
+                    type: string
+                    example: "fail"
                   message:
                     type: string
+                    example: "Invalid request body or validation error"
                   error:
                     type: string
+                    example: "Validation failed: design must be between 0 and 10"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Internal server error"
   /panel/deletescore/{id}:
     delete:
       summary: Delete a score
