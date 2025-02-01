@@ -13,8 +13,14 @@ import (
 )
 
 const exportAllTeams = `-- name: ExportAllTeams :many
-SELECT id, name, number_of_people, round_qualified, code
-FROM teams
+SELECT
+    id,
+    name,
+    number_of_people,
+    round_qualified,
+    code
+FROM
+    teams
 `
 
 type ExportAllTeamsRow struct {
@@ -52,8 +58,28 @@ func (q *Queries) ExportAllTeams(ctx context.Context) ([]ExportAllTeamsRow, erro
 }
 
 const exportAllUsers = `-- name: ExportAllUsers :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, hostel_block, room_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete
-FROM users
+SELECT
+    u.id,
+    u.team_id,
+    u.first_name,
+    u.last_name,
+    u.email,
+    u.phone_no,
+    u.gender,
+    u.reg_no,
+    u.hostel_block,
+    u.room_no,
+    u.github_profile,
+    u.password,
+    u.role,
+    u.is_leader,
+    u.is_verified,
+    u.is_banned,
+    u.is_profile_complete,
+    t.round_qualified
+FROM
+    users u
+    JOIN teams t ON u.team_id = t.id
 `
 
 type ExportAllUsersRow struct {
@@ -74,6 +100,7 @@ type ExportAllUsersRow struct {
 	IsVerified        bool
 	IsBanned          bool
 	IsProfileComplete bool
+	RoundQualified    pgtype.Int4
 }
 
 func (q *Queries) ExportAllUsers(ctx context.Context) ([]ExportAllUsersRow, error) {
@@ -103,6 +130,7 @@ func (q *Queries) ExportAllUsers(ctx context.Context) ([]ExportAllUsersRow, erro
 			&i.IsVerified,
 			&i.IsBanned,
 			&i.IsProfileComplete,
+			&i.RoundQualified,
 		); err != nil {
 			return nil, err
 		}

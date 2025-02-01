@@ -326,11 +326,12 @@ func (q *Queries) GetTeamUsersEmails(ctx context.Context, teamID uuid.NullUUID) 
 }
 
 const getTeams = `-- name: GetTeams :many
-SELECT id, name, number_of_people, round_qualified, code, is_banned
+SELECT teams.id, teams.name, teams.number_of_people, teams.round_qualified, teams.code, teams.is_banned,ideas.title,ideas.description,ideas.track
 FROM teams
-WHERE name ILIKE '%' || $1 || '%'
-  AND id > $2
-ORDER BY id
+LEFT JOIN ideas ON ideas.team_id = teams.id
+WHERE teams.name ILIKE '%' || $1 || '%'
+  AND teams.id > $2
+ORDER BY teams.id
 LIMIT $3
 `
 
@@ -340,15 +341,27 @@ type GetTeamsParams struct {
 	Limit   int32
 }
 
-func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, error) {
+type GetTeamsRow struct {
+	ID             uuid.UUID
+	Name           string
+	NumberOfPeople int32
+	RoundQualified pgtype.Int4
+	Code           string
+	IsBanned       bool
+	Title          *string
+	Description    *string
+	Track          *string
+}
+
+func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]GetTeamsRow, error) {
 	rows, err := q.db.Query(ctx, getTeams, arg.Column1, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Team
+	var items []GetTeamsRow
 	for rows.Next() {
-		var i Team
+		var i GetTeamsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -356,6 +369,9 @@ func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, err
 			&i.RoundQualified,
 			&i.Code,
 			&i.IsBanned,
+			&i.Title,
+			&i.Description,
+			&i.Track,
 		); err != nil {
 			return nil, err
 		}
