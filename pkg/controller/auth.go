@@ -2,11 +2,13 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/middleware"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
@@ -156,12 +158,23 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
+	fmt.Printf("Type of req: %T\n", req)
+
 	if err := utils.Validate.Struct(req); err != nil {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
 			Message: "Validation errors",
 			Data:    utils.FormatValidationErrors(err),
+		})
+	}
+
+	if err := middleware.TrimSpaces(&req); err != nil {
+		return c.JSON(echo.ErrBadRequest.Code, models.Response{
+			Status: "fail",
+			Data: map[string]string{
+				"error": err.Error(),
+			},
 		})
 	}
 

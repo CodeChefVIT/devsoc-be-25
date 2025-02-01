@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
+	"github.com/CodeChefVIT/devsoc-be-24/pkg/middleware"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 )
@@ -274,6 +275,15 @@ func CreateTeam(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
+		})
+	}
+
+	if err := middleware.TrimSpaces(&payload) ; err != nil {
+		return c.JSON(echo.ErrBadRequest.Code, models.Response{
+			Status:"fail",
+			Data:map[string]string{
+				"error":err.Error(),
+			},
 		})
 	}
 
@@ -632,6 +642,15 @@ func UpdateTeamName(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   validationErrors,
+		})
+	}
+
+	if err := middleware.TrimSpaces(&payload) ; err != nil {
+		return c.JSON(echo.ErrBadRequest.Code, models.Response{
+			Status:"fail",
+			Data:map[string]string{
+				"error":err.Error(),
+			},
 		})
 	}
 
