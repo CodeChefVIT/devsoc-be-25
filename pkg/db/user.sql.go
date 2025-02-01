@@ -124,13 +124,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete, is_starred, room_no, hostel_block
-FROM users
-WHERE (first_name LIKE '%' || $1 || '%'
-       OR reg_no LIKE '%' || $1 || '%'
-       OR email LIKE '%' || $1 || '%')
-  AND id > $2
-ORDER BY id
+SELECT u.id, u.team_id, u.first_name, u.last_name, u.email, u.phone_no, u.gender, u.reg_no, u.github_profile, u.password, u.role, u.is_leader, u.is_verified, u.is_banned, u.is_profile_complete, u.is_starred, u.room_no, u.hostel_block,t.round_qualified
+FROM users u
+JOIN teams t ON t.id = u.team_id
+WHERE (u.first_name LIKE '%' || $1 || '%'
+       OR u.reg_no LIKE '%' || $1 || '%'
+       OR u.email LIKE '%' || $1 || '%')
+  AND u.id > $2
+ORDER BY u.id
 LIMIT $3
 `
 
@@ -140,15 +141,37 @@ type GetAllUsersParams struct {
 	Limit   int32
 }
 
-func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]User, error) {
+type GetAllUsersRow struct {
+	ID                uuid.UUID
+	TeamID            uuid.NullUUID
+	FirstName         string
+	LastName          string
+	Email             string
+	PhoneNo           pgtype.Text
+	Gender            string
+	RegNo             *string
+	GithubProfile     *string
+	Password          string
+	Role              string
+	IsLeader          bool
+	IsVerified        bool
+	IsBanned          bool
+	IsProfileComplete bool
+	IsStarred         bool
+	RoomNo            *string
+	HostelBlock       *string
+	RoundQualified    pgtype.Int4
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]GetAllUsersRow, error) {
 	rows, err := q.db.Query(ctx, getAllUsers, arg.Column1, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []GetAllUsersRow
 	for rows.Next() {
-		var i User
+		var i GetAllUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.TeamID,
@@ -168,6 +191,7 @@ func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]Use
 			&i.IsStarred,
 			&i.RoomNo,
 			&i.HostelBlock,
+			&i.RoundQualified,
 		); err != nil {
 			return nil, err
 		}
