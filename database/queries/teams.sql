@@ -2,11 +2,12 @@
 SELECT id FROM teams WHERE code = $1;
 
 -- name: GetTeams :many
-SELECT *
+SELECT teams.*,ideas.title,ideas.description,ideas.track
 FROM teams
-WHERE name ILIKE '%' || $1 || '%'
-  AND id > $2
-ORDER BY id
+LEFT JOIN ideas ON ideas.team_id = teams.id
+WHERE teams.name ILIKE '%' || $1 || '%'
+  AND teams.id > $2
+ORDER BY teams.id
 LIMIT $3;
 
 
