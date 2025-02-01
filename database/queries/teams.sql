@@ -10,6 +10,11 @@ WHERE teams.name ILIKE '%' || $1 || '%'
 ORDER BY teams.id
 LIMIT $3;
 
+-- name: GetTeamByTrack :many
+SELECT t.*, i.title, i.description, i.track
+FROM teams t
+LEFT JOIN ideas i ON i.team_id = t.id
+WHERE i.track = $1;
 
 -- name: GetTeamById :one
 SELECT teams.id, teams.name, teams.round_qualified, teams.code,teams.is_banned,

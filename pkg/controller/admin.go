@@ -272,6 +272,25 @@ func GetTeamById(c echo.Context) error {
 	})
 }
 
+func GetTeamsByTrack(c echo.Context) error {
+	ctx := c.Request().Context()
+	track := c.Param("track")
+
+	teams, err := utils.Queries.GetTeamByTrack(ctx, track)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "teams fetched successfully",
+		Data:    teams,
+	})
+}
+
 func GetTeamLeader(c echo.Context) error {
 	teamIdParam := c.Param("id")
 	teamId, err := uuid.Parse(teamIdParam)

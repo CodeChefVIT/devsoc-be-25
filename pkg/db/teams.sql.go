@@ -215,6 +215,55 @@ func (q *Queries) GetTeamByTeamId(ctx context.Context, id uuid.UUID) (Team, erro
 	return i, err
 }
 
+const getTeamByTrack = `-- name: GetTeamByTrack :many
+SELECT t.id, t.name, t.number_of_people, t.round_qualified, t.code, t.is_banned, i.title, i.description, i.track
+FROM teams t
+LEFT JOIN ideas i ON i.team_id = t.id
+WHERE i.track = $1
+`
+
+type GetTeamByTrackRow struct {
+	ID             uuid.UUID
+	Name           string
+	NumberOfPeople int32
+	RoundQualified pgtype.Int4
+	Code           string
+	IsBanned       bool
+	Title          *string
+	Description    *string
+	Track          *string
+}
+
+func (q *Queries) GetTeamByTrack(ctx context.Context, track string) ([]GetTeamByTrackRow, error) {
+	rows, err := q.db.Query(ctx, getTeamByTrack, track)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTeamByTrackRow
+	for rows.Next() {
+		var i GetTeamByTrackRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.NumberOfPeople,
+			&i.RoundQualified,
+			&i.Code,
+			&i.IsBanned,
+			&i.Title,
+			&i.Description,
+			&i.Track,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTeamIDByCode = `-- name: GetTeamIDByCode :one
 SELECT id FROM teams WHERE code = $1
 `
