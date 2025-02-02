@@ -124,13 +124,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT u.id, u.team_id, u.first_name, u.last_name, u.email, u.phone_no, u.gender, u.reg_no, u.github_profile, u.password, u.role, u.is_leader, u.is_verified, u.is_banned, u.is_profile_complete, u.is_starred, u.room_no, u.hostel_block,t.round_qualified
+SELECT u.id, u.team_id, u.first_name, u.last_name, u.email, u.phone_no, u.gender, u.reg_no, u.github_profile, u.password, u.role, u.is_leader, u.is_verified, u.is_banned, u.is_profile_complete, u.is_starred, u.room_no, u.hostel_block, t.round_qualified
 FROM users u
 JOIN teams t ON t.id = u.team_id
 WHERE (u.first_name LIKE '%' || $1 || '%'
        OR u.reg_no LIKE '%' || $1 || '%'
        OR u.email LIKE '%' || $1 || '%')
   AND u.id > $2
+  AND ($4 = '' OR u.gender = $4)   -- Optional gender filter
 ORDER BY u.id
 LIMIT $3
 `
@@ -139,6 +140,7 @@ type GetAllUsersParams struct {
 	Column1 *string
 	ID      uuid.UUID
 	Limit   int32
+	Column4 interface{}
 }
 
 type GetAllUsersRow struct {
@@ -164,7 +166,12 @@ type GetAllUsersRow struct {
 }
 
 func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]GetAllUsersRow, error) {
-	rows, err := q.db.Query(ctx, getAllUsers, arg.Column1, arg.ID, arg.Limit)
+	rows, err := q.db.Query(ctx, getAllUsers,
+		arg.Column1,
+		arg.ID,
+		arg.Limit,
+		arg.Column4,
+	)
 	if err != nil {
 		return nil, err
 	}

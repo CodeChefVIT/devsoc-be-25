@@ -23,6 +23,7 @@ func GetAllUsers(c echo.Context) error {
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
 	name := c.QueryParam("name")
+	gender := c.QueryParam("gender")
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
@@ -48,6 +49,7 @@ func GetAllUsers(c echo.Context) error {
 		Limit:   int32(limit),
 		ID:      cursorUUID,
 		Column1: &name,
+		Column4: gender,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -93,7 +95,7 @@ func GetUsersByGender(c echo.Context) error {
 	ctx := c.Request().Context()
 	gender := c.Param("gender")
 
-	if gender != "M" && gender != "F" {
+	if gender != "M" && gender != "F" && gender != "O" {
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
 			Message: "Gender should be M or F",
