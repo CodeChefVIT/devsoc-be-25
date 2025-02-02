@@ -111,6 +111,7 @@ func JoinTeam(c echo.Context) error {
 	if count >= 5 {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
+			Message: "Cannot join team already full",
 			Data: map[string]string{
 				"message": "Cannot join team already full",
 			},
