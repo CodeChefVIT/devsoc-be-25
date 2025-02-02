@@ -58,11 +58,18 @@ func GetAllUsers(c echo.Context) error {
 		})
 	}
 
+	var nextCursor uuid.NullUUID
+
+	for _, user := range users {
+		nextCursor = uuid.NullUUID{UUID: user.ID}
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "Users fetched successfully",
 		Data: map[string]interface{}{
-			"users": users,
+			"users":       users,
+			"next_cursor": nextCursor.UUID.String(),
 		},
 	})
 }
@@ -216,11 +223,18 @@ func GetTeams(c echo.Context) error {
 		})
 	}
 
+	var nextCursor uuid.NullUUID
+
+	for _, team := range teams {
+		nextCursor = uuid.NullUUID{UUID: team.ID}
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "Teams fetched successfully",
 		Data: map[string]interface{}{
-			"teams": teams,
+			"teams":       teams,
+			"next_cursor": nextCursor.UUID.String(),
 		},
 	})
 }
@@ -603,7 +617,7 @@ func GetLeaderBoard(c echo.Context) error {
 	if cursorParam != "" {
 		parsedCursor, err := uuid.Parse(cursorParam)
 		if err == nil {
-			cursor = uuid.NullUUID{UUID: parsedCursor, Valid: true}
+			cursor = uuid.NullUUID{UUID: parsedCursor}
 		}
 	}
 
@@ -644,7 +658,7 @@ func GetLeaderBoard(c echo.Context) error {
 			Teamwork:       int(row.Teamwork),
 			RoundTotal:     int(row.RoundTotal),
 		})
-		nextCursor = uuid.NullUUID{UUID: row.TeamID, Valid: true}
+		nextCursor = uuid.NullUUID{UUID: row.TeamID}
 	}
 
 	leaderBoard := make([]models.TeamLeaderboard, 0, len(leaderboardMap))
@@ -701,10 +715,19 @@ func GetAllIdeas(c echo.Context) error {
 		})
 	}
 
+	var nextCursor uuid.NullUUID
+
+	for _, idea := range ideas {
+		nextCursor = uuid.NullUUID{UUID: idea.TeamID, Valid: true}
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "ideas fetched successfully",
-		Data:    ideas,
+		Data: map[string]interface{}{
+			"ideas":       ideas,
+			"next_cursor": nextCursor,
+		},
 	})
 }
 
@@ -822,10 +845,19 @@ func GetIdeasByTrack(c echo.Context) error {
 		})
 	}
 
+	var nextCursor uuid.NullUUID
+
+	for _, ide := range idea {
+		nextCursor = uuid.NullUUID{UUID: ide.TeamID}
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
-		Message: "Ideas fetched successfully",
-		Data:    idea,
+		Message: "ideas fetched successfully",
+		Data: map[string]interface{}{
+			"ideas":       idea,
+			"next_cursor": nextCursor,
+		},
 	})
 
 }
