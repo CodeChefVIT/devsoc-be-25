@@ -30,4 +30,7 @@ func AdminRoutes(incomingRoutes *echo.Group) {
 	admin.GET("/usercsv", controller.ExportUsers)
 	admin.GET("/teamcsv", controller.ExportTeams)
 	admin.PUT("/team/rounds", controller.UpdateTeamRounds)
+
+	admin.GET("/ideas", controller.GetAllIdeas)
+	admin.GET("/ideas/:track", controller.GetIdeasByTrack)
 }
