@@ -2853,6 +2853,65 @@ paths:
                     type: string
                     example: Internal server error
 
+  /admin/users/{gender}:
+    get:
+      tags:
+        - Admin
+      summary: Get users by gender
+      description: Retrieves a list of users filtered by gender (M or F).
+      parameters:
+        - name: gender
+          in: path
+          required: true
+          description: Gender of the users to retrieve (M or F).
+          schema:
+            type: string
+            enum: ["M", "F"]
+      responses:
+        "200":
+          description: Successful response with users list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: users fetched successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid gender parameter.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Gender should be M or F
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Internal Server Error
+
 components:
   schemas:
     User:
