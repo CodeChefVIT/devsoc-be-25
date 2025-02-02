@@ -1,13 +1,17 @@
 -- name: GetAllUsers :many
-SELECT u.*,t.round_qualified
+SELECT u.*, t.round_qualified
 FROM users u
 JOIN teams t ON t.id = u.team_id
 WHERE (u.first_name LIKE '%' || $1 || '%'
        OR u.reg_no LIKE '%' || $1 || '%'
        OR u.email LIKE '%' || $1 || '%')
   AND u.id > $2
+  AND ($4 = '' OR u.gender = $4)
 ORDER BY u.id
 LIMIT $3;
+
+-- name: GetUsersByGender :many
+SELECT * FROM users WHERE gender = $1;
 
 -- name: GetUsersByTeamId :many
 SELECT first_name, last_name, email, reg_no, phone_no FROM users WHERE team_id = $1;

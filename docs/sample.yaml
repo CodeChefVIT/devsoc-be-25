@@ -2853,6 +2853,131 @@ paths:
                     type: string
                     example: Internal server error
 
+  /admin/ideas:
+    get:
+      summary: Get all ideas
+      tags:
+        - Admin
+      description: Fetches all submitted ideas.
+      responses:
+        "200":
+          description: Successfully fetched ideas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: ideas fetched successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
+                        title:
+                          type: string
+                          example: "AI-Powered Assistant"
+                        description:
+                          type: string
+                          example: "An AI-powered virtual assistant."
+                        track:
+                          type: string
+                          example: "Artificial Intelligence"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /admin/ideas/{track}:
+    get:
+      tags:
+        - Admin
+      summary: Get ideas by track
+      description: Fetches ideas associated with a specific track based on a numeric identifier.
+      parameters:
+        - name: track
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [1, 2, 3, 4, 5, 6]
+          description: "Track number (1: Media and Entertainment, 2: Finance and Fintech, 3: Healthcare and Education, 4: Digital Security, 5: Environment and Sustainability, 6: Open Innovation)"
+      responses:
+        "200":
+          description: Successfully fetched ideas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Ideas fetched successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
+                        title:
+                          type: string
+                          example: "Revolutionizing Digital Security"
+                        description:
+                          type: string
+                          example: "An AI-powered security solution for digital platforms."
+                        track:
+                          type: string
+                          example: "Digital Security"
+        "400":
+          description: Invalid track number
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: give number from 1 to 6
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Internal server error
+
 components:
   schemas:
     User:

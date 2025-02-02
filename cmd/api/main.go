@@ -22,6 +22,8 @@ func main() {
 		LogURI:        true,
 		LogStatus:     true,
 		LogError:      true,
+		LogLatency:    true,
+		LogMethod:     true,
 		LogValuesFunc: logger.RouteLogger,
 	}))
 

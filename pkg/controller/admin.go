@@ -23,6 +23,7 @@ func GetAllUsers(c echo.Context) error {
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
 	name := c.QueryParam("name")
+	gender := c.QueryParam("gender")
 
 	limit, err := strconv.Atoi(limitParam)
 	if err != nil {
@@ -48,6 +49,7 @@ func GetAllUsers(c echo.Context) error {
 		Limit:   int32(limit),
 		ID:      cursorUUID,
 		Column1: &name,
+		Column4: gender,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -87,6 +89,33 @@ func GetUsersByEmail(c echo.Context) error {
 			"user": user,
 		},
 	})
+}
+
+func GetUsersByGender(c echo.Context) error {
+	ctx := c.Request().Context()
+	gender := c.Param("gender")
+
+	if gender != "M" && gender != "F" && gender != "O" {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "Gender should be M or F",
+		})
+	}
+
+	users, err := utils.Queries.GetUsersByGender(ctx, gender)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "users fetched successfully",
+		Data:    users,
+	})
+
 }
 
 func BanUser(c echo.Context) error {
@@ -553,6 +582,7 @@ func UpdateTeamRounds(c echo.Context) error {
 	})
 }
 
+
 func GetLeaderBoard(c echo.Context) error {
     ctx := c.Request().Context()
 
@@ -633,4 +663,97 @@ func GetLeaderBoard(c echo.Context) error {
         Message: "Leaderboard fetched successfully",
         Data:    response,
     })
+
+func GetAllIdeas(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	ideas, err := utils.Queries.GetAllIdeas(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "ideas fetched successfully",
+		Data:    ideas,
+	})
+}
+
+func GetIdeasByTrack(c echo.Context) error {
+	ctx := c.Request().Context()
+	num := c.Param("track")
+	trackNum, err := strconv.Atoi(num)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: "couldn't convert string to int",
+		})
+	}
+
+	var idea []db.Idea
+
+	if trackNum == 1 {
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Media and Entertainment")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	} else if trackNum == 2 {
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Finance and Fintech")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	} else if trackNum == 3 {
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Healthcare and Education")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	} else if trackNum == 4 {
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Digital Security")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	} else if trackNum == 5 {
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Environment and Sustainability")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	} else if trackNum == 6 {
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Open Innovation")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	} else {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "give number from 1 to 6",
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "Ideas fetched successfully",
+		Data:    idea,
+	})
+
 }

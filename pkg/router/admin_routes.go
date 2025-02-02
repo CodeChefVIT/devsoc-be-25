@@ -16,7 +16,10 @@ func AdminRoutes(incomingRoutes *echo.Group) {
 	admin.POST("/ban", controller.BanUser)
 	admin.POST("/unban", controller.UnbanUser)
 	admin.POST("/star", controller.CheckStarred)
+
 	admin.GET("/leaderboard",controller.GetLeaderBoard)
+
+	admin.GET("/users/:gender", controller.GetUsersByGender)
 
 	admin.GET("/teams", controller.GetTeams)
 	admin.GET("/teams/:id", controller.GetTeamById)
@@ -31,4 +34,7 @@ func AdminRoutes(incomingRoutes *echo.Group) {
 	admin.GET("/usercsv", controller.ExportUsers)
 	admin.GET("/teamcsv", controller.ExportTeams)
 	admin.PUT("/team/rounds", controller.UpdateTeamRounds)
+
+	admin.GET("/ideas", controller.GetAllIdeas)
+	admin.GET("/ideas/:track", controller.GetIdeasByTrack)
 }
