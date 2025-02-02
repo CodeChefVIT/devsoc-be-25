@@ -167,15 +167,6 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
-	if err := middleware.TrimSpaces(&req); err != nil {
-		return c.JSON(echo.ErrBadRequest.Code, models.Response{
-			Status: "fail",
-			Data: map[string]string{
-				"error": err.Error(),
-			},
-		})
-	}
-
 	req.FirstName = strings.TrimSpace(req.FirstName)
 	req.LastName = strings.TrimSpace(req.LastName)
 

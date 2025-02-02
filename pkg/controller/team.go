@@ -269,15 +269,6 @@ func CreateTeam(c echo.Context) error {
 		})
 	}
 
-	if err := middleware.TrimSpaces(&payload) ; err != nil {
-		return c.JSON(echo.ErrBadRequest.Code, models.Response{
-			Status:"fail",
-			Data:map[string]string{
-				"error":err.Error(),
-			},
-		})
-	}
-
 	payload.Name = strings.TrimSpace(payload.Name)
 
 	user, ok := c.Get("user").(db.User)
@@ -637,15 +628,6 @@ func UpdateTeamName(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status:  "fail",
 			Message: validationErrors,
-		})
-	}
-
-	if err := middleware.TrimSpaces(&payload) ; err != nil {
-		return c.JSON(echo.ErrBadRequest.Code, models.Response{
-			Status:"fail",
-			Data:map[string]string{
-				"error":err.Error(),
-			},
 		})
 	}
 
