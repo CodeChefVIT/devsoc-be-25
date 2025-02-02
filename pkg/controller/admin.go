@@ -552,3 +552,85 @@ func UpdateTeamRounds(c echo.Context) error {
 		Message: "Rounds qualified by team Updated",
 	})
 }
+
+func GetLeaderBoard(c echo.Context) error {
+    ctx := c.Request().Context()
+
+    limitParam := c.QueryParam("limit")
+    cursorParam := c.QueryParam("cursor")
+    nameParam := c.QueryParam("name")
+
+    limit := 10 
+    var cursor uuid.NullUUID 
+    var err error
+
+    if limitParam != "" {
+        parsedLimit, err := strconv.Atoi(limitParam)
+        if err == nil && parsedLimit > 0 {
+            limit = parsedLimit
+        }
+    }
+
+    if cursorParam != "" {
+        parsedCursor, err := uuid.Parse(cursorParam)
+        if err == nil {
+            cursor = uuid.NullUUID{UUID: parsedCursor, Valid: true}
+        }
+    }
+
+    rows, err := utils.Queries.GetLeaderboardWithPagination(ctx, db.GetLeaderboardWithPaginationParams{
+        Column1: cursor.UUID,
+        Limit:  int32(limit),
+        Column2:   nameParam,
+    })
+    if err != nil {
+        return c.JSON(echo.ErrInternalServerError.Code, &models.Response{
+            Status:  "fail",
+            Message: "Some error occurred",
+            Data: map[string]string{
+                "error": err.Error(),
+            },
+        })
+    }
+
+    leaderboardMap := make(map[uuid.UUID]*models.TeamLeaderboard)
+    var nextCursor uuid.NullUUID
+
+    for _, row := range rows {
+        if _, exists := leaderboardMap[row.TeamID]; !exists {
+            leaderboardMap[row.TeamID] = &models.TeamLeaderboard{
+                TeamID:       row.TeamID,
+                TeamName:     row.Name,
+                Rounds:       []models.Round{},
+                OverallTotal: int(row.OverallTotal),
+            }
+        }
+
+        leaderboardMap[row.TeamID].Rounds = append(leaderboardMap[row.TeamID].Rounds, models.Round{
+            Round:          int(row.Round),
+            Design:         int(row.Design),
+            Implementation: int(row.Implementation),
+            Presentation:   int(row.Presentation),
+            Innovation:     int(row.Innovation),
+            Teamwork:       int(row.Teamwork),
+            RoundTotal:     int(row.RoundTotal),
+        })
+        nextCursor = uuid.NullUUID{UUID: row.TeamID, Valid: true}
+    }
+
+    leaderBoard := make([]models.TeamLeaderboard, 0, len(leaderboardMap))
+    for _, team := range leaderboardMap {
+        leaderBoard = append(leaderBoard, *team)
+    }
+
+    response := map[string]interface{}{
+        "leaderboard": leaderBoard,
+        "next_cursor": nextCursor.UUID.String(),
+    }
+
+    return c.JSON(http.StatusOK, &models.Response{
+        Status:  "success",
+        Message: "Leaderboard fetched successfully",
+        Data:    response,
+    })
+}
