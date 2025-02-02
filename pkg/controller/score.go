@@ -65,8 +65,8 @@ func GetScore(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status: "success",
+		Message: "Scores fetched successfully",
 		Data: map[string]interface{}{
-			"message": "Scores fetched successfully",
 			"scores":  scores,
 		},
 	})

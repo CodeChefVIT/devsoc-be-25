@@ -148,7 +148,7 @@ func CheckStarred(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, models.Response{
-		Status: "success",
-		Data:   "user has starred the repo",
+		Status:  "success",
+		Message: "user has starred the repo",
 	})
 }

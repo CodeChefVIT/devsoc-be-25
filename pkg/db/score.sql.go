@@ -53,6 +53,100 @@ func (q *Queries) DeleteScore(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getLeaderboardWithPagination = `-- name: GetLeaderboardWithPagination :many
+WITH RoundScores AS (
+    SELECT 
+        s.team_id,
+        t.name,
+        s.round,
+        s.design,
+        s.implementation,
+        s.presentation,
+        s.innovation,
+        s.teamwork,
+        (s.design + s.implementation + s.presentation + s.innovation + s.teamwork) AS round_total
+    FROM score s
+    JOIN teams t ON s.team_id = t.id
+),
+TotalScores AS (
+    SELECT 
+        s.team_id,
+        t.name,
+        SUM(s.design + s.implementation + s.presentation + s.innovation + s.teamwork) AS overall_total
+    FROM score s
+    JOIN teams t ON s.team_id = t.id
+    GROUP BY s.team_id, t.name
+)
+SELECT 
+    rs.team_id,
+    rs.name,
+    rs.round,
+    rs.design,
+    rs.implementation,
+    rs.presentation,
+    rs.innovation,
+    rs.teamwork,
+    rs.round_total,
+    ts.overall_total
+FROM RoundScores rs
+JOIN TotalScores ts ON rs.team_id = ts.team_id
+WHERE 
+    ($1::UUID IS NULL OR rs.team_id > $1)  -- Cursor-based pagination
+    AND ($2::TEXT IS NULL OR rs.name ILIKE '%' || $2 || '%') -- Optional name filter
+ORDER BY ts.overall_total DESC, rs.round ASC
+LIMIT $3
+`
+
+type GetLeaderboardWithPaginationParams struct {
+	Column1 uuid.UUID
+	Column2 string
+	Limit   int32
+}
+
+type GetLeaderboardWithPaginationRow struct {
+	TeamID         uuid.UUID
+	Name           string
+	Round          int32
+	Design         int32
+	Implementation int32
+	Presentation   int32
+	Innovation     int32
+	Teamwork       int32
+	RoundTotal     int32
+	OverallTotal   int64
+}
+
+func (q *Queries) GetLeaderboardWithPagination(ctx context.Context, arg GetLeaderboardWithPaginationParams) ([]GetLeaderboardWithPaginationRow, error) {
+	rows, err := q.db.Query(ctx, getLeaderboardWithPagination, arg.Column1, arg.Column2, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLeaderboardWithPaginationRow
+	for rows.Next() {
+		var i GetLeaderboardWithPaginationRow
+		if err := rows.Scan(
+			&i.TeamID,
+			&i.Name,
+			&i.Round,
+			&i.Design,
+			&i.Implementation,
+			&i.Presentation,
+			&i.Innovation,
+			&i.Teamwork,
+			&i.RoundTotal,
+			&i.OverallTotal,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTeamScores = `-- name: GetTeamScores :many
 SELECT id, team_id, design, implementation, presentation, round, innovation, teamwork, comment
 FROM score
