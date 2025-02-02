@@ -560,12 +560,16 @@ func UpdateTeamRounds(c echo.Context) error {
 		})
 	}
 
+	logger.Infof("payload is %+v\n", payload)
+
 	if err := utils.Validate.Struct(payload); err != nil {
 		return c.JSON(http.StatusBadRequest, models.Response{
 			Status: "fail",
 			Data:   utils.FormatValidationErrors(err),
 		})
 	}
+
+	logger.Infof("team id is %+v\n", payload.TeamId)
 
 	ctx := c.Request().Context()
 
