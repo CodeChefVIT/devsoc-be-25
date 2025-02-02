@@ -2853,34 +2853,15 @@ paths:
                     type: string
                     example: Internal server error
 
-
-  /admin/users/{gender}:
-    get:
-      tags:
-        - Admin
-      summary: Get users by gender
-      description: Retrieves a list of users filtered by gender (M or F).
-      parameters:
-        - name: gender
-          in: path
-          required: true
-          description: Gender of the users to retrieve (M or F).
-          schema:
-            type: string
-            enum: ["M", "F"]
-      responses:
-        "200":
-          description: Successful response with users list.
-
   /admin/ideas:
     get:
+      summary: Get all ideas
       tags:
         - Admin
-      summary: Get all ideas
-      description: Retrieves a list of all ideas.
+      description: Fetches all submitted ideas.
       responses:
         "200":
-          description: Successful response with ideas list.
+          description: Successfully fetched ideas
           content:
             application/json:
               schema:
@@ -2899,19 +2880,19 @@ paths:
                       properties:
                         id:
                           type: string
-                          example: "123e4567-e89b-12d3-a456-426614174000"
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
                         title:
                           type: string
-                          example: "New Startup Idea"
+                          example: "AI-Powered Assistant"
                         description:
                           type: string
-                          example: "A platform for AI-driven content creation"
-                        created_at:
+                          example: "An AI-powered virtual assistant."
+                        track:
                           type: string
-                          format: date-time
-                          example: "2024-02-01T12:00:00Z"
+                          example: "Artificial Intelligence"
         "500":
-          description: Internal server error.
+          description: Internal server error
           content:
             application/json:
               schema:
@@ -2922,25 +2903,25 @@ paths:
                     example: fail
                   message:
                     type: string
-                    example: Internal Server Error
+                    example: Internal server error
 
-  /ideas/{track}:
+  /admin/ideas/{track}:
     get:
       tags:
         - Admin
       summary: Get ideas by track
-      description: Retrieves a list of ideas based on the provided track number (1 to 6).
+      description: Fetches ideas associated with a specific track based on a numeric identifier.
       parameters:
         - name: track
           in: path
           required: true
-          description: Track number (1-6) to filter ideas.
           schema:
             type: integer
             enum: [1, 2, 3, 4, 5, 6]
+          description: "Track number (1: Media and Entertainment, 2: Finance and Fintech, 3: Healthcare and Education, 4: Digital Security, 5: Environment and Sustainability, 6: Open Innovation)"
       responses:
         "200":
-          description: Successful response with a list of ideas.
+          description: Successfully fetched ideas
           content:
             application/json:
               schema:
@@ -2951,15 +2932,6 @@ paths:
                     example: success
                   message:
                     type: string
-
-                    example: users fetched successfully
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/User"
-        "400":
-          description: Invalid gender parameter.
-
                     example: Ideas fetched successfully
                   data:
                     type: array
@@ -2968,22 +2940,19 @@ paths:
                       properties:
                         id:
                           type: string
-                          example: "123e4567-e89b-12d3-a456-426614174000"
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
                         title:
                           type: string
-                          example: "AI-powered News Aggregator"
+                          example: "Revolutionizing Digital Security"
                         description:
                           type: string
-                          example: "An AI-driven platform to aggregate personalized news content."
+                          example: "An AI-powered security solution for digital platforms."
                         track:
                           type: string
-                          example: "Media and Entertainment"
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: "2024-02-01T12:00:00Z"
+                          example: "Digital Security"
         "400":
-          description: Invalid track number provided.
+          description: Invalid track number
           content:
             application/json:
               schema:
@@ -2994,11 +2963,9 @@ paths:
                     example: fail
                   message:
                     type: string
-                    example: Gender should be M or F
-
                     example: give number from 1 to 6
         "500":
-          description: Internal server error.
+          description: Internal server error
           content:
             application/json:
               schema:
@@ -3009,7 +2976,7 @@ paths:
                     example: fail
                   message:
                     type: string
-                    example: Internal Server Error
+                    example: Internal server error
 
 components:
   schemas:
