@@ -552,3 +552,21 @@ func UpdateTeamRounds(c echo.Context) error {
 		Message: "Rounds qualified by team Updated",
 	})
 }
+
+func GetAllIdeas(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	ideas, err := utils.Queries.GetAllIdeas(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "ideas fetched successfully",
+		Data:    ideas,
+	})
+}

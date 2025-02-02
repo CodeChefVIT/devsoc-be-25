@@ -2853,6 +2853,58 @@ paths:
                     type: string
                     example: Internal server error
 
+  /admin/ideas:
+    get:
+      tags:
+        - Admin
+      summary: Get all ideas
+      description: Retrieves a list of all ideas.
+      responses:
+        "200":
+          description: Successful response with ideas list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: ideas fetched successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "123e4567-e89b-12d3-a456-426614174000"
+                        title:
+                          type: string
+                          example: "New Startup Idea"
+                        description:
+                          type: string
+                          example: "A platform for AI-driven content creation"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2024-02-01T12:00:00Z"
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Internal Server Error
+
 components:
   schemas:
     User:

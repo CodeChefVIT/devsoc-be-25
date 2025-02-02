@@ -27,25 +27,11 @@ WHERE team_id = $1;
 DELETE FROM ideas
 WHERE id = $1;
 
--- +goose Up
-CREATE TABLE ideas (
-  id UUID NOT NULL UNIQUE,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  track TEXT NOT NULL,
-  team_id UUID NOT NULL,
-  is_selected BOOLEAN NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY(id)
-);
-
 -- name: GetIdeaByTeamID :one
 SELECT id, title, description, track
 FROM ideas
 WHERE team_id = $1
 LIMIT 1;
 
-
--- +goose Down
-DROP TABLE ideas;
+-- name: GetAllIdeas :many
+SELECT * FROM ideas;
