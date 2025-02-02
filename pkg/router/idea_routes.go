@@ -12,7 +12,7 @@ func IdeaRoutes(incomingRoutes *echo.Group) {
 	idea.Use(middleware.CheckTeamBan)
 	idea.Use(middleware.CheckUserVerifiation)
 
-	idea.POST("/create", controller.CreateIdea)
-	idea.PUT("/update", controller.UpdateIdea)
+	// idea.POST("/create", controller.CreateIdea)
+	// idea.PUT("/update", controller.UpdateIdea)
 	idea.GET("/", controller.GetIdea)
 }
