@@ -124,13 +124,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT u.id, u.team_id, u.first_name, u.last_name, u.email, u.phone_no, u.gender, u.reg_no, u.github_profile, u.password, u.role, u.is_leader, u.is_verified, u.is_banned, u.is_profile_complete, u.is_starred, u.room_no, u.hostel_block,t.round_qualified
+SELECT u.id, u.team_id, u.first_name, u.last_name, u.email, u.phone_no, u.gender, u.reg_no, u.github_profile, u.password, u.role, u.is_leader, u.is_verified, u.is_banned, u.is_profile_complete, u.is_starred, u.room_no, u.hostel_block, t.round_qualified
 FROM users u
 JOIN teams t ON t.id = u.team_id
 WHERE (u.first_name LIKE '%' || $1 || '%'
        OR u.reg_no LIKE '%' || $1 || '%'
        OR u.email LIKE '%' || $1 || '%')
   AND u.id > $2
+  AND ($4 = '' OR u.gender = $4)   -- Optional gender filter
 ORDER BY u.id
 LIMIT $3
 `
@@ -139,6 +140,7 @@ type GetAllUsersParams struct {
 	Column1 *string
 	ID      uuid.UUID
 	Limit   int32
+	Column4 interface{}
 }
 
 type GetAllUsersRow struct {
@@ -164,7 +166,12 @@ type GetAllUsersRow struct {
 }
 
 func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]GetAllUsersRow, error) {
-	rows, err := q.db.Query(ctx, getAllUsers, arg.Column1, arg.ID, arg.Limit)
+	rows, err := q.db.Query(ctx, getAllUsers,
+		arg.Column1,
+		arg.ID,
+		arg.Limit,
+		arg.Column4,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -402,6 +409,49 @@ SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, gith
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 	rows, err := q.db.Query(ctx, getUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.TeamID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.PhoneNo,
+			&i.Gender,
+			&i.RegNo,
+			&i.GithubProfile,
+			&i.Password,
+			&i.Role,
+			&i.IsLeader,
+			&i.IsVerified,
+			&i.IsBanned,
+			&i.IsProfileComplete,
+			&i.IsStarred,
+			&i.RoomNo,
+			&i.HostelBlock,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUsersByGender = `-- name: GetUsersByGender :many
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete, is_starred, room_no, hostel_block FROM users WHERE gender = $1
+`
+
+func (q *Queries) GetUsersByGender(ctx context.Context, gender string) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsersByGender, gender)
 	if err != nil {
 		return nil, err
 	}
