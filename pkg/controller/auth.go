@@ -8,7 +8,6 @@ import (
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
 	logger "github.com/CodeChefVIT/devsoc-be-24/pkg/logging"
-	"github.com/CodeChefVIT/devsoc-be-24/pkg/middleware"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"

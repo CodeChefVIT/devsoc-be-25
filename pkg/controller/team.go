@@ -13,7 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/db"
-	"github.com/CodeChefVIT/devsoc-be-24/pkg/middleware"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 )
