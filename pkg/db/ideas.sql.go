@@ -64,10 +64,18 @@ func (q *Queries) DeleteIdea(ctx context.Context, id uuid.UUID) error {
 
 const getAllIdeas = `-- name: GetAllIdeas :many
 SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas
+WHERE id > $1
+ORDER BY id
+LIMIT $2
 `
 
-func (q *Queries) GetAllIdeas(ctx context.Context) ([]Idea, error) {
-	rows, err := q.db.Query(ctx, getAllIdeas)
+type GetAllIdeasParams struct {
+	ID    uuid.UUID
+	Limit int32
+}
+
+func (q *Queries) GetAllIdeas(ctx context.Context, arg GetAllIdeasParams) ([]Idea, error) {
+	rows, err := q.db.Query(ctx, getAllIdeas, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -143,11 +151,21 @@ func (q *Queries) GetIdeaByTeamID(ctx context.Context, teamID uuid.UUID) (GetIde
 }
 
 const getIdeasByTrack = `-- name: GetIdeasByTrack :many
-SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas WHERE track = $1
+SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas
+WHERE track = $1
+AND id > $2
+ORDER BY id
+LIMIT $3
 `
 
-func (q *Queries) GetIdeasByTrack(ctx context.Context, track string) ([]Idea, error) {
-	rows, err := q.db.Query(ctx, getIdeasByTrack, track)
+type GetIdeasByTrackParams struct {
+	Track string
+	ID    uuid.UUID
+	Limit int32
+}
+
+func (q *Queries) GetIdeasByTrack(ctx context.Context, arg GetIdeasByTrackParams) ([]Idea, error) {
+	rows, err := q.db.Query(ctx, getIdeasByTrack, arg.Track, arg.ID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

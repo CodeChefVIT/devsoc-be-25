@@ -582,92 +582,118 @@ func UpdateTeamRounds(c echo.Context) error {
 	})
 }
 
-
 func GetLeaderBoard(c echo.Context) error {
-    ctx := c.Request().Context()
+	ctx := c.Request().Context()
 
-    limitParam := c.QueryParam("limit")
-    cursorParam := c.QueryParam("cursor")
-    nameParam := c.QueryParam("name")
+	limitParam := c.QueryParam("limit")
+	cursorParam := c.QueryParam("cursor")
+	nameParam := c.QueryParam("name")
 
-    limit := 10 
-    var cursor uuid.NullUUID 
-    var err error
+	limit := 10
+	var cursor uuid.NullUUID
+	var err error
 
-    if limitParam != "" {
-        parsedLimit, err := strconv.Atoi(limitParam)
-        if err == nil && parsedLimit > 0 {
-            limit = parsedLimit
-        }
-    }
+	if limitParam != "" {
+		parsedLimit, err := strconv.Atoi(limitParam)
+		if err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
 
-    if cursorParam != "" {
-        parsedCursor, err := uuid.Parse(cursorParam)
-        if err == nil {
-            cursor = uuid.NullUUID{UUID: parsedCursor, Valid: true}
-        }
-    }
+	if cursorParam != "" {
+		parsedCursor, err := uuid.Parse(cursorParam)
+		if err == nil {
+			cursor = uuid.NullUUID{UUID: parsedCursor, Valid: true}
+		}
+	}
 
-    rows, err := utils.Queries.GetLeaderboardWithPagination(ctx, db.GetLeaderboardWithPaginationParams{
-        Column1: cursor.UUID,
-        Limit:  int32(limit),
-        Column2:   nameParam,
-    })
-    if err != nil {
-        return c.JSON(echo.ErrInternalServerError.Code, &models.Response{
-            Status:  "fail",
-            Message: "Some error occurred",
-            Data: map[string]string{
-                "error": err.Error(),
-            },
-        })
-    }
+	rows, err := utils.Queries.GetLeaderboardWithPagination(ctx, db.GetLeaderboardWithPaginationParams{
+		Column1: cursor.UUID,
+		Limit:   int32(limit),
+		Column2: nameParam,
+	})
+	if err != nil {
+		return c.JSON(echo.ErrInternalServerError.Code, &models.Response{
+			Status:  "fail",
+			Message: "Some error occurred",
+			Data: map[string]string{
+				"error": err.Error(),
+			},
+		})
+	}
 
-    leaderboardMap := make(map[uuid.UUID]*models.TeamLeaderboard)
-    var nextCursor uuid.NullUUID
+	leaderboardMap := make(map[uuid.UUID]*models.TeamLeaderboard)
+	var nextCursor uuid.NullUUID
 
-    for _, row := range rows {
-        if _, exists := leaderboardMap[row.TeamID]; !exists {
-            leaderboardMap[row.TeamID] = &models.TeamLeaderboard{
-                TeamID:       row.TeamID,
-                TeamName:     row.Name,
-                Rounds:       []models.Round{},
-                OverallTotal: int(row.OverallTotal),
-            }
-        }
+	for _, row := range rows {
+		if _, exists := leaderboardMap[row.TeamID]; !exists {
+			leaderboardMap[row.TeamID] = &models.TeamLeaderboard{
+				TeamID:       row.TeamID,
+				TeamName:     row.Name,
+				Rounds:       []models.Round{},
+				OverallTotal: int(row.OverallTotal),
+			}
+		}
 
-        leaderboardMap[row.TeamID].Rounds = append(leaderboardMap[row.TeamID].Rounds, models.Round{
-            Round:          int(row.Round),
-            Design:         int(row.Design),
-            Implementation: int(row.Implementation),
-            Presentation:   int(row.Presentation),
-            Innovation:     int(row.Innovation),
-            Teamwork:       int(row.Teamwork),
-            RoundTotal:     int(row.RoundTotal),
-        })
-        nextCursor = uuid.NullUUID{UUID: row.TeamID, Valid: true}
-    }
+		leaderboardMap[row.TeamID].Rounds = append(leaderboardMap[row.TeamID].Rounds, models.Round{
+			Round:          int(row.Round),
+			Design:         int(row.Design),
+			Implementation: int(row.Implementation),
+			Presentation:   int(row.Presentation),
+			Innovation:     int(row.Innovation),
+			Teamwork:       int(row.Teamwork),
+			RoundTotal:     int(row.RoundTotal),
+		})
+		nextCursor = uuid.NullUUID{UUID: row.TeamID, Valid: true}
+	}
 
-    leaderBoard := make([]models.TeamLeaderboard, 0, len(leaderboardMap))
-    for _, team := range leaderboardMap {
-        leaderBoard = append(leaderBoard, *team)
-    }
+	leaderBoard := make([]models.TeamLeaderboard, 0, len(leaderboardMap))
+	for _, team := range leaderboardMap {
+		leaderBoard = append(leaderBoard, *team)
+	}
 
-    response := map[string]interface{}{
-        "leaderboard": leaderBoard,
-        "next_cursor": nextCursor.UUID.String(),
-    }
+	response := map[string]interface{}{
+		"leaderboard": leaderBoard,
+		"next_cursor": nextCursor.UUID.String(),
+	}
 
-    return c.JSON(http.StatusOK, &models.Response{
-        Status:  "success",
-        Message: "Leaderboard fetched successfully",
-        Data:    response,
-    })
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "Leaderboard fetched successfully",
+		Data:    response,
+	})
+
+}
 
 func GetAllIdeas(c echo.Context) error {
 	ctx := c.Request().Context()
+	limitParam := c.QueryParam("limit")
+	cursor := c.QueryParam("cursor")
 
-	ideas, err := utils.Queries.GetAllIdeas(ctx)
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	var cursorUUID uuid.UUID
+	if cursor == "" {
+		cursorUUID = uuid.Nil
+	} else {
+		cursorUUID, err = uuid.Parse(cursor)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid UUID for cursor",
+			})
+		}
+	}
+
+	ideas, err := utils.Queries.GetAllIdeas(ctx, db.GetAllIdeasParams{
+		Limit: int32(limit),
+		ID:    cursorUUID,
+	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -685,6 +711,8 @@ func GetAllIdeas(c echo.Context) error {
 func GetIdeasByTrack(c echo.Context) error {
 	ctx := c.Request().Context()
 	num := c.Param("track")
+	limitParam := c.QueryParam("limit")
+	cursor := c.QueryParam("cursor")
 	trackNum, err := strconv.Atoi(num)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -693,10 +721,34 @@ func GetIdeasByTrack(c echo.Context) error {
 		})
 	}
 
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	var cursorUUID uuid.UUID
+	if cursor == "" {
+		cursorUUID = uuid.Nil
+	} else {
+		cursorUUID, err = uuid.Parse(cursor)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid UUID for cursor",
+			})
+		}
+	}
+
 	var idea []db.Idea
 
 	if trackNum == 1 {
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Media and Entertainment")
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Track: "AI & ML",
+			ID:    cursorUUID,
+			Limit: int32(limit),
+		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
@@ -704,7 +756,11 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	} else if trackNum == 2 {
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Finance and Fintech")
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Track: "Finance and Fintech",
+			ID:    cursorUUID,
+			Limit: int32(limit),
+		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
@@ -712,7 +768,11 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	} else if trackNum == 3 {
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Healthcare and Education")
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Track: "Healthcare and Education",
+			ID:    cursorUUID,
+			Limit: int32(limit),
+		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
@@ -720,7 +780,11 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	} else if trackNum == 4 {
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Digital Security")
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Track: "Digital Security",
+			ID:    cursorUUID,
+			Limit: int32(limit),
+		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
@@ -728,7 +792,11 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	} else if trackNum == 5 {
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Environment and Sustainability")
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Track: "Environment and Sustainability",
+			ID:    cursorUUID,
+			Limit: int32(limit),
+		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
@@ -736,7 +804,11 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	} else if trackNum == 6 {
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, "Open Innovation")
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Track: "Open Innovation",
+			ID:    cursorUUID,
+			Limit: int32(limit),
+		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",

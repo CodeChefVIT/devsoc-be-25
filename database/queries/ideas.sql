@@ -34,7 +34,14 @@ WHERE team_id = $1
 LIMIT 1;
 
 -- name: GetAllIdeas :many
-SELECT * FROM ideas;
+SELECT * FROM ideas
+WHERE id > $1
+ORDER BY id
+LIMIT $2;
 
 -- name: GetIdeasByTrack :many
-SELECT * FROM ideas WHERE track = $1;
+SELECT * FROM ideas
+WHERE track = $1
+AND id > $2
+ORDER BY id
+LIMIT $3;
