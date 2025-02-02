@@ -35,3 +35,6 @@ LIMIT 1;
 
 -- name: GetAllIdeas :many
 SELECT * FROM ideas;
+
+-- name: GetIdeasByTrack :many
+SELECT * FROM ideas WHERE track = $1;

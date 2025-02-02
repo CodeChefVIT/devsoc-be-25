@@ -32,4 +32,5 @@ func AdminRoutes(incomingRoutes *echo.Group) {
 	admin.PUT("/team/rounds", controller.UpdateTeamRounds)
 
 	admin.GET("/ideas", controller.GetAllIdeas)
+	admin.GET("/ideas/:track", controller.GetIdeasByTrack)
 }
