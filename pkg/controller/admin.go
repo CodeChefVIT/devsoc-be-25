@@ -89,6 +89,33 @@ func GetUsersByEmail(c echo.Context) error {
 	})
 }
 
+func GetUsersByGender(c echo.Context) error {
+	ctx := c.Request().Context()
+	gender := c.Param("gender")
+
+	if gender != "M" && gender != "F" {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: "Gender should be M or F",
+		})
+	}
+
+	users, err := utils.Queries.GetUsersByGender(ctx, gender)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "users fetched successfully",
+		Data:    users,
+	})
+
+}
+
 func BanUser(c echo.Context) error {
 	var payload models.BanUserReq
 

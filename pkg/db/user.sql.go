@@ -439,6 +439,49 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getUsersByGender = `-- name: GetUsersByGender :many
+SELECT id, team_id, first_name, last_name, email, phone_no, gender, reg_no, github_profile, password, role, is_leader, is_verified, is_banned, is_profile_complete, is_starred, room_no, hostel_block FROM users WHERE gender = $1
+`
+
+func (q *Queries) GetUsersByGender(ctx context.Context, gender string) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsersByGender, gender)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.TeamID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.PhoneNo,
+			&i.Gender,
+			&i.RegNo,
+			&i.GithubProfile,
+			&i.Password,
+			&i.Role,
+			&i.IsLeader,
+			&i.IsVerified,
+			&i.IsBanned,
+			&i.IsProfileComplete,
+			&i.IsStarred,
+			&i.RoomNo,
+			&i.HostelBlock,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUsersByTeamId = `-- name: GetUsersByTeamId :many
 SELECT first_name, last_name, email, reg_no, phone_no FROM users WHERE team_id = $1
 `

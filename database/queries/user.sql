@@ -9,6 +9,9 @@ WHERE (u.first_name LIKE '%' || $1 || '%'
 ORDER BY u.id
 LIMIT $3;
 
+-- name: GetUsersByGender :many
+SELECT * FROM users WHERE gender = $1;
+
 -- name: GetUsersByTeamId :many
 SELECT first_name, last_name, email, reg_no, phone_no FROM users WHERE team_id = $1;
 

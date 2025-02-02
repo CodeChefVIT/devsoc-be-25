@@ -16,6 +16,7 @@ func AdminRoutes(incomingRoutes *echo.Group) {
 	admin.POST("/ban", controller.BanUser)
 	admin.POST("/unban", controller.UnbanUser)
 	admin.POST("/star", controller.CheckStarred)
+	admin.GET("/users/:gender", controller.GetUsersByGender)
 
 	admin.GET("/teams", controller.GetTeams)
 	admin.GET("/teams/:id", controller.GetTeamById)
