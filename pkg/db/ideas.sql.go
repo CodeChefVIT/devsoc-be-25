@@ -62,6 +62,39 @@ func (q *Queries) DeleteIdea(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAllIdeas = `-- name: GetAllIdeas :many
+SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas
+`
+
+func (q *Queries) GetAllIdeas(ctx context.Context) ([]Idea, error) {
+	rows, err := q.db.Query(ctx, getAllIdeas)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Idea
+	for rows.Next() {
+		var i Idea
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.Track,
+			&i.TeamID,
+			&i.IsSelected,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getIdea = `-- name: GetIdea :one
 SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas
 WHERE id = $1 LIMIT 1
@@ -107,6 +140,39 @@ func (q *Queries) GetIdeaByTeamID(ctx context.Context, teamID uuid.UUID) (GetIde
 		&i.Track,
 	)
 	return i, err
+}
+
+const getIdeasByTrack = `-- name: GetIdeasByTrack :many
+SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas WHERE track = $1
+`
+
+func (q *Queries) GetIdeasByTrack(ctx context.Context, track string) ([]Idea, error) {
+	rows, err := q.db.Query(ctx, getIdeasByTrack, track)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Idea
+	for rows.Next() {
+		var i Idea
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.Track,
+			&i.TeamID,
+			&i.IsSelected,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listIdeas = `-- name: ListIdeas :many
