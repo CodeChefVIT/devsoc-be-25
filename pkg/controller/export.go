@@ -50,6 +50,7 @@ func ExportUsers(c echo.Context) error {
 		"IsVerified",
 		"IsBanned",
 		"IsProfComplete",
+		"RoundQualified",
 	}
 	if err := csvWriter.Write(headers); err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -91,6 +92,7 @@ func ExportUsers(c echo.Context) error {
 			strconv.FormatBool(user.IsVerified),
 			strconv.FormatBool(user.IsBanned),
 			strconv.FormatBool(user.IsProfileComplete),
+			strconv.Itoa(int(user.RoundQualified.Int32)),
 		}
 
 		if err := csvWriter.Write(record); err != nil {

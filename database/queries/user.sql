@@ -1,11 +1,12 @@
 -- name: GetAllUsers :many
-SELECT *
-FROM users
-WHERE (first_name LIKE '%' || $1 || '%'
-       OR reg_no LIKE '%' || $1 || '%'
-       OR email LIKE '%' || $1 || '%')
-  AND id > $2
-ORDER BY id
+SELECT u.*,t.round_qualified
+FROM users u
+JOIN teams t ON t.id = u.team_id
+WHERE (u.first_name LIKE '%' || $1 || '%'
+       OR u.reg_no LIKE '%' || $1 || '%'
+       OR u.email LIKE '%' || $1 || '%')
+  AND u.id > $2
+ORDER BY u.id
 LIMIT $3;
 
 -- name: GetUsersByTeamId :many

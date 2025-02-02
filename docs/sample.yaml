@@ -2779,6 +2779,80 @@ paths:
                     type: string
                     example: unauthorized
 
+  /admin/teams/{track}:
+    get:
+      tags:
+        - Admin
+      summary: Get teams by track
+      description: Fetches teams associated with a specific track.
+      parameters:
+        - name: track
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The track to filter teams by.
+      responses:
+        "200":
+          description: Successfully fetched teams
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: teams fetched successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: "550e8400-e29b-41d4-a716-446655440000"
+                        title:
+                          type: string
+                          example: "Innovative AI Project"
+                        description:
+                          type: string
+                          example: "A project focused on AI-driven solutions."
+                        track:
+                          type: string
+                          example: "Artificial Intelligence"
+                        name:
+                          type: string
+                          example: "Team Alpha"
+                        number_of_people:
+                          type: integer
+                          example: 5
+                        round_qualified:
+                          type: integer
+                          example: 1
+                        code:
+                          type: string
+                          example: "TMAI1234"
+                        is_banned:
+                          type: boolean
+                          example: false
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: Internal server error
+
 components:
   schemas:
     User:

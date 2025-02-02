@@ -34,8 +34,7 @@ func SignUp(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Validation errors",
-			Data:    utils.FormatValidationErrors(err),
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -164,8 +163,7 @@ func CompleteProfile(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Validation errors",
-			Data:    utils.FormatValidationErrors(err),
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -188,10 +186,18 @@ func CompleteProfile(c echo.Context) error {
 		})
 	}
 
+	if !utils.ValidateAlphaNum(req.FirstName) {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status: "success",
+			Data: map[string]any{
+				"first_name": "The name must contain only alphabetic characters and spaces. No other characters are allowed",
+			},
+		})
+	}
+
 	if !utils.ValidateAlphaNum(req.LastName) {
 		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status:  "success",
-			Message: "Validation errors",
+			Status: "success",
 			Data: map[string]any{
 				"last_name": "The name must contain only alphabetic characters and spaces. No other characters are allowed",
 			},
@@ -300,8 +306,7 @@ func VerifyOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Validation errors",
-			Data:    utils.FormatValidationErrors(err),
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -384,8 +389,7 @@ func ResendOTP(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Validation errors",
-			Data:    utils.FormatValidationErrors(err),
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -421,8 +425,7 @@ func Login(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Validation errors",
-			Data:    utils.FormatValidationErrors(err),
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 
@@ -544,8 +547,7 @@ func UpdatePassword(c echo.Context) error {
 		logger.Errorf(logger.InternalError, err.Error())
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "Validation errors",
-			Data:    utils.FormatValidationErrors(err),
+			Message: utils.FormatValidationErrors(err),
 		})
 	}
 

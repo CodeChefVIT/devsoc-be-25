@@ -2,13 +2,19 @@
 SELECT id FROM teams WHERE code = $1;
 
 -- name: GetTeams :many
-SELECT *
+SELECT teams.*,ideas.title,ideas.description,ideas.track
 FROM teams
-WHERE name ILIKE '%' || $1 || '%'
-  AND id > $2
-ORDER BY id
+LEFT JOIN ideas ON ideas.team_id = teams.id
+WHERE teams.name ILIKE '%' || $1 || '%'
+  AND teams.id > $2
+ORDER BY teams.id
 LIMIT $3;
 
+-- name: GetTeamByTrack :many
+SELECT t.*, i.title, i.description, i.track
+FROM teams t
+LEFT JOIN ideas i ON i.team_id = t.id
+WHERE i.track = $1;
 
 -- name: GetTeamById :one
 SELECT teams.id, teams.name, teams.round_qualified, teams.code,teams.is_banned,
@@ -21,6 +27,8 @@ LEFT JOIN submission ON submission.team_id = teams.id
 LEFT JOIN ideas ON ideas.team_id = teams.id
 WHERE teams.id = $1;
 
+-- name: GetTeamByTeamId :one
+SELECT * FROM teams WHERE id = $1;
 
 -- name: FindTeam :one
 SELECT id,name,code,round_qualified FROM teams

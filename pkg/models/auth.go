@@ -1,37 +1,37 @@
 package models
 
 type SignupRequest struct {
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email"    validate:"required,email,endswith=@vitstudent.ac.in"`
 	Password string `json:"password" validate:"required"`
 }
 
 type CompleteProfileRequest struct {
-	FirstName     string `json:"first_name" validate:"required,alphanum"`
-	LastName      string `json:"last_name" validate:"required,alphanum"`
-	PhoneNo       string `json:"phone_no" validate:"required,len=10"`
-	Gender        string `json:"gender" validate:"required,len=1"`
-	RegNo         string `json:"reg_no" validate:"required"`
+	FirstName     string `json:"first_name"     validate:"required"`
+	LastName      string `json:"last_name"      validate:"required"`
+	PhoneNo       string `json:"phone_no"       validate:"required,len=10"`
+	Gender        string `json:"gender"         validate:"required,len=1"`
+	RegNo         string `json:"reg_no"         validate:"required"`
 	GithubProfile string `json:"github_profile" validate:"required,url"`
-	HostelBlock   string `json:"hostel_block" validate:"required"`
-	RoomNo        string `json:"room_no" validate:"required"`
+	HostelBlock   string `json:"hostel_block"   validate:"required"`
+	RoomNo        string `json:"room_no"        validate:"required"`
 }
 
 type VerifyOTPRequest struct {
-	Email string `json:"email" validate:"required,email"`
-	OTP   string `json:"otp" validate:"required"`
+	Email string `json:"email" validate:"required,email,endswith=@vitstudent.ac.in"`
+	OTP   string `json:"otp"   validate:"required"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email"    validate:"required,email,endswith=@vitstudent.ac.in"`
 	Password string `json:"password" validate:"required"`
 }
 
 type UpdatePasswordRequest struct {
-	Email       string `json:"email" validate:"required,email"`
+	Email       string `json:"email"        validate:"required,email,endswith=@vitstudent.ac.in"`
 	NewPassword string `json:"new_password" validate:"required"`
-	OTP         string `json:"otp" validate:"required"`
+	OTP         string `json:"otp"          validate:"required"`
 }
 
 type ResendOTP struct {
-	Email string `json:"email"`
+	Email string `json:"email" validate:"required,email,endswith=@vitstudent.ac.in"`
 }

@@ -45,7 +45,7 @@ func CheckPanel(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
-		if user.Role != "panel" {
+		if user.Role != "panel" && user.Role != "admin" {
 			return c.JSON(http.StatusForbidden, &models.Response{
 				Status: "fail",
 				Data: map[string]string{

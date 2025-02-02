@@ -12,6 +12,7 @@ import (
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/models"
 	"github.com/CodeChefVIT/devsoc-be-24/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -205,7 +206,7 @@ func GetTeamById(c echo.Context) error {
 		})
 	}
 
-	team, err := utils.Queries.GetTeamById(c.Request().Context(), teamId)
+	team, err := utils.Queries.GetTeamByTeamId(c.Request().Context(), teamId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
@@ -226,13 +227,67 @@ func GetTeamById(c echo.Context) error {
 		})
 	}
 
+	submission, err := utils.Queries.GetSubmissionByTeamID(c.Request().Context(), teamId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			submission = db.Submission{}
+		} else {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	}
+
+	idea, err := utils.Queries.GetIdeaByTeamID(c.Request().Context(), teamId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			idea = db.GetIdeaByTeamIDRow{}
+		} else {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	}
+
+	score, err := utils.Queries.GetTeamScores(c.Request().Context(), teamId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "Team fetched successfully",
 		Data: map[string]interface{}{
 			"team":         team,
 			"team_members": users,
+			"submission":   submission,
+			"idea":         idea,
+			"score":        score,
 		},
+	})
+}
+
+func GetTeamsByTrack(c echo.Context) error {
+	ctx := c.Request().Context()
+	track := c.Param("track")
+
+	teams, err := utils.Queries.GetTeamByTrack(ctx, track)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, &models.Response{
+		Status:  "success",
+		Message: "teams fetched successfully",
+		Data:    teams,
 	})
 }
 

@@ -314,9 +314,19 @@ func CreateTeam(c echo.Context) error {
 
 	team, err := utils.Queries.CreateTeam(ctx, params)
 	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			return c.JSON(http.StatusBadRequest, models.Response{
+				Status:  "fail",
+				Message: "Team name has already been taken",
+				Data: map[string]string{
+					"message": "Failed to create Team",
+					"error":   err.Error(),
+				},
+			})
+		}
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Message: "Failed to create Team",
+			Status:  "fail",
+			Message: "DB error",
 			Data: map[string]string{
 				"error":   err.Error(),
 			},
@@ -625,8 +635,8 @@ func UpdateTeamName(c echo.Context) error {
 	if err := utils.Validate.Struct(payload); err != nil {
 		validationErrors := utils.FormatValidationErrors(err)
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Data:   validationErrors,
+			Status:  "fail",
+			Message: validationErrors,
 		})
 	}
 
@@ -658,9 +668,19 @@ func UpdateTeamName(c echo.Context) error {
 		Name: payload.Name,
 		ID:   user.TeamID.UUID,
 	}); err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			return c.JSON(http.StatusBadRequest, models.Response{
+				Status:  "fail",
+				Message: "Team name has already been taken",
+				Data: map[string]string{
+					"message": "Failed to create Team",
+					"error":   err.Error(),
+				},
+			})
+		}
 		return c.JSON(http.StatusBadRequest, models.Response{
-			Status: "fail",
-			Message: "some error occured",
+			Status:  "fail",
+			Message: "DB error",
 			Data: map[string]string{
 				"error":   err.Error(),
 			},
