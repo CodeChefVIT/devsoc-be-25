@@ -737,6 +737,10 @@ func GetIdeasByTrack(c echo.Context) error {
 	TrackParam := c.QueryParam("track")
 	TitleParam := c.QueryParam("title")
 
+	if TrackParam == " " || TitleParam == ""  {
+		TrackParam = "7"
+	}
+
 	TrackParamInt, err := strconv.Atoi(TrackParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -744,6 +748,7 @@ func GetIdeasByTrack(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+
 	if TrackParamInt < 1 || TrackParamInt > 6 {
 		TrackParamInt = 7
 	}
@@ -755,6 +760,7 @@ func GetIdeasByTrack(c echo.Context) error {
 		Track: TrackParamInt,
 		Title: TitleParam,
 	}
+
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
 
@@ -774,6 +780,7 @@ func GetIdeasByTrack(c echo.Context) error {
 	}
 
 	var cursorUUID uuid.UUID
+
 	if cursor == "" {
 		cursorUUID = uuid.Nil
 	} else {
@@ -883,7 +890,7 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	case 7:
-		trackname := tracks[7]
+		trackname := tracks[6]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
 			Column2: &trackname,
