@@ -744,6 +744,10 @@ func GetIdeasByTrack(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+	if TrackParamInt < 1 || TrackParamInt > 6 {
+		TrackParamInt = 7
+	}
+
 	payload := struct {
 		Track int    `json:"track"`
 		Title string `json:"title"`
@@ -783,13 +787,24 @@ func GetIdeasByTrack(c echo.Context) error {
 
 	var idea []db.Idea
 
+	tracks := map[int]string{
+		1: "AI&ML",
+		2: "Finance and Fintech",
+		3: "Healthcare and Education",
+		4: "Digital Security",
+		5: "Environment and Sustainability",
+		6: "Open Innovation",
+		7: " ",
+	}
+
 	switch payload.Track {
 	case 1:
+		trackname := tracks[0]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Title: payload.Title,
-			Track: "AI & ML",
-			ID:    cursorUUID,
-			Limit: int32(limit),
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -798,11 +813,12 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	case 2:
+		trackname := tracks[1]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Title: payload.Title,
-			Track: "Finance and Fintech",
-			ID:    cursorUUID,
-			Limit: int32(limit),
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -811,11 +827,12 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	case 3:
+		trackname := tracks[2]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Title: payload.Title,
-			Track: "Healthcare and Education",
-			ID:    cursorUUID,
-			Limit: int32(limit),
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -824,11 +841,12 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	case 4:
+		trackname := tracks[3]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Title: payload.Title,
-			Track: "Digital Security",
-			ID:    cursorUUID,
-			Limit: int32(limit),
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -837,11 +855,12 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	case 5:
+		trackname := tracks[4]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Title: payload.Title,
-			Track: "Environment and Sustainability",
-			ID:    cursorUUID,
-			Limit: int32(limit),
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
@@ -850,11 +869,26 @@ func GetIdeasByTrack(c echo.Context) error {
 			})
 		}
 	case 6:
+		trackname := tracks[5]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Title: payload.Title,
-			Track: "Open Innovation",
-			ID:    cursorUUID,
-			Limit: int32(limit),
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
+		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	case 7:
+		trackname := tracks[7]
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
