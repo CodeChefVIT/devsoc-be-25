@@ -733,14 +733,18 @@ func GetAllIdeas(c echo.Context) error {
 
 func GetIdeasByTrack(c echo.Context) error {
 	ctx := c.Request().Context()
-	num := c.Param("track")
+	var payload struct {
+		Track int    `json:"track"`
+		Title string `json:"title"`
+	}
+
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
-	trackNum, err := strconv.Atoi(num)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status:  "fail",
-			Message: "couldn't convert string to int",
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "success",
+			Message: err.Error(),
 		})
 	}
 
@@ -766,8 +770,10 @@ func GetIdeasByTrack(c echo.Context) error {
 
 	var idea []db.Idea
 
-	if trackNum == 1 {
+		switch payload.Track {
+			case 1: 
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Title: payload.Title,
 			Track: "AI & ML",
 			ID:    cursorUUID,
 			Limit: int32(limit),
@@ -778,8 +784,9 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	} else if trackNum == 2 {
+	case 2:
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Title: payload.Title,
 			Track: "Finance and Fintech",
 			ID:    cursorUUID,
 			Limit: int32(limit),
@@ -790,8 +797,9 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	} else if trackNum == 3 {
+	case 3: 
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Title: payload.Title,
 			Track: "Healthcare and Education",
 			ID:    cursorUUID,
 			Limit: int32(limit),
@@ -802,8 +810,9 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	} else if trackNum == 4 {
+	case 4: 
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Title: payload.Title,
 			Track: "Digital Security",
 			ID:    cursorUUID,
 			Limit: int32(limit),
@@ -814,8 +823,9 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	} else if trackNum == 5 {
+	case 5: 
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Title: payload.Title,
 			Track: "Environment and Sustainability",
 			ID:    cursorUUID,
 			Limit: int32(limit),
@@ -826,8 +836,9 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	} else if trackNum == 6 {
+	case 6: 
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Title: payload.Title,
 			Track: "Open Innovation",
 			ID:    cursorUUID,
 			Limit: int32(limit),
@@ -838,10 +849,10 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	} else {
+	default: 
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
-			Message: "give number from 1 to 6",
+			Message: "",
 		})
 	}
 

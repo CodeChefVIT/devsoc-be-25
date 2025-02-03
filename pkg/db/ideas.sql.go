@@ -152,20 +152,26 @@ func (q *Queries) GetIdeaByTeamID(ctx context.Context, teamID uuid.UUID) (GetIde
 
 const getIdeasByTrack = `-- name: GetIdeasByTrack :many
 SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas
-WHERE track = $1
-AND id > $2
+WHERE (track = $1 OR $1 = '') AND (title = $2 OR $2 = '')
+AND id > $3
 ORDER BY id
-LIMIT $3
+LIMIT $4
 `
 
 type GetIdeasByTrackParams struct {
 	Track string
+	Title string
 	ID    uuid.UUID
 	Limit int32
 }
 
 func (q *Queries) GetIdeasByTrack(ctx context.Context, arg GetIdeasByTrackParams) ([]Idea, error) {
-	rows, err := q.db.Query(ctx, getIdeasByTrack, arg.Track, arg.ID, arg.Limit)
+	rows, err := q.db.Query(ctx, getIdeasByTrack,
+		arg.Track,
+		arg.Title,
+		arg.ID,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
