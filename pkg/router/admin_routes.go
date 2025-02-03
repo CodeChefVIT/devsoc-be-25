@@ -35,5 +35,5 @@ func AdminRoutes(incomingRoutes *echo.Group) {
 	admin.PUT("/team/rounds", controller.UpdateTeamRounds)
 
 	admin.GET("/ideas", controller.GetAllIdeas)
-	admin.GET("/ideas/filter/:track/:title", controller.GetIdeasByTrack)
+	admin.GET("/ideas/filter", controller.GetIdeasByTrack)
 }
