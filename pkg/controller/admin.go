@@ -733,11 +733,24 @@ func GetAllIdeas(c echo.Context) error {
 
 func GetIdeasByTrack(c echo.Context) error {
 	ctx := c.Request().Context()
-	var payload struct {
+
+	TrackParam := c.QueryParam("track")
+	TitleParam := c.QueryParam("title")
+
+	TrackParamInt, err := strconv.Atoi(TrackParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &models.Response{
+			Status:  "fail",
+			Message: err.Error(),
+		})
+	}
+	payload := struct {
 		Track int    `json:"track"`
 		Title string `json:"title"`
+	}{
+		Track: TrackParamInt,
+		Title: TitleParam,
 	}
-
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
 
@@ -770,8 +783,8 @@ func GetIdeasByTrack(c echo.Context) error {
 
 	var idea []db.Idea
 
-		switch payload.Track {
-			case 1: 
+	switch payload.Track {
+	case 1:
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Title: payload.Title,
 			Track: "AI & ML",
@@ -797,7 +810,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 3: 
+	case 3:
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Title: payload.Title,
 			Track: "Healthcare and Education",
@@ -810,7 +823,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 4: 
+	case 4:
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Title: payload.Title,
 			Track: "Digital Security",
@@ -823,7 +836,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 5: 
+	case 5:
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Title: payload.Title,
 			Track: "Environment and Sustainability",
@@ -836,7 +849,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 6: 
+	case 6:
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Title: payload.Title,
 			Track: "Open Innovation",
@@ -849,7 +862,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	default: 
+	default:
 		return c.JSON(http.StatusBadRequest, &models.Response{
 			Status:  "fail",
 			Message: "",
