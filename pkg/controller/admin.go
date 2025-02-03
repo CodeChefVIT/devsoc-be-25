@@ -737,10 +737,9 @@ func GetIdeasByTrack(c echo.Context) error {
 	TrackParam := c.QueryParam("track")
 	TitleParam := c.QueryParam("title")
 
-	if TrackParam == " " || TitleParam == ""  {
+	if TrackParam == "" {
 		TrackParam = "7"
 	}
-
 	TrackParamInt, err := strconv.Atoi(TrackParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -801,25 +800,11 @@ func GetIdeasByTrack(c echo.Context) error {
 		4: "Digital Security",
 		5: "Environment and Sustainability",
 		6: "Open Innovation",
-		7: " ",
+		7: "General",
 	}
 
 	switch payload.Track {
 	case 1:
-		trackname := tracks[0]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 2:
 		trackname := tracks[1]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
@@ -833,7 +818,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 3:
+	case 2:
 		trackname := tracks[2]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
@@ -847,7 +832,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 4:
+	case 3:
 		trackname := tracks[3]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
@@ -861,7 +846,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 5:
+	case 4:
 		trackname := tracks[4]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
@@ -875,7 +860,7 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 6:
+	case 5:
 		trackname := tracks[5]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
@@ -889,8 +874,22 @@ func GetIdeasByTrack(c echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-	case 7:
+	case 6:
 		trackname := tracks[6]
+		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+			Column1: &payload.Title,
+			Column2: &trackname,
+			ID:      cursorUUID,
+			Limit:   int32(limit),
+		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &models.Response{
+				Status:  "fail",
+				Message: err.Error(),
+			})
+		}
+	case 7:
+		trackname := tracks[7]
 		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
 			Column1: &payload.Title,
 			Column2: &trackname,
