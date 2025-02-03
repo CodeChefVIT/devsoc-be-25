@@ -152,15 +152,17 @@ func (q *Queries) GetIdeaByTeamID(ctx context.Context, teamID uuid.UUID) (GetIde
 
 const getIdeasByTrack = `-- name: GetIdeasByTrack :many
 SELECT id, title, description, track, team_id, is_selected, created_at, updated_at FROM ideas
-WHERE (track ILIKE '%' || $1 || '%' OR $1 = '') AND (title ILIKE '%' || $2 || '%' OR $2 = '')
-AND id > $3
+WHERE 
+     (COALESCE($1, '') = '' OR track ILIKE '%' || $1 || '%') 
+    OR (COALESCE($2, '') = '' OR title ILIKE '%' || $2 || '%')
+    AND id > $3
 ORDER BY id
 LIMIT $4
 `
 
 type GetIdeasByTrackParams struct {
-	Column1 *string
-	Column2 *string
+	Column1 interface{}
+	Column2 interface{}
 	ID      uuid.UUID
 	Limit   int32
 }
