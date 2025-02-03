@@ -41,7 +41,9 @@ LIMIT $2;
 
 -- name: GetIdeasByTrack :many
 SELECT * FROM ideas
-WHERE (track ILIKE '%' || $1 || '%' OR $1 = '') AND (title ILIKE '%' || $2 || '%' OR $2 = '')
-AND id > $3
+WHERE 
+     (COALESCE($1, '') = '' OR track ILIKE '%' || $1 || '%') 
+    OR (COALESCE($2, '') = '' OR title ILIKE '%' || $2 || '%')
+    AND id > $3
 ORDER BY id
 LIMIT $4;

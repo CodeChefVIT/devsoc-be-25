@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -737,9 +738,14 @@ func GetIdeasByTrack(c echo.Context) error {
 	TrackParam := c.QueryParam("track")
 	TitleParam := c.QueryParam("title")
 
+	log.Println(TrackParam)
+
 	if TrackParam == "" {
 		TrackParam = "7"
 	}
+
+	log.Println(TrackParam)
+
 	TrackParamInt, err := strconv.Atoi(TrackParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &models.Response{
@@ -802,6 +808,9 @@ func GetIdeasByTrack(c echo.Context) error {
 		6: "Open Innovation",
 		7: "General",
 	}
+	log.Println("--------------")
+	log.Println(payload.Title)
+	log.Println("--------------")
 
 	switch payload.Track {
 	case 1:
@@ -896,6 +905,10 @@ func GetIdeasByTrack(c echo.Context) error {
 			ID:      cursorUUID,
 			Limit:   int32(limit),
 		})
+		log.Println("-----------")
+		log.Println(cursorUUID)
+		log.Println(payload.Title)
+		log.Println("-----------")
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &models.Response{
 				Status:  "fail",
