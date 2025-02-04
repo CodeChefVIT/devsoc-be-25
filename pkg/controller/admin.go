@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -735,60 +734,17 @@ func GetAllIdeas(c echo.Context) error {
 func GetIdeasByTrack(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	TrackParam := c.QueryParam("track")
-	TitleParam := c.QueryParam("title")
-
-	log.Println(TrackParam)
-
-	if TrackParam == "" {
-		TrackParam = "7"
-	}
-
-	log.Println(TrackParam)
-
-	TrackParamInt, err := strconv.Atoi(TrackParam)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status:  "fail",
-			Message: err.Error(),
-		})
-	}
-
-	if TrackParamInt < 1 || TrackParamInt > 6 {
-		TrackParamInt = 7
-	}
-
-	payload := struct {
-		Track int    `json:"track"`
-		Title string `json:"title"`
-	}{
-		Track: TrackParamInt,
-		Title: TitleParam,
-	}
-
+	search := c.QueryParam("search")
 	limitParam := c.QueryParam("limit")
 	cursor := c.QueryParam("cursor")
 
-	if err := c.Bind(&payload); err != nil {
-		return c.JSON(http.StatusBadRequest, &models.Response{
-			Status:  "success",
-			Message: err.Error(),
-		})
-	}
-
 	limit, err := strconv.Atoi(limitParam)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &models.Response{
-			Status:  "fail",
-			Message: err.Error(),
-		})
+	if err != nil || limit <= 0 {
+		limit = 10 
 	}
 
 	var cursorUUID uuid.UUID
-
-	if cursor == "" {
-		cursorUUID = uuid.Nil
-	} else {
+	if cursor != "" {
 		cursorUUID, err = uuid.Parse(cursor)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
@@ -797,144 +753,31 @@ func GetIdeasByTrack(c echo.Context) error {
 		}
 	}
 
-	var idea []db.Idea
-
-	tracks := map[int]string{
-		1: "AI&ML",
-		2: "Finance and Fintech",
-		3: "Healthcare and Education",
-		4: "Digital Security",
-		5: "Environment and Sustainability",
-		6: "Open Innovation",
-		7: "General",
-	}
-	log.Println("--------------")
-	log.Println(payload.Title)
-	log.Println("--------------")
-
-	switch payload.Track {
-	case 1:
-		trackname := tracks[1]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 2:
-		trackname := tracks[2]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 3:
-		trackname := tracks[3]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 4:
-		trackname := tracks[4]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 5:
-		trackname := tracks[5]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 6:
-		trackname := tracks[6]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	case 7:
-		trackname := tracks[7]
-		idea, err = utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
-			Column1: &payload.Title,
-			Column2: &trackname,
-			ID:      cursorUUID,
-			Limit:   int32(limit),
-		})
-		log.Println("-----------")
-		log.Println(cursorUUID)
-		log.Println(payload.Title)
-		log.Println("-----------")
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &models.Response{
-				Status:  "fail",
-				Message: err.Error(),
-			})
-		}
-	default:
-		return c.JSON(http.StatusBadRequest, &models.Response{
+	ideas, err := utils.Queries.GetIdeasByTrack(ctx, db.GetIdeasByTrackParams{
+		Column1: &search,
+		Column2: cursorUUID,
+		Column3: int32(limit),
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &models.Response{
 			Status:  "fail",
-			Message: "",
+			Message: err.Error(),
 		})
 	}
 
 	var nextCursor uuid.NullUUID
-
-	for _, ide := range idea {
-		nextCursor = uuid.NullUUID{UUID: ide.TeamID}
+	if len(ideas) > 0 {
+		nextCursor = uuid.NullUUID{UUID: ideas[len(ideas)-1].ID, Valid: true}
+	} else {
+		nextCursor = uuid.NullUUID{Valid: false}
 	}
 
 	return c.JSON(http.StatusOK, &models.Response{
 		Status:  "success",
 		Message: "ideas fetched successfully",
 		Data: map[string]interface{}{
-			"ideas":       idea,
+			"ideas":       ideas,
 			"next_cursor": nextCursor,
 		},
 	})
-
 }
