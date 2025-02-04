@@ -42,8 +42,16 @@ LIMIT $2;
 -- name: GetIdeasByTrack :many
 SELECT * FROM ideas
 WHERE 
-     (COALESCE($1, '') = '' OR track ILIKE '%' || $1 || '%') 
-    OR (COALESCE($2, '') = '' OR title ILIKE '%' || $2 || '%')
-    AND id > $3
+    (title ilike '%'||$1||'%' OR track ilike '%'||$1||'%')
+    AND id > $2::UUID  -- Explicit UUID comparison
 ORDER BY id
-LIMIT $4;
+LIMIT $3::INTEGER;  -- Explicit INTEGER for limit
+
+
+
+
+
+
+
+
+
