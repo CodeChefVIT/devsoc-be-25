@@ -30,7 +30,7 @@ func SendEmail(to, subject, body string, attachments ...string) error {
 		mailers <- dialer
 	}()
 	m := gomail.NewMessage()
-	m.SetHeader("From", Config.SendingEmail)
+	m.SetHeader("From", m.FormatAddress(Config.SendingEmail, Config.SenderName))
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", body)

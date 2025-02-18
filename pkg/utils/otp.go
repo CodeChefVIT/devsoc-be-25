@@ -28,14 +28,7 @@ func GenerateOTP(ctx context.Context, email string) error {
 		return fmt.Errorf("Failed to store OTP: %v", err)
 	}
 
-	htmlBody := `
-	<h2>Your OTP for DEVSOC Registration</h2>
-	<p>Your One Time Password is: <strong>%s</strong></p>
-	<p>This OTP will expire in 5 minutes.</p>
-	<p>If you did not request this OTP, please ignore this email.</p>
-	`
-
-	err = SendEmail(email, "DEVSOC Registration OTP", fmt.Sprintf(htmlBody, otp))
+	err = SendEmail(email, "DEVSOC Registration OTP", fmt.Sprintf(Config.OTPTemplate, otp))
 	if err != nil {
 
 		RedisClient.Del(ctx, email)
